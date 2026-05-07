@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Success Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Login View -->
+    <div id="view-login" class="view active view-transition">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo-placeholder">
+                        <i data-lucide="graduation-cap" class="logo-icon"></i>
+                    </div>
+                    <h1>Student Success Tracker</h1>
+                    <p>Masuk ke portal akademik Anda</p>
+                </div>
+                
+                <div class="role-switcher">
+                    <button class="role-btn active" data-role="student">Mahasiswa</button>
+                    <button class="role-btn" data-role="lecturer">Dosen PA</button>
+                </div>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="identifier" id="label-identifier">NIM / Email</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user" class="input-icon"></i>
+                            <input type="text" id="identifier" placeholder="Masukkan ID Anda" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock" class="input-icon"></i>
+                            <input type="password" id="password" placeholder="Masukkan password" required>
+                            <button type="button" class="toggle-password" id="toggle-password-btn">
+                                <i data-lucide="eye" id="eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <label class="checkbox-container">
+                            <input type="checkbox"> Ingat saya
+                        </label>
+                        <a href="#" class="forgot-link">Lupa Password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+                </form>
+            </div>
+        </div>
+        <div class="login-background"></div>
+    </div>
+
+    <!-- Student Dashboard View -->
+    <div id="view-student-dashboard" class="view view-transition layout-dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i data-lucide="graduation-cap" class="sidebar-logo"></i>
+                <span>SST Portal</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="student-home">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-target="student-skkm">
+                    <i data-lucide="award"></i> SKKM
+                </a>
+                <a href="#" class="nav-item" data-target="student-guidance">
+                    <i data-lucide="book-open"></i> Bimbingan
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user"></i> Profil
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="app.logout()">
+                    <i data-lucide="log-out"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div>
+                    <h2 class="greeting">Selamat Datang, Budi!</h2>
+                    <span class="badge badge-info">Semester Aktif: 5</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon"><i data-lucide="bell"></i></button>
+                    <div class="avatar">B</div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- SKKM Widget -->
+                <div class="card widget-skkm">
+                    <div class="card-header">
+                        <h3>Poin SKKM Semester Ini</h3>
+                        <i data-lucide="target" class="text-slate"></i>
+                    </div>
+                    <div class="card-body flex-center">
+                        <div class="circular-progress" style="--progress: 75deg;">
+                            <div class="inner-circle">
+                                <span class="progress-value">15<span class="progress-total">/20</span></span>
+                                <span class="progress-label">Poin</span>
+                            </div>
+                        </div>
+                        <p class="skkm-status success">75% Target Tercapai</p>
+                    </div>
+                </div>
+
+                <!-- Guidance Widget -->
+                <div class="card widget-guidance">
+                    <div class="card-header">
+                        <h3>Bimbingan Terakhir</h3>
+                        <i data-lucide="calendar" class="text-slate"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="guidance-detail">
+                            <div class="guidance-date">12 Okt 2026</div>
+                            <div class="guidance-topic">Evaluasi KRS dan Rencana Magang</div>
+                            <div class="guidance-status"><span class="badge badge-success">Divalidasi</span></div>
+                        </div>
+                        <div class="guidance-lecturer">
+                            <i data-lucide="user-check"></i> Dr. Ahmad, S.Kom., M.Kom.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card widget-actions col-span-full">
+                    <div class="card-header">
+                        <h3>Aksi Cepat</h3>
+                    </div>
+                    <div class="card-body action-buttons">
+                        <button class="btn btn-primary btn-lg" onclick="app.showSkkmModal()">
+                            <i data-lucide="upload-cloud"></i> Upload Sertifikat SKKM
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="app.showGuidanceModal()">
+                            <i data-lucide="pen-tool"></i> Isi Logbook Bimbingan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Table -->
+                <div class="card widget-history col-span-full">
+                    <div class="card-header">
+                        <h3>Riwayat Aktivitas Terbaru</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Kategori</th>
+                                    <th>Aktivitas/Topik</th>
+                                    <th>Poin</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-activity-table">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Guidance History Table (CRUD Demo) -->
+                <div class="card widget-history col-span-full mt-6">
+                    <div class="card-header">
+                        <h3>Logbook Bimbingan</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Topik Pembahasan</th>
+                                    <th>Catatan/Hasil</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-guidance-table">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Lecturer Dashboard View -->
+    <div id="view-lecturer-dashboard" class="view view-transition layout-dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i data-lucide="graduation-cap" class="sidebar-logo"></i>
+                <span>SST Portal (Dosen)</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="check-square"></i> Antrean Persetujuan
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="users"></i> Monitoring Mhs
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="app.logout()">
+                    <i data-lucide="log-out"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div>
+                    <h2 class="greeting">Dashboard Dosen PA</h2>
+                    <span class="badge badge-info">Dr. Ahmad, S.Kom.</span>
+                </div>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i data-lucide="search"></i>
+                        <input type="text" placeholder="Cari mahasiswa...">
+                    </div>
+                    <button class="btn-icon"><i data-lucide="bell"></i></button>
+                    <div class="avatar avatar-lecturer">A</div>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue-light"><i data-lucide="users" class="text-blue"></i></div>
+                    <div class="stat-info">
+                        <h4>Total Mahasiswa</h4>
+                        <div class="stat-value">24</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-yellow-light"><i data-lucide="file-clock" class="text-yellow"></i></div>
+                    <div class="stat-info">
+                        <h4>Menunggu SKKM</h4>
+                        <div class="stat-value">7</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-green-light"><i data-lucide="calendar-clock" class="text-green"></i></div>
+                    <div class="stat-info">
+                        <h4>Bimbingan Hari Ini</h4>
+                        <div class="stat-value">3</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-red-light"><i data-lucide="alert-triangle" class="text-red"></i></div>
+                    <div class="stat-info">
+                        <h4>Mahasiswa Beresiko</h4>
+                        <div class="stat-value text-red">2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid mt-6">
+                <!-- Approval Table -->
+                <div class="card col-span-full">
+                    <div class="card-header flex-between">
+                        <h3>Antrean Verifikasi SKKM</h3>
+                        <button class="btn btn-sm btn-outline">Lihat Semua</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Mahasiswa</th>
+                                    <th>NIM</th>
+                                    <th>Nama Kegiatan</th>
+                                    <th>Poin</th>
+                                    <th>Dokumen</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lecturer-approval-table">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+    
+    <!-- Upload SKKM Modal -->
+    <div id="modal-skkm" class="modal">
+        <div class="modal-header">
+            <h3>Upload Sertifikat SKKM</h3>
+            <button class="close-modal"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="form-skkm">
+                <div class="form-group">
+                    <label>Nama Kegiatan</label>
+                    <input type="text" id="skkm-name" required placeholder="Contoh: Panitia Seminar Nasional">
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="skkm-category" required>
+                        <option value="organisasi">Organisasi & Kepemimpinan</option>
+                        <option value="penalaran">Penalaran & Keilmuan</option>
+                        <option value="minat">Minat & Bakat</option>
+                        <option value="pengabdian">Pengabdian Masyarakat</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Poin Diajukan (Maks 20/Semester)</label>
+                    <input type="number" id="skkm-points" required min="1" max="20" value="2">
+                </div>
+                <div class="form-group">
+                    <label>File Sertifikat (PDF/JPG)</label>
+                    <div class="file-upload-box">
+                        <i data-lucide="upload-cloud"></i>
+                        <p>Klik atau drag file ke sini</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline cancel-modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Ajukan SKKM</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Guidance Logbook Modal (CRUD) -->
+    <div id="modal-guidance" class="modal">
+        <div class="modal-header">
+            <h3 id="guidance-modal-title">Isi Logbook Bimbingan</h3>
+            <button class="close-modal"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="form-guidance">
+                <input type="hidden" id="guidance-id">
+                <div class="form-group">
+                    <label>Tanggal Bimbingan</label>
+                    <input type="date" id="guidance-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Topik Pembahasan</label>
+                    <input type="text" id="guidance-topic" required placeholder="Contoh: Konsultasi Judul Skripsi">
+                </div>
+                <div class="form-group">
+                    <label>Catatan / Hasil</label>
+                    <textarea id="guidance-notes" rows="4" required placeholder="Tuliskan catatan hasil bimbingan..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline cancel-modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-guidance">Simpan Logbook</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
