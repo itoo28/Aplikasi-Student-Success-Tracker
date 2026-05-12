@@ -71,6 +71,31 @@ class SkkmSubmissionController extends Controller
     }
 
     /**
+     * Dashboard Verifikasi untuk Dosen PA
+     */
+    public function verifikasiIndex()
+    {
+        // Menampilkan daftar pengajuan dari mahasiswa bimbingannya (dengan status pending)
+        // Note: Asumsi User memiliki relasi adviseeStudents yang sudah ada
+        $adviseeIds = Auth::user()->adviseeStudents()->pluck('id');
+        
+        $pendingSubmissions = SkkmSubmission::whereIn('mahasiswa_id', $adviseeIds)
+            ->where('status_verifikasi', 'pending')
+            ->with(['mahasiswa', 'pointRule'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+            
+        $verifiedSubmissions = SkkmSubmission::whereIn('mahasiswa_id', $adviseeIds)
+            ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
+            ->with(['mahasiswa', 'pointRule'])
+            ->orderBy('verified_at', 'desc')
+            ->take(20)
+            ->get();
+
+        return view('skkm.dosen.verifikasi', compact('pendingSubmissions', 'verifiedSubmissions'));
+    }
+
+    /**
      * Verifikasi oleh Dosen PA
      */
     public function verify(Request $request, SkkmSubmission $submission)

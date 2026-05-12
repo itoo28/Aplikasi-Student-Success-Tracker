@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\GuidanceLog;
-use App\Models\SkkmPoint;
+use App\Models\SkkmSubmission;
+use App\Models\SkkmProgress;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -28,9 +29,13 @@ class DashboardController extends Controller
     {
         $student->load('lecturer');
 
-        $skkmTarget = 20;
-        $approvedPoints = (int) $student->skkmPoints()->where('status', 'approved')->sum('points');
-        $progressPercent = min(100, (int) round(($approvedPoints / $skkmTarget) * 100));
+        $skkmTarget = 20; // PRD v2.0 block target
+        
+        $progress = $student->skkmProgress;
+        $approvedPoints = $progress ? $progress->total_poin : 0;
+        
+        // Target kelulusan 80 untuk S1
+        $progressPercent = min(100, (int) round(($approvedPoints / 80) * 100));
         $progressDegree = (int) round(($progressPercent / 100) * 360);
 
         $latestGuidance = $student->guidanceLogs()
@@ -40,20 +45,20 @@ class DashboardController extends Controller
 
         $activities = collect();
 
-        $skkmActivities = $student->skkmPoints()
+        $skkmActivities = $student->skkmSubmissions()
             ->latest()
             ->take(5)
             ->get()
-            ->map(function (SkkmPoint $item) {
+            ->map(function (SkkmSubmission $item) {
                 $activityDate = $item->created_at;
 
                 return [
                     'date' => optional($activityDate)->format('d M Y'),
                     'sort_date' => $activityDate?->timestamp ?? 0,
                     'category' => 'SKKM',
-                    'activity' => $item->name,
-                    'points' => $item->points,
-                    'status' => $item->status,
+                    'activity' => $item->nama_kegiatan,
+                    'points' => $item->poin_otomatis,
+                    'status' => $item->status_verifikasi,
                 ];
             });
 
@@ -98,14 +103,15 @@ class DashboardController extends Controller
      */
     private function buildLecturerDashboardData(User $lecturer): array
     {
+        // For sum, we use relationship to skkmSubmissions
         $students = $lecturer->adviseeStudents()
             ->where('role', 'student')
-            ->withSum(['skkmPoints as approved_points_sum' => fn ($query) => $query->where('status', 'approved')], 'points')
+            ->withSum(['skkmSubmissions as approved_points_sum' => fn ($query) => $query->where('status_verifikasi', 'disetujui')], 'poin_otomatis')
             ->get();
 
-        $pendingSkkmCount = SkkmPoint::query()
-            ->where('status', 'pending')
-            ->whereHas('student', fn ($query) => $query->where('lecturer_id', $lecturer->id))
+        $pendingSkkmCount = SkkmSubmission::query()
+            ->where('status_verifikasi', 'pending')
+            ->whereHas('mahasiswa', fn ($query) => $query->where('lecturer_id', $lecturer->id))
             ->count();
 
         $guidanceTodayCount = GuidanceLog::query()
@@ -114,13 +120,14 @@ class DashboardController extends Controller
             ->count();
 
         $atRiskCount = $students->filter(function (User $student) {
-            return ($student->semester ?? 0) >= 5 && (($student->approved_points_sum ?? 0) < 10);
+            // Updated atRisk based on PRD v2.0
+            return ($student->semester ?? 0) >= 5 && (($student->approved_points_sum ?? 0) < 40);
         })->count();
 
-        $approvalQueue = SkkmPoint::query()
-            ->with('student')
-            ->where('status', 'pending')
-            ->whereHas('student', fn ($query) => $query->where('lecturer_id', $lecturer->id))
+        $approvalQueue = SkkmSubmission::query()
+            ->with('mahasiswa')
+            ->where('status_verifikasi', 'pending')
+            ->whereHas('mahasiswa', fn ($query) => $query->where('lecturer_id', $lecturer->id))
             ->latest()
             ->take(8)
             ->get();
