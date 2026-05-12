@@ -84,14 +84,19 @@ class User extends Authenticatable
         return $this->hasMany(self::class, 'lecturer_id');
     }
 
-    public function skkmPoints(): HasMany
+    public function skkmSubmissions(): HasMany
     {
-        return $this->hasMany(SkkmPoint::class);
+        return $this->hasMany(SkkmSubmission::class, 'mahasiswa_id');
     }
 
-    public function approvedSkkmPoints(): HasMany
+    public function verifiedSkkmSubmissions(): HasMany
     {
-        return $this->hasMany(SkkmPoint::class, 'approved_by');
+        return $this->hasMany(SkkmSubmission::class, 'verified_by');
+    }
+
+    public function skkmProgress()
+    {
+        return $this->hasOne(SkkmProgress::class, 'mahasiswa_id');
     }
 
     public function guidanceLogs(): HasMany
