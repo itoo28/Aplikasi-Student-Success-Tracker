@@ -40,11 +40,14 @@ class FortifyServiceProvider extends ServiceProvider
             $request->validate([
                 'email' => ['required', 'string'],
                 'password' => ['required', 'string'],
-                'role' => ['nullable', 'in:student,lecturer'],
+                'role' => ['nullable', 'in:mahasiswa,student,dosen_pa,kaprodi,kemahasiswaan,super_admin'],
             ]);
 
             $loginInput = Str::lower(trim($request->string('email')->toString()));
             $roleInput = $request->string('role')->toString();
+            if ($roleInput === 'student') {
+                $roleInput = 'mahasiswa';
+            }
 
             $userQuery = User::query()
                 ->where(function ($query) use ($loginInput) {
@@ -53,7 +56,22 @@ class FortifyServiceProvider extends ServiceProvider
                 });
 
             if ($roleInput !== '') {
-                $userQuery->where('role', $roleInput);
+                $userQuery->where(function ($query) use ($roleInput) {
+                    $query->where('skkm_role', $roleInput);
+
+                    if ($roleInput === 'mahasiswa') {
+                        $query->orWhere('skkm_role', 'student');
+                        $query->orWhere(function ($subQuery) {
+                            $subQuery->whereNull('skkm_role')->where('role', 'student');
+                        });
+                    }
+
+                    if ($roleInput === 'dosen_pa') {
+                        $query->orWhere(function ($subQuery) {
+                            $subQuery->whereNull('skkm_role')->where('role', 'lecturer');
+                        });
+                    }
+                });
             }
 
             $user = $userQuery

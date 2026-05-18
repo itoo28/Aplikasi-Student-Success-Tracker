@@ -17,27 +17,40 @@ class SkkmDummySeeder extends Seeder
     public function run(): void
     {
         // 1. Create Dosen PA
-        $dosen = User::create([
-            'name' => 'Dr. Budi Santoso, M.Kom',
-            'email' => 'dosen@example.com',
-            'role' => 'lecturer',
-            'identifier' => '198501012010011001',
-            'password' => Hash::make('password'),
-        ]);
+        $dosen = User::updateOrCreate(
+            ['email' => 'dosen@example.com'],
+            [
+                'name' => 'Dr. Budi Santoso, M.Kom',
+                'role' => 'lecturer',
+                'skkm_role' => 'dosen_pa',
+                'identifier' => '198501012010011001',
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'password' => Hash::make('password'),
+            ]
+        );
 
         // 2. Create Mahasiswa
-        $mhs = User::create([
-            'name' => 'Ahmad Rendy',
-            'email' => 'student@example.com',
-            'role' => 'student',
-            'identifier' => '220101001',
-            'semester' => 3,
-            'lecturer_id' => $dosen->id,
-            'password' => Hash::make('password'),
-        ]);
+        $mhs = User::updateOrCreate(
+            ['email' => 'student@example.com'],
+            [
+                'name' => 'Ahmad Rendy',
+                'role' => 'student',
+                'skkm_role' => 'mahasiswa',
+                'identifier' => '220101001',
+                'semester' => 3,
+                'jenjang_studi' => 'S1',
+                'lecturer_id' => $dosen->id,
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'password' => Hash::make('password'),
+            ]
+        );
 
         // 3. Create Initial Progress
-        $progress = SkkmProgress::create([
+        SkkmProgress::updateOrCreate([
+            'mahasiswa_id' => $mhs->id,
+        ], [
             'mahasiswa_id' => $mhs->id,
             'jenjang' => 'S1',
             'semester_aktif' => 3,
@@ -51,7 +64,10 @@ class SkkmDummySeeder extends Seeder
         // Submission 1: Approved (Disetujui)
         $ruleJurnal = PointRule::where('sub_unsur', 'jurnal_ilmiah')->where('tingkat', 'internasional')->first();
         if ($ruleJurnal) {
-            SkkmSubmission::create([
+            SkkmSubmission::updateOrCreate([
+                'mahasiswa_id' => $mhs->id,
+                'nama_kegiatan' => 'Publikasi Jurnal Machine Learning Internasional',
+            ], [
                 'mahasiswa_id' => $mhs->id,
                 'point_rule_id' => $ruleJurnal->id,
                 'nama_kegiatan' => 'Publikasi Jurnal Machine Learning Internasional',
@@ -63,13 +79,17 @@ class SkkmDummySeeder extends Seeder
                 'status_verifikasi' => 'disetujui',
                 'verified_by' => $dosen->id,
                 'verified_at' => now(),
+                'is_progress_counted' => true,
             ]);
         }
 
         // Submission 2: Pending (Menunggu)
         $ruleLomba = PointRule::where('sub_unsur', 'lomba_kti')->where('peranan', 'juara_1')->where('tingkat', 'nasional')->first();
         if ($ruleLomba) {
-            SkkmSubmission::create([
+            SkkmSubmission::updateOrCreate([
+                'mahasiswa_id' => $mhs->id,
+                'nama_kegiatan' => 'Lomba KTI Nasional Green Technology',
+            ], [
                 'mahasiswa_id' => $mhs->id,
                 'point_rule_id' => $ruleLomba->id,
                 'nama_kegiatan' => 'Lomba KTI Nasional Green Technology',
@@ -79,13 +99,17 @@ class SkkmDummySeeder extends Seeder
                 'semester_input' => 3,
                 'poin_otomatis' => $ruleLomba->poin,
                 'status_verifikasi' => 'pending',
+                'is_progress_counted' => false,
             ]);
         }
 
         // Submission 3: Rejected (Ditolak)
         $ruleAsdos = PointRule::where('sub_unsur', 'asisten_dosen')->first();
         if ($ruleAsdos) {
-            SkkmSubmission::create([
+            SkkmSubmission::updateOrCreate([
+                'mahasiswa_id' => $mhs->id,
+                'nama_kegiatan' => 'Asisten Dosen Pemrograman Web',
+            ], [
                 'mahasiswa_id' => $mhs->id,
                 'point_rule_id' => $ruleAsdos->id,
                 'nama_kegiatan' => 'Asisten Dosen Pemrograman Web',
@@ -98,6 +122,7 @@ class SkkmDummySeeder extends Seeder
                 'catatan_dosen' => 'File bukti sertifikat kurang jelas, mohon upload ulang scan aslinya.',
                 'verified_by' => $dosen->id,
                 'verified_at' => now(),
+                'is_progress_counted' => false,
             ]);
         }
     }

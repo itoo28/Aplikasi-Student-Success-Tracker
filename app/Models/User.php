@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -33,9 +34,13 @@ class User extends Authenticatable
         'name',
         'email',
         'role',
+        'skkm_role',
         'identifier',
         'semester',
+        'jenjang_studi',
         'lecturer_id',
+        'program_studi_id',
+        'is_active',
         'password',
     ];
 
@@ -71,6 +76,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'semester' => 'integer',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -84,6 +90,11 @@ class User extends Authenticatable
         return $this->hasMany(self::class, 'lecturer_id');
     }
 
+    public function programStudi(): BelongsTo
+    {
+        return $this->belongsTo(ProgramStudi::class);
+    }
+
     public function skkmSubmissions(): HasMany
     {
         return $this->hasMany(SkkmSubmission::class, 'mahasiswa_id');
@@ -94,7 +105,7 @@ class User extends Authenticatable
         return $this->hasMany(SkkmSubmission::class, 'verified_by');
     }
 
-    public function skkmProgress()
+    public function skkmProgress(): HasOne
     {
         return $this->hasOne(SkkmProgress::class, 'mahasiswa_id');
     }
@@ -107,5 +118,25 @@ class User extends Authenticatable
     public function lecturerGuidanceLogs(): HasMany
     {
         return $this->hasMany(GuidanceLog::class, 'lecturer_id');
+    }
+
+    public function hasSkkmRole(string ...$roles): bool
+    {
+        $normalizedRoles = array_map(function (string $role): string {
+            return $role === 'student' ? 'mahasiswa' : $role;
+        }, $roles);
+
+        return in_array($this->resolvedSkkmRole(), $normalizedRoles, true);
+    }
+
+    public function resolvedSkkmRole(): string
+    {
+        $storedRole = $this->skkm_role;
+
+        if ($storedRole === null || $storedRole === '') {
+            return $this->role === 'lecturer' ? 'dosen_pa' : 'mahasiswa';
+        }
+
+        return $storedRole === 'student' ? 'mahasiswa' : $storedRole;
     }
 }

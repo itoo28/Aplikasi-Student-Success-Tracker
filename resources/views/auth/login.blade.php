@@ -51,22 +51,26 @@
                 </div>
             @endsession
 
-            <!-- Role Switcher -->
-            <div class="flex p-1 bg-slate-200/50 rounded-2xl mb-8 relative">
-                <div id="role-slider" class="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] bg-white rounded-xl shadow-sm transition-transform duration-300 ease-in-out {{ old('role') === 'lecturer' ? 'translate-x-[calc(100%+0.5rem)]' : '' }}"></div>
-                
-                <button type="button" class="role-btn relative z-10 flex-1 py-2.5 text-sm font-bold text-center transition-colors duration-300 {{ old('role', 'student') === 'student' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700' }}" data-role="student">
-                    Mahasiswa
-                </button>
-                <button type="button" class="role-btn relative z-10 flex-1 py-2.5 text-sm font-bold text-center transition-colors duration-300 {{ old('role') === 'lecturer' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700' }}" data-role="lecturer">
-                    Dosen PA
-                </button>
-            </div>
-
             <!-- Login Form -->
             <form method="POST" action="{{ route('login') }}">
                 @csrf
-                <input type="hidden" name="role" id="role" value="{{ old('role', 'student') }}">
+
+                <!-- Role Selector -->
+                <div class="mb-8">
+                    <label for="role" class="block text-sm font-bold text-slate-700 mb-2">Masuk Sebagai</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-slate-400"></i>
+                        </div>
+                        <select id="role" name="role" class="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none">
+                            <option value="mahasiswa" @selected(old('role', 'mahasiswa') === 'mahasiswa')>Mahasiswa</option>
+                            <option value="dosen_pa" @selected(old('role') === 'dosen_pa')>Dosen PA</option>
+                            <option value="kaprodi" @selected(old('role') === 'kaprodi')>Kaprodi</option>
+                            <option value="kemahasiswaan" @selected(old('role') === 'kemahasiswaan')>Kemahasiswaan</option>
+                            <option value="super_admin" @selected(old('role') === 'super_admin')>Super Admin</option>
+                        </select>
+                    </div>
+                </div>
 
                 <!-- Email/Identifier -->
                 <div class="mb-5">
@@ -95,7 +99,7 @@
                         </div>
                         <input type="password" id="password" name="password" required autocomplete="current-password" 
                             class="block w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none" 
-                            placeholder="••••••••">
+                            placeholder="Masukkan password">
                         <button type="button" id="toggle-password-btn" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-indigo-600 transition-colors">
                             <i data-lucide="eye" id="eye-icon" class="w-5 h-5"></i>
                         </button>
@@ -129,43 +133,28 @@
     <script>
         lucide.createIcons();
 
-        const roleButtons = document.querySelectorAll('.role-btn');
         const roleInput = document.getElementById('role');
         const identifierLabel = document.getElementById('label-identifier');
         const identifierInput = document.getElementById('email');
-        const slider = document.getElementById('role-slider');
 
         const updateRoleLabel = (role) => {
-            if (role === 'lecturer') {
-                identifierLabel.innerText = 'NIDN / Email';
-                identifierInput.placeholder = 'Masukkan NIDN atau Email';
-                slider.style.transform = 'translateX(calc(100% + 0.5rem))';
-                
-                roleButtons[0].classList.remove('text-indigo-600');
-                roleButtons[0].classList.add('text-slate-500');
-                roleButtons[1].classList.remove('text-slate-500');
-                roleButtons[1].classList.add('text-indigo-600');
-            } else {
+            if (role === 'mahasiswa') {
                 identifierLabel.innerText = 'NIM / Email';
                 identifierInput.placeholder = 'Masukkan NIM atau Email';
-                slider.style.transform = 'translateX(0)';
-                
-                roleButtons[1].classList.remove('text-indigo-600');
-                roleButtons[1].classList.add('text-slate-500');
-                roleButtons[0].classList.remove('text-slate-500');
-                roleButtons[0].classList.add('text-indigo-600');
+                return;
+            }
+
+            if (role === 'dosen_pa' || role === 'kaprodi') {
+                identifierLabel.innerText = 'NIDN / Email';
+                identifierInput.placeholder = 'Masukkan NIDN atau Email';
+            } else {
+                identifierLabel.innerText = 'Email / Identifier';
+                identifierInput.placeholder = 'Masukkan Email atau Identifier';
             }
         };
 
         updateRoleLabel(roleInput.value);
-
-        roleButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const newRole = button.dataset.role;
-                roleInput.value = newRole;
-                updateRoleLabel(newRole);
-            });
-        });
+        roleInput.addEventListener('change', () => updateRoleLabel(roleInput.value));
 
         const togglePasswordButton = document.getElementById('toggle-password-btn');
         const passwordInput = document.getElementById('password');

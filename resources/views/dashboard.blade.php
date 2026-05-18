@@ -41,7 +41,7 @@
                         </svg>
                         <div class="absolute flex flex-col items-center justify-center">
                             <span class="text-3xl font-extrabold text-slate-800">{{ $approvedPoints }}</span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">/ 80 Poin</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">/ {{ $targetKelulusan }} Poin</span>
                         </div>
                     </div>
                     
@@ -102,6 +102,23 @@
                     </div>
                 </div>
                 
+                <!-- Grafik Poin per Semester -->
+                <div class="col-span-1 lg:col-span-2 rounded-3xl bg-white border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500 mr-2"></i>
+                        Grafik Poin SKKM per Semester
+                    </h3>
+                    <div class="w-full h-80 relative">
+                        @if(empty($pointsPerSemester))
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                                <i data-lucide="bar-chart" class="w-12 h-12 mb-3 opacity-20"></i>
+                                <p class="text-sm font-medium">Belum ada data poin SKKM yang disetujui.</p>
+                            </div>
+                        @endif
+                        <canvas id="skkmChart"></canvas>
+                    </div>
+                </div>
+
                 <!-- Riwayat Aktivitas -->
                 <div class="col-span-1 lg:col-span-2 rounded-3xl bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
                     <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -137,6 +154,12 @@
                                         <td class="px-8 py-5">
                                             @if(in_array($item['status'], ['approved', 'validated', 'disetujui']))
                                                 <span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold">Disetujui</span>
+                                            @elseif($item['status'] === 'menunggu_dosen')
+                                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu Dosen PA</span>
+                                            @elseif($item['status'] === 'menunggu_kaprodi')
+                                                <span class="inline-flex items-center px-2.5 py-1 bg-sky-50 text-sky-600 rounded-lg text-xs font-bold">Menunggu Kaprodi</span>
+                                            @elseif($item['status'] === 'menunggu_kemahasiswaan')
+                                                <span class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold">Menunggu Kemahasiswaan</span>
                                             @elseif(in_array($item['status'], ['pending']))
                                                 <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu</span>
                                             @else
@@ -265,5 +288,88 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    @if ($dashboardType === 'student')
+        @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const chartCanvas = document.getElementById('skkmChart');
+                if (chartCanvas) {
+                    const ctx = chartCanvas.getContext('2d');
+                    const pointsData = @json($pointsPerSemester ?? []);
+                    
+                    if (Object.keys(pointsData).length > 0) {
+                        const labels = Object.keys(pointsData).map(sem => 'Semester ' + sem);
+                        const data = Object.values(pointsData);
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Poin SKKM',
+                                    data: data,
+                                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                                    borderColor: 'rgba(79, 70, 229, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 6,
+                                    hoverBackgroundColor: 'rgba(79, 70, 229, 1)',
+                                    barPercentage: 0.6,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                        titleFont: { size: 13, family: 'Inter' },
+                                        bodyFont: { size: 14, family: 'Inter', weight: 'bold' },
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        displayColors: false,
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.parsed.y + ' Poin';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: 'rgba(241, 245, 249, 1)',
+                                            drawBorder: false,
+                                        },
+                                        border: { display: false },
+                                        ticks: {
+                                            font: { family: 'Inter' },
+                                            color: '#64748b',
+                                            stepSize: 10
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                            drawBorder: false,
+                                        },
+                                        border: { display: false },
+                                        ticks: {
+                                            font: { family: 'Inter', weight: '500' },
+                                            color: '#475569'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        </script>
+        @endpush
     @endif
 </x-app-layout>

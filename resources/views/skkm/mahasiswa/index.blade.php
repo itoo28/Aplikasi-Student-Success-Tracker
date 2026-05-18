@@ -12,7 +12,7 @@
             @if($progress && $progress->total_poin < 80 && $progress->semester_aktif >= 7)
             <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md shadow-sm mb-6 flex items-center" role="alert">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                <p><strong>Peringatan Dini:</strong> Segera lengkapi SKKM — tersisa sedikit waktu untuk memenuhi syarat Yudisium.</p>
+                <p><strong>Peringatan Dini:</strong> Segera lengkapi SKKM â€” tersisa sedikit waktu untuk memenuhi syarat Yudisium.</p>
             </div>
             @endif
 
@@ -98,7 +98,7 @@
                                 </td>
                                 <td class="px-6 py-5">
                                     <div class="text-slate-700 capitalize">{{ str_replace('_', ' ', $sub->pointRule->unsur) }}</div>
-                                    <div class="text-xs text-slate-400 capitalize">{{ $sub->pointRule->tingkat ?? '-' }} • {{ str_replace('_', ' ', $sub->pointRule->peranan) }}</div>
+                                    <div class="text-xs text-slate-400 capitalize">{{ $sub->pointRule->tingkat ?? '-' }} â€¢ {{ str_replace('_', ' ', $sub->pointRule->peranan) }}</div>
                                 </td>
                                 <td class="px-6 py-5 text-center">
                                     <span class="inline-flex items-center justify-center px-2.5 py-1 text-sm font-bold bg-slate-100 text-slate-600 rounded-lg">
@@ -106,18 +106,40 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-5">
-                                    @if($sub->status_verifikasi == 'pending')
+                                    @if($sub->status_verifikasi === 'pending')
                                         <span class="inline-flex items-center bg-amber-50 text-amber-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-amber-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-500"></span> Pending
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-500"></span> Menunggu Dosen PA
                                         </span>
-                                    @elseif($sub->status_verifikasi == 'disetujui')
-                                        <span class="inline-flex items-center bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-emerald-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Disetujui
+                                    @elseif($sub->status_verifikasi === 'ditolak')
+                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Dosen PA
+                                        </span>
+                                    @elseif($sub->status_kaprodi === null || $sub->status_kaprodi === 'pending')
+                                        <span class="inline-flex items-center bg-sky-50 text-sky-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-sky-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-sky-500"></span> Menunggu Kaprodi
+                                        </span>
+                                    @elseif($sub->status_kaprodi === 'ditolak')
+                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Kaprodi
+                                        </span>
+                                    @elseif($sub->status_kemahasiswaan === null || $sub->status_kemahasiswaan === 'pending')
+                                        <span class="inline-flex items-center bg-indigo-50 text-indigo-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-indigo-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-500"></span> Menunggu Kemahasiswaan
+                                        </span>
+                                    @elseif($sub->status_kemahasiswaan === 'ditolak')
+                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Kemahasiswaan
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak
+                                        <span class="inline-flex items-center bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-emerald-500/20">
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Final Disetujui
                                         </span>
+                                    @endif
+
+                                    @if($sub->catatan_dosen || $sub->catatan_kaprodi || $sub->catatan_kemahasiswaan)
+                                        <p class="text-[11px] text-slate-500 mt-2">
+                                            {{ $sub->catatan_kemahasiswaan ?? $sub->catatan_kaprodi ?? $sub->catatan_dosen }}
+                                        </p>
                                     @endif
                                 </td>
                                 <td class="px-6 py-5 text-right">

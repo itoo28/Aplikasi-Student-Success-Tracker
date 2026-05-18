@@ -7,15 +7,29 @@ use App\Models\SkkmSubmission;
 use App\Models\SkkmProgress;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): View|RedirectResponse
     {
         $user = $request->user();
+        $skkmRole = $user->resolvedSkkmRole();
 
-        if ($user->role === 'lecturer') {
+        if ($skkmRole === 'super_admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($skkmRole === 'kaprodi') {
+            return redirect()->route('skkm.kaprodi.index');
+        }
+
+        if ($skkmRole === 'kemahasiswaan') {
+            return redirect()->route('skkm.kemahasiswaan.index');
+        }
+
+        if ($skkmRole === 'dosen_pa') {
             return view('dashboard', $this->buildLecturerDashboardData($user));
         }
 
@@ -30,18 +44,28 @@ class DashboardController extends Controller
         $student->load('lecturer');
 
         $skkmTarget = 20; // PRD v2.0 block target
+        $targetKelulusan = ($student->jenjang_studi ?? 'S1') === 'D3' ? 60 : 80;
         
         $progress = $student->skkmProgress;
         $approvedPoints = $progress ? $progress->total_poin : 0;
         
-        // Target kelulusan 80 untuk S1
-        $progressPercent = min(100, (int) round(($approvedPoints / 80) * 100));
+        $progressPercent = $targetKelulusan > 0
+            ? min(100, (int) round(($approvedPoints / $targetKelulusan) * 100))
+            : 0;
         $progressDegree = (int) round(($progressPercent / 100) * 360);
 
         $latestGuidance = $student->guidanceLogs()
             ->with('lecturer')
             ->latest('guidance_date')
             ->first();
+
+        $pointsPerSemester = $student->skkmSubmissions()
+            ->finalApproved()
+            ->selectRaw('semester_input, sum(poin_otomatis) as total_points')
+            ->groupBy('semester_input')
+            ->orderBy('semester_input')
+            ->pluck('total_points', 'semester_input')
+            ->toArray();
 
         $activities = collect();
 
@@ -58,7 +82,7 @@ class DashboardController extends Controller
                     'category' => 'SKKM',
                     'activity' => $item->nama_kegiatan,
                     'points' => $item->poin_otomatis,
-                    'status' => $item->status_verifikasi,
+                    'status' => $this->resolveSkkmDisplayStatus($item),
                 ];
             });
 
@@ -90,10 +114,12 @@ class DashboardController extends Controller
             'dashboardType' => 'student',
             'student' => $student,
             'skkmTarget' => $skkmTarget,
+            'targetKelulusan' => $targetKelulusan,
             'approvedPoints' => $approvedPoints,
             'progressPercent' => $progressPercent,
             'progressDegree' => $progressDegree,
             'latestGuidance' => $latestGuidance,
+            'pointsPerSemester' => $pointsPerSemester,
             'activities' => $activities,
         ];
     }
@@ -141,5 +167,22 @@ class DashboardController extends Controller
             'atRiskCount' => $atRiskCount,
             'approvalQueue' => $approvalQueue,
         ];
+    }
+
+    private function resolveSkkmDisplayStatus(SkkmSubmission $submission): string
+    {
+        if ($submission->status_verifikasi === 'ditolak') {
+            return 'ditolak';
+        }
+
+        if ($submission->status_verifikasi === 'pending') {
+            return 'menunggu_dosen';
+        }
+
+        if ($submission->status_verifikasi === 'disetujui') {
+            return 'disetujui';
+        }
+
+        return 'pending';
     }
 }

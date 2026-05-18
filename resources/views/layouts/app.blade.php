@@ -24,13 +24,25 @@
         <div class="min-h-screen flex">
             <!-- Sidebar -->
             <aside class="w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 shadow-xl">
+                @php
+                    $skkmRole = auth()->user()->resolvedSkkmRole();
+                    $roleLabel = match ($skkmRole) {
+                        'mahasiswa' => 'Mahasiswa',
+                        'dosen_pa' => 'Dosen PA',
+                        'kaprodi' => 'Kaprodi',
+                        'kemahasiswaan' => 'Kemahasiswaan',
+                        'super_admin' => 'Super Admin',
+                        default => 'Pengguna',
+                    };
+                @endphp
+
                 <div class="h-20 flex items-center px-6 bg-slate-950/50 border-b border-slate-800">
                     <div class="bg-indigo-500/20 p-2.5 rounded-xl mr-3">
                         <i data-lucide="graduation-cap" class="w-6 h-6 text-indigo-400"></i>
                     </div>
                     <div>
                         <div class="font-bold text-lg tracking-wide leading-tight">SST Portal</div>
-                        <div class="text-xs text-slate-400 font-medium tracking-wider uppercase">{{ Auth::user()->role === 'student' ? 'Mahasiswa' : 'Dosen PA' }}</div>
+                        <div class="text-xs text-slate-400 font-medium tracking-wider uppercase">{{ $roleLabel }}</div>
                     </div>
                 </div>
                 <nav class="flex-1 px-4 py-8 space-y-2.5 overflow-y-auto">
@@ -39,7 +51,7 @@
                         <span>Dashboard</span>
                     </a>
                     
-                    @if(auth()->user()->role === 'student')
+                    @if($skkmRole === 'mahasiswa')
                     <a href="{{ route('skkm.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
                         <i data-lucide="award" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
                         <span>Poin SKKM</span>
@@ -48,14 +60,45 @@
                         <i data-lucide="book-open" class="w-5 h-5 mr-3 text-slate-500 group-hover:text-indigo-400 transition-colors"></i>
                         <span>Bimbingan</span>
                     </a>
-                    @else
-                    <a href="{{ route('skkm.verifikasi.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
-                        <i data-lucide="check-square" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                    @elseif($skkmRole === 'dosen_pa')
+                    <a href="{{ route('skkm.verifikasi.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.verifikasi.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="check-square" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.verifikasi.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
                         <span>Antrean SKKM</span>
                     </a>
-                    <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white font-medium rounded-2xl transition-all duration-200 group">
-                        <i data-lucide="users" class="w-5 h-5 mr-3 text-slate-500 group-hover:text-indigo-400 transition-colors"></i>
-                        <span>Monitoring Mhs</span>
+                    <a href="{{ route('skkm.monitoring.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.monitoring.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="users" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.monitoring.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Data Mahasiswa</span>
+                    </a>
+                    @elseif($skkmRole === 'kaprodi')
+                    <a href="{{ route('skkm.kaprodi.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kaprodi.index') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="clipboard-check" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kaprodi.index') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Validasi Kaprodi</span>
+                    </a>
+                    <a href="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kaprodi.mahasiswa.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="users" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kaprodi.mahasiswa.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Data Mahasiswa</span>
+                    </a>
+                    @elseif($skkmRole === 'kemahasiswaan')
+                    <a href="{{ route('skkm.kemahasiswaan.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kemahasiswaan.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="shield-check" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kemahasiswaan.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Validasi Akhir</span>
+                    </a>
+                    @elseif($skkmRole === 'super_admin')
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="shield" class="w-5 h-5 mr-3 {{ request()->routeIs('admin.dashboard') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Panel Admin</span>
+                    </a>
+                    <a href="{{ route('admin.users.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('admin.users.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="users-cog" class="w-5 h-5 mr-3 {{ request()->routeIs('admin.users.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>CRUD User</span>
+                    </a>
+                    <a href="{{ route('admin.fakultas.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('admin.fakultas.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="building-2" class="w-5 h-5 mr-3 {{ request()->routeIs('admin.fakultas.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>CRUD Fakultas</span>
+                    </a>
+                    <a href="{{ route('admin.program-studi.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('admin.program-studi.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
+                        <i data-lucide="book-copy" class="w-5 h-5 mr-3 {{ request()->routeIs('admin.program-studi.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>CRUD Program Studi</span>
                     </a>
                     @endif
                 </nav>
@@ -111,5 +154,6 @@
         <script>
             lucide.createIcons();
         </script>
+        @stack('scripts')
     </body>
 </html>

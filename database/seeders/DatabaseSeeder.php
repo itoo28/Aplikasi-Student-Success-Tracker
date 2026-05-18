@@ -2,138 +2,123 @@
 
 namespace Database\Seeders;
 
-use App\Models\GuidanceLog;
-use App\Models\SkkmPoint;
+use App\Models\PointRule;
+use App\Models\SkkmProgress;
+use App\Models\SkkmSubmission;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        $lecturer = User::query()->create([
-            'name' => 'Dr. Ahmad, S.Kom., M.Kom.',
-            'email' => 'ahmad.dosen@example.com',
-            'role' => 'lecturer',
-            'identifier' => '19870001',
-            'semester' => null,
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-        ]);
+        $this->call(PointRuleSeeder::class);
 
-        $student = User::query()->create([
-            'name' => 'Budi Santoso',
-            'email' => 'budi.mahasiswa@example.com',
-            'role' => 'student',
-            'identifier' => '220101010',
-            'semester' => 5,
-            'lecturer_id' => $lecturer->id,
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'superadmin@example.com'],
+            [
+                'name' => 'Super Admin Sistem',
+                'role' => 'lecturer',
+                'skkm_role' => 'super_admin',
+                'identifier' => 'SUP001',
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        $studentTwo = User::query()->create([
-            'name' => 'Siti Aminah',
-            'email' => 'siti.mahasiswa@example.com',
-            'role' => 'student',
-            'identifier' => '220101012',
-            'semester' => 6,
-            'lecturer_id' => $lecturer->id,
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-        ]);
+        $dosenPa = User::updateOrCreate(
+            ['email' => 'ahmad.dosen@example.com'],
+            [
+                'name' => 'Dr. Ahmad, S.Kom., M.Kom.',
+                'role' => 'lecturer',
+                'skkm_role' => 'dosen_pa',
+                'identifier' => '19870001',
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        SkkmPoint::query()->insert([
+        User::updateOrCreate(
+            ['email' => 'kaprodi@example.com'],
             [
-                'user_id' => $student->id,
-                'name' => 'Panitia Seminar Nasional',
-                'category' => 'Organisasi',
-                'points' => 5,
-                'status' => 'approved',
-                'approved_by' => $lecturer->id,
-                'created_at' => now()->subDays(20),
-                'updated_at' => now()->subDays(20),
-            ],
-            [
-                'user_id' => $student->id,
-                'name' => 'Juara 3 Lomba Esai',
-                'category' => 'Minat',
-                'points' => 10,
-                'status' => 'approved',
-                'approved_by' => $lecturer->id,
-                'created_at' => now()->subDays(30),
-                'updated_at' => now()->subDays(30),
-            ],
-            [
-                'user_id' => $student->id,
-                'name' => 'Workshop Web Development',
-                'category' => 'Penalaran',
-                'points' => 2,
-                'status' => 'pending',
-                'approved_by' => null,
-                'created_at' => now()->subDays(6),
-                'updated_at' => now()->subDays(6),
-            ],
-            [
-                'user_id' => $studentTwo->id,
-                'name' => 'Relawan Bencana',
-                'category' => 'Pengabdian',
-                'points' => 5,
-                'status' => 'pending',
-                'approved_by' => null,
-                'created_at' => now()->subDays(4),
-                'updated_at' => now()->subDays(4),
-            ],
-            [
-                'user_id' => $studentTwo->id,
-                'name' => 'Asisten Laboratorium',
-                'category' => 'Penalaran',
-                'points' => 3,
-                'status' => 'approved',
-                'approved_by' => $lecturer->id,
-                'created_at' => now()->subDays(40),
-                'updated_at' => now()->subDays(40),
-            ],
-        ]);
+                'name' => 'Kaprodi Teknik Informatika',
+                'role' => 'lecturer',
+                'skkm_role' => 'kaprodi',
+                'identifier' => 'KAP001',
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        GuidanceLog::query()->insert([
+        User::updateOrCreate(
+            ['email' => 'kemahasiswaan@example.com'],
             [
-                'user_id' => $student->id,
-                'lecturer_id' => $lecturer->id,
-                'guidance_date' => now()->subDays(12)->toDateString(),
-                'topic' => 'Evaluasi KRS dan Rencana Magang',
-                'notes' => 'Perlu peningkatan nilai Algoritma sebelum ambil topik magang.',
-                'status' => 'validated',
-                'created_at' => now()->subDays(12),
-                'updated_at' => now()->subDays(11),
-            ],
+                'name' => 'Admin Kemahasiswaan',
+                'role' => 'lecturer',
+                'skkm_role' => 'kemahasiswaan',
+                'identifier' => 'KMH001',
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $student = User::updateOrCreate(
+            ['email' => 'budi.mahasiswa@example.com'],
             [
-                'user_id' => $student->id,
-                'lecturer_id' => $lecturer->id,
-                'guidance_date' => now()->subDays(2)->toDateString(),
-                'topic' => 'Konsultasi Persiapan Proposal',
-                'notes' => 'Mahasiswa diminta melengkapi referensi jurnal terbaru.',
-                'status' => 'pending',
-                'created_at' => now()->subDays(2),
-                'updated_at' => now()->subDays(2),
-            ],
+                'name' => 'Budi Santoso',
+                'role' => 'student',
+                'skkm_role' => 'mahasiswa',
+                'identifier' => '220101010',
+                'semester' => 5,
+                'jenjang_studi' => 'S1',
+                'lecturer_id' => $dosenPa->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $rule = PointRule::query()->first();
+
+        if ($rule) {
+            SkkmSubmission::firstOrCreate(
+                [
+                    'mahasiswa_id' => $student->id,
+                    'nama_kegiatan' => 'Seminar Nasional Teknologi Pendidikan',
+                ],
+                [
+                    'point_rule_id' => $rule->id,
+                    'penyelenggara' => 'Universitas Harapan Bangsa',
+                    'tanggal_kegiatan' => now()->subDays(10)->toDateString(),
+                    'file_bukti' => 'bukti_skkm/dummy_seminar.pdf',
+                    'semester_input' => 5,
+                    'poin_otomatis' => $rule->poin,
+                    'status_verifikasi' => 'pending',
+                    'is_progress_counted' => false,
+                ]
+            );
+        }
+
+        SkkmProgress::updateOrCreate(
+            ['mahasiswa_id' => $student->id],
             [
-                'user_id' => $studentTwo->id,
-                'lecturer_id' => $lecturer->id,
-                'guidance_date' => now()->toDateString(),
-                'topic' => 'Monitoring Progress Skripsi',
-                'notes' => 'Progress sesuai timeline, lanjut ke bab metodologi.',
-                'status' => 'validated',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+                'jenjang' => 'S1',
+                'semester_aktif' => 5,
+                'poin_smt_1_2' => 20,
+                'poin_smt_3_4' => 15,
+                'poin_smt_5_6' => 0,
+                'poin_smt_7_8' => 0,
+                'total_poin' => 35,
+                'status_yudisium' => 'dalam_proses',
+            ]
+        );
     }
 }
