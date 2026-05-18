@@ -7,162 +7,193 @@
 
     @if ($dashboardType === 'student')
         <div class="space-y-8">
-            <!-- Greeting & Stats Row -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <div>
-                    <h3 class="text-2xl font-bold text-slate-800">Selamat Datang, {{ $student->name }}!</h3>
-                    <p class="text-slate-500 mt-1">Pantau progress SKKM dan bimbingan akademik Anda di sini.</p>
-                </div>
-                <div class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl font-semibold">
-                    <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
-                    Semester Aktif: {{ $student->semester ?? '-' }}
+
+            {{-- Hero Greeting --}}
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-8 text-white shadow-2xl shadow-indigo-300/30">
+                <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-purple-400/10 blur-2xl"></div>
+
+                <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    {{-- Left: Greeting + Info --}}
+                    <div>
+                        <p class="text-indigo-200 text-sm font-medium">Selamat datang kembali 👋</p>
+                        <h2 class="text-2xl lg:text-3xl font-extrabold mt-1">{{ $student->name }}</h2>
+                        <div class="flex flex-wrap items-center gap-3 mt-3">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10">
+                                <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> {{ $student->jenjang_studi ?? 'S1' }}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Semester {{ $student->semester ?? '-' }}
+                            </span>
+                            @if($student->lecturer)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5"></i> PA: {{ $student->lecturer->name }}
+                            </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Right: Circular Progress --}}
+                    <div class="flex items-center gap-6">
+                        <div class="relative w-28 h-28 flex-shrink-0">
+                            <svg class="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="10"/>
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="url(#dashGrad)" stroke-width="10" stroke-linecap="round"
+                                    stroke-dasharray="{{ 2 * 3.14159 * 52 }}" stroke-dashoffset="{{ 2 * 3.14159 * 52 * (1 - $progressPercent / 100) }}"/>
+                                <defs><linearGradient id="dashGrad"><stop offset="0%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#e9d5ff"/></linearGradient></defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-2xl font-extrabold">{{ $progressPercent }}%</span>
+                                <span class="text-[9px] text-indigo-200 font-semibold uppercase tracking-wider">Tercapai</span>
+                            </div>
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-bold text-lg">{{ $approvedPoints }}<span class="text-indigo-300 font-medium text-sm"> / {{ $targetKelulusan }}</span></p>
+                            <p class="text-indigo-200 text-xs mt-0.5">Poin SKKM Disetujui</p>
+                            @if($progressPercent >= 100)
+                                <span class="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-emerald-400/20 text-emerald-200 rounded-full text-[10px] font-bold border border-emerald-400/30">
+                                    <i data-lucide="check-circle" class="w-3 h-3"></i> Memenuhi Syarat
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-amber-400/20 text-amber-200 rounded-full text-[10px] font-bold border border-amber-400/30">
+                                    <i data-lucide="target" class="w-3 h-3"></i> Kurang {{ $remainingPoints }} poin
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Grid Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                <!-- Card Poin SKKM -->
-                <div class="rounded-3xl bg-white border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center items-center text-center relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-50 opacity-50 blur-2xl"></div>
-                    
-                    <h4 class="text-lg font-bold text-slate-800 mb-6 flex items-center justify-center w-full">
-                        <i data-lucide="target" class="w-5 h-5 text-indigo-500 mr-2"></i>
-                        Target SKKM Kelulusan
-                    </h4>
-                    
-                    <!-- Circular Progress Placeholder -->
-                    <div class="relative w-40 h-40 flex items-center justify-center mb-6">
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <!-- Background Circle -->
-                            <circle class="text-slate-100 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent"></circle>
-                            <!-- Progress Circle -->
-                            <circle class="text-indigo-500 stroke-current" stroke-width="8" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="{{ 251.2 - (251.2 * $progressPercent / 100) }}" stroke-linecap="round"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span class="text-3xl font-extrabold text-slate-800">{{ $approvedPoints }}</span>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">/ {{ $targetKelulusan }} Poin</span>
-                        </div>
+            {{-- Stats Mini Cards --}}
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center"><i data-lucide="check-circle" class="w-4.5 h-4.5 text-emerald-600"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Disetujui</span>
                     </div>
-                    
-                    @if($progressPercent >= 100)
-                        <div class="inline-flex items-center px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-sm font-bold">
-                            <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Target Tercapai
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $approvedCount }}</p>
+                    <p class="text-xs text-emerald-600 font-semibold mt-0.5">+{{ $approvedPoints }} poin</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center"><i data-lucide="clock" class="w-4.5 h-4.5 text-amber-600"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Menunggu</span>
+                    </div>
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $pendingCount }}</p>
+                    <p class="text-xs text-amber-600 font-semibold mt-0.5">+{{ $pendingPoints }} poin</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center"><i data-lucide="x-circle" class="w-4.5 h-4.5 text-rose-600"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Ditolak</span>
+                    </div>
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $rejectedCount }}</p>
+                    <p class="text-xs text-rose-600 font-semibold mt-0.5">perlu revisi</p>
+                </div>
+                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center"><i data-lucide="trending-up" class="w-4.5 h-4.5 text-violet-600"></i></div>
+                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sisa Target</span>
+                    </div>
+                    <p class="text-2xl font-extrabold text-slate-800">{{ $remainingPoints }}</p>
+                    <p class="text-xs text-violet-600 font-semibold mt-0.5">poin lagi</p>
+                </div>
+            </div>
+
+            {{-- Main Grid --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                {{-- Bimbingan Terakhir --}}
+                <div class="rounded-3xl bg-white border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-500 mr-2"></i> Bimbingan Terakhir
+                    </h4>
+                    @if ($latestGuidance)
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs font-semibold text-slate-500">{{ $latestGuidance->guidance_date?->format('d M Y') }}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md {{ $latestGuidance->status === 'validated' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                                    {{ $latestGuidance->status === 'validated' ? 'Divalidasi' : 'Menunggu' }}
+                                </span>
+                            </div>
+                            <p class="text-slate-800 font-medium text-sm line-clamp-2 mb-3">{{ $latestGuidance->topic }}</p>
+                            <div class="flex items-center text-xs text-slate-500">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5"></i>
+                                {{ $latestGuidance->lecturer?->name ?? '-' }}
+                            </div>
                         </div>
                     @else
-                        <div class="inline-flex items-center px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm font-bold">
-                            <i data-lucide="alert-circle" class="w-4 h-4 mr-1.5"></i> {{ $progressPercent }}% Tercapai
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center">
+                            <i data-lucide="file-x" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
+                            <p class="text-slate-500 text-xs font-medium">Belum ada data bimbingan.</p>
                         </div>
                     @endif
+
+                    {{-- Quick Actions --}}
+                    <div class="mt-5 flex flex-col gap-2">
+                        <a href="{{ route('skkm.create') }}" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload SKKM
+                        </a>
+                        <a href="{{ route('skkm.index') }}" class="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-colors">
+                            <i data-lucide="list" class="w-4 h-4"></i> Lihat Semua Poin
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Card Bimbingan & Aksi Cepat -->
-                <div class="space-y-8">
-                    <div class="rounded-3xl bg-white border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                        <h4 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                            <i data-lucide="clock" class="w-5 h-5 text-emerald-500 mr-2"></i>
-                            Bimbingan Terakhir
-                        </h4>
-                        
-                        @if ($latestGuidance)
-                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-sm font-semibold text-slate-500">{{ $latestGuidance->guidance_date?->format('d M Y') }}</span>
-                                    <span class="text-xs font-bold px-2 py-1 rounded-lg {{ $latestGuidance->status === 'validated' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                                        {{ $latestGuidance->status === 'validated' ? 'Divalidasi' : 'Menunggu Review' }}
-                                    </span>
-                                </div>
-                                <p class="text-slate-800 font-medium line-clamp-2 mb-3">{{ $latestGuidance->topic }}</p>
-                                <div class="flex items-center text-sm text-slate-500">
-                                    <i data-lucide="user-check" class="w-4 h-4 mr-1.5"></i>
-                                    {{ $latestGuidance->lecturer?->name ?? '-' }}
-                                </div>
-                            </div>
-                        @else
-                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center flex flex-col items-center justify-center">
-                                <i data-lucide="file-x" class="w-8 h-8 text-slate-300 mb-2"></i>
-                                <p class="text-slate-500 text-sm font-medium">Belum ada data bimbingan.<br>Silakan isi logbook terlebih dahulu.</p>
-                            </div>
-                        @endif
-                    </div>
-                    
-                    <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-8 shadow-lg shadow-indigo-600/20 text-white relative overflow-hidden">
-                        <div class="absolute -right-4 -bottom-4 opacity-10">
-                            <i data-lucide="zap" class="w-32 h-32"></i>
-                        </div>
-                        <h4 class="text-lg font-bold mb-4 relative z-10">Aksi Cepat</h4>
-                        <div class="flex flex-col sm:flex-row gap-3 relative z-10">
-                            <a href="{{ route('skkm.create') }}" class="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload SKKM
-                            </a>
-                            <button class="flex-1 bg-white text-indigo-600 hover:bg-slate-50 px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center shadow-sm">
-                                <i data-lucide="pen-tool" class="w-4 h-4 mr-2"></i> Isi Logbook
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Grafik Poin per Semester -->
-                <div class="col-span-1 lg:col-span-2 rounded-3xl bg-white border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
-                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500 mr-2"></i>
-                        Grafik Poin SKKM per Semester
-                    </h3>
-                    <div class="w-full h-80 relative">
+                {{-- Chart --}}
+                <div class="lg:col-span-2 rounded-3xl bg-white border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500 mr-2"></i> Poin SKKM per Semester
+                    </h4>
+                    <div class="w-full h-72 relative">
                         <canvas id="skkmChart"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- Riwayat Aktivitas -->
-                <div class="col-span-1 lg:col-span-2 rounded-3xl bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-                    <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                        <h3 class="text-lg font-bold text-slate-800">Riwayat Aktivitas Terbaru</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-slate-500">
-                            <thead class="text-xs text-slate-400 uppercase bg-slate-50">
-                                <tr>
-                                    <th class="px-8 py-4 font-semibold tracking-wider">Tanggal</th>
-                                    <th class="px-8 py-4 font-semibold tracking-wider">Kategori</th>
-                                    <th class="px-8 py-4 font-semibold tracking-wider">Aktivitas / Topik</th>
-                                    <th class="px-8 py-4 font-semibold tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @forelse ($activities as $item)
-                                    <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-8 py-5 text-slate-800 font-medium">{{ $item['date'] }}</td>
-                                        <td class="px-8 py-5">
-                                            @if($item['category'] === 'SKKM')
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-md text-xs font-bold border border-indigo-100">SKKM</span>
-                                            @else
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-cyan-50 text-cyan-600 rounded-md text-xs font-bold border border-cyan-100">BIMBINGAN</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-8 py-5">
-                                            <div class="text-slate-800 font-semibold">{{ $item['activity'] }}</div>
-                                            @if($item['points'])
-                                                <div class="text-xs text-indigo-500 font-bold mt-1">+{{ $item['points'] }} Poin</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-8 py-5">
-                                            @if(in_array($item['status'], ['approved', 'validated', 'disetujui']))
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold">Disetujui</span>
-                                            @elseif(in_array($item['status'], ['pending', 'menunggu_dosen']))
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu Validasi</span>
-                                            @else
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold">Ditolak/Revisi</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-8 py-8 text-center text-slate-500">Belum ada riwayat aktivitas yang tercatat.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+            {{-- Activity Feed --}}
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center">
+                        <i data-lucide="activity" class="w-5 h-5 text-indigo-500 mr-2"></i> Aktivitas Terbaru
+                    </h3>
+                    <a href="{{ route('skkm.index') }}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">Lihat Semua</a>
+                </div>
+                <div class="divide-y divide-slate-100">
+                    @forelse ($activities as $item)
+                        <div class="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                            @if($item['category'] === 'SKKM')
+                                <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="file-badge" class="w-4 h-4 text-indigo-600"></i>
+                                </div>
+                            @else
+                                <div class="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="book-open" class="w-4 h-4 text-cyan-600"></i>
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 truncate">{{ $item['activity'] }}</p>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[11px] text-slate-400">{{ $item['date'] }}</span>
+                                    @if($item['points'])
+                                        <span class="text-[11px] font-bold text-indigo-500">+{{ $item['points'] }} poin</span>
+                                    @endif
+                                </div>
+                            </div>
+                            @if(in_array($item['status'], ['approved', 'validated', 'disetujui']))
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Disetujui</span>
+                            @elseif(in_array($item['status'], ['pending', 'menunggu_dosen']))
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Menunggu</span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Ditolak</span>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="px-6 py-10 text-center">
+                            <i data-lucide="inbox" class="w-10 h-10 text-slate-200 mx-auto mb-3"></i>
+                            <p class="text-sm text-slate-500">Belum ada riwayat aktivitas.</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>

@@ -123,6 +123,12 @@ class DashboardController extends Controller
             ->take(8)
             ->values();
 
+        $pendingCount = $student->skkmSubmissions()->where('status_verifikasi', 'pending')->count();
+        $pendingPoints = (int) $student->skkmSubmissions()->where('status_verifikasi', 'pending')->sum('poin_otomatis');
+        $rejectedCount = $student->skkmSubmissions()->where('status_verifikasi', 'ditolak')->count();
+        $approvedCount = $student->skkmSubmissions()->finalApproved()->count();
+        $remainingPoints = max(0, $targetKelulusan - $approvedPoints);
+
         return [
             'dashboardType' => 'student',
             'student' => $student,
@@ -134,6 +140,11 @@ class DashboardController extends Controller
             'latestGuidance' => $latestGuidance,
             'pointsPerSemester' => $pointsPerSemester,
             'activities' => $activities,
+            'pendingCount' => $pendingCount,
+            'pendingPoints' => $pendingPoints,
+            'rejectedCount' => $rejectedCount,
+            'approvedCount' => $approvedCount,
+            'remainingPoints' => $remainingPoints,
         ];
     }
 
