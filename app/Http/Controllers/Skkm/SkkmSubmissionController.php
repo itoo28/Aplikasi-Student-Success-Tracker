@@ -18,15 +18,28 @@ class SkkmSubmissionController extends Controller
     {
         abort_unless(Auth::user()->hasSkkmRole('student'), 403);
 
+        $user = Auth::user();
+
         // Mahasiswa melihat daftar pengajuannya
         $submissions = SkkmSubmission::where('mahasiswa_id', Auth::id())
             ->with('pointRule')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $progress = SkkmProgress::where('mahasiswa_id', Auth::id())->first();
+        $approvedPoints = (int) $user->skkmSubmissions()->finalApproved()->sum('poin_otomatis');
+        $targetKelulusan = ($user->jenjang_studi ?? 'S1') === 'D3' ? 60 : 80;
+        $statusYudisium = $approvedPoints >= $targetKelulusan ? 'memenuhi' : 'dalam_proses';
+        $remainingPoints = max(0, $targetKelulusan - $approvedPoints);
 
-        return view('skkm.mahasiswa.index', compact('submissions', 'progress'));
+        $pendingCount  = $submissions->where('status_verifikasi', 'pending')->count();
+        $approvedCount = $submissions->where('status_verifikasi', 'disetujui')->count();
+        $rejectedCount = $submissions->where('status_verifikasi', 'ditolak')->count();
+        $pendingPoints = (int) $submissions->where('status_verifikasi', 'pending')->sum('poin_otomatis');
+
+        return view('skkm.mahasiswa.index', compact(
+            'submissions', 'approvedPoints', 'targetKelulusan', 'statusYudisium',
+            'remainingPoints', 'pendingCount', 'approvedCount', 'rejectedCount', 'pendingPoints', 'user'
+        ));
     }
 
     /**

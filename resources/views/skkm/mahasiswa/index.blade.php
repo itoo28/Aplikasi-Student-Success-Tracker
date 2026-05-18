@@ -9,7 +9,10 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             
             <!-- Alert Peringatan Dini (Sesuai PRD) -->
-            @if($progress && $progress->total_poin < 80 && $progress->semester_aktif >= 7)
+            @php
+                $isWarning = $approvedPoints < $targetKelulusan && $user->semester >= ($user->jenjang_studi === 'D3' ? 6 : 7);
+            @endphp
+            @if($isWarning)
             <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-md shadow-sm mb-6 flex items-center" role="alert">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <p><strong>Peringatan Dini:</strong> Segera lengkapi SKKM â€” tersisa sedikit waktu untuk memenuhi syarat Yudisium.</p>
@@ -25,14 +28,14 @@
                     <div class="relative z-10 flex items-center justify-between">
                         <div>
                             <p class="text-indigo-100 font-medium text-sm tracking-wider uppercase">Total Poin Disetujui</p>
-                            <p class="text-5xl font-extrabold mt-2">{{ $progress ? $progress->total_poin : 0 }} <span class="text-xl font-medium text-indigo-200">/ 80</span></p>
+                            <p class="text-5xl font-extrabold mt-2">{{ $approvedPoints }} <span class="text-xl font-medium text-indigo-200">/ {{ $targetKelulusan }}</span></p>
                         </div>
                         <div class="p-3 bg-white bg-opacity-20 rounded-2xl backdrop-blur-md">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                         </div>
                     </div>
                     <div class="mt-6 w-full bg-indigo-900 bg-opacity-30 rounded-full h-2.5">
-                        @php $percentage = $progress ? min(($progress->total_poin / 80) * 100, 100) : 0; @endphp
+                        @php $percentage = min(($approvedPoints / $targetKelulusan) * 100, 100); @endphp
                         <div class="bg-white h-2.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" style="width: {{ $percentage }}%"></div>
                     </div>
                 </div>
@@ -40,7 +43,7 @@
                 <!-- Card Status Yudisium -->
                 <div class="rounded-3xl bg-white border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl relative overflow-hidden flex flex-col justify-center transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
                     <p class="text-slate-500 font-medium text-sm tracking-wider uppercase mb-1">Status Kelulusan SKKM</p>
-                    @if($progress && $progress->status_yudisium == 'memenuhi')
+                    @if($statusYudisium == 'memenuhi')
                         <div class="flex items-center space-x-3 text-emerald-600 mt-2">
                             <div class="bg-emerald-100 p-2 rounded-xl">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -108,37 +111,21 @@
                                 <td class="px-6 py-5">
                                     @if($sub->status_verifikasi === 'pending')
                                         <span class="inline-flex items-center bg-amber-50 text-amber-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-amber-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-500"></span> Menunggu Dosen PA
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-amber-500"></span> Menunggu Validasi
                                         </span>
                                     @elseif($sub->status_verifikasi === 'ditolak')
                                         <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Dosen PA
-                                        </span>
-                                    @elseif($sub->status_kaprodi === null || $sub->status_kaprodi === 'pending')
-                                        <span class="inline-flex items-center bg-sky-50 text-sky-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-sky-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-sky-500"></span> Menunggu Kaprodi
-                                        </span>
-                                    @elseif($sub->status_kaprodi === 'ditolak')
-                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Kaprodi
-                                        </span>
-                                    @elseif($sub->status_kemahasiswaan === null || $sub->status_kemahasiswaan === 'pending')
-                                        <span class="inline-flex items-center bg-indigo-50 text-indigo-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-indigo-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-indigo-500"></span> Menunggu Kemahasiswaan
-                                        </span>
-                                    @elseif($sub->status_kemahasiswaan === 'ditolak')
-                                        <span class="inline-flex items-center bg-rose-50 text-rose-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-rose-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak Kemahasiswaan
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-rose-500"></span> Ditolak / Revisi
                                         </span>
                                     @else
                                         <span class="inline-flex items-center bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full ring-1 ring-inset ring-emerald-500/20">
-                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Final Disetujui
+                                            <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500"></span> Disetujui
                                         </span>
                                     @endif
 
-                                    @if($sub->catatan_dosen || $sub->catatan_kaprodi || $sub->catatan_kemahasiswaan)
+                                    @if($sub->catatan_dosen)
                                         <p class="text-[11px] text-slate-500 mt-2">
-                                            {{ $sub->catatan_kemahasiswaan ?? $sub->catatan_kaprodi ?? $sub->catatan_dosen }}
+                                            {{ $sub->catatan_dosen }}
                                         </p>
                                     @endif
                                 </td>

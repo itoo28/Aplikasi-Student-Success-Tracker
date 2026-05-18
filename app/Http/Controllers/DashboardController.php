@@ -47,7 +47,7 @@ class DashboardController extends Controller
         $targetKelulusan = ($student->jenjang_studi ?? 'S1') === 'D3' ? 60 : 80;
         
         $progress = $student->skkmProgress;
-        $approvedPoints = $progress ? $progress->total_poin : 0;
+        $approvedPoints = (int) $student->skkmSubmissions()->finalApproved()->sum('poin_otomatis');
         
         $progressPercent = $targetKelulusan > 0
             ? min(100, (int) round(($approvedPoints / $targetKelulusan) * 100))
@@ -59,13 +59,26 @@ class DashboardController extends Controller
             ->latest('guidance_date')
             ->first();
 
-        $pointsPerSemester = $student->skkmSubmissions()
+        $maxSemester = ($student->jenjang_studi ?? 'S1') === 'D3' ? 6 : 8;
+        $pointsPerSemester = [];
+        
+        for ($i = 1; $i <= $maxSemester; $i++) {
+            $pointsPerSemester[$i] = 0;
+        }
+
+        $queryPoints = $student->skkmSubmissions()
             ->finalApproved()
             ->selectRaw('semester_input, sum(poin_otomatis) as total_points')
             ->groupBy('semester_input')
             ->orderBy('semester_input')
             ->pluck('total_points', 'semester_input')
             ->toArray();
+
+        foreach ($queryPoints as $smt => $points) {
+            if ($smt <= $maxSemester) {
+                $pointsPerSemester[$smt] = $points;
+            }
+        }
 
         $activities = collect();
 

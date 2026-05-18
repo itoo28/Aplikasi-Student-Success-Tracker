@@ -109,12 +109,6 @@
                         Grafik Poin SKKM per Semester
                     </h3>
                     <div class="w-full h-80 relative">
-                        @if(empty($pointsPerSemester))
-                            <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                                <i data-lucide="bar-chart" class="w-12 h-12 mb-3 opacity-20"></i>
-                                <p class="text-sm font-medium">Belum ada data poin SKKM yang disetujui.</p>
-                            </div>
-                        @endif
                         <canvas id="skkmChart"></canvas>
                     </div>
                 </div>
@@ -154,14 +148,8 @@
                                         <td class="px-8 py-5">
                                             @if(in_array($item['status'], ['approved', 'validated', 'disetujui']))
                                                 <span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold">Disetujui</span>
-                                            @elseif($item['status'] === 'menunggu_dosen')
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu Dosen PA</span>
-                                            @elseif($item['status'] === 'menunggu_kaprodi')
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-sky-50 text-sky-600 rounded-lg text-xs font-bold">Menunggu Kaprodi</span>
-                                            @elseif($item['status'] === 'menunggu_kemahasiswaan')
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold">Menunggu Kemahasiswaan</span>
-                                            @elseif(in_array($item['status'], ['pending']))
-                                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu</span>
+                                            @elseif(in_array($item['status'], ['pending', 'menunggu_dosen']))
+                                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">Menunggu Validasi</span>
                                             @else
                                                 <span class="inline-flex items-center px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold">Ditolak/Revisi</span>
                                             @endif
