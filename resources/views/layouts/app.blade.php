@@ -117,9 +117,11 @@
             <div class="flex-1 flex flex-col ml-64 min-w-0 bg-slate-50 min-h-screen">
                 <!-- Top Navigation/Header -->
                 <header class="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-10 sticky top-0 z-40 shadow-sm">
-                    <div class="flex items-center text-slate-800">
+                    <div class="flex items-center text-slate-800 flex-1 min-w-0 pr-6">
                         @if (isset($header))
-                            {{ $header }}
+                            <div class="w-full">
+                                {{ $header }}
+                            </div>
                         @else
                             <h2 class="font-bold text-2xl tracking-tight">Dashboard</h2>
                         @endif
