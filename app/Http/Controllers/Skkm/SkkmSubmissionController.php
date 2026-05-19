@@ -161,19 +161,9 @@ class SkkmSubmissionController extends Controller
         ];
 
         if ($request->status_verifikasi === 'disetujui') {
-            $payload['status_kaprodi'] = 'disetujui'; // Bypass Kaprodi
-            $payload['status_kemahasiswaan'] = 'disetujui'; // Bypass Kemahasiswaan
-            $payload['kaprodi_verified_by'] = Auth::id();
-            $payload['kaprodi_verified_at'] = now();
-            $payload['kemahasiswaan_verified_by'] = Auth::id();
-            $payload['kemahasiswaan_verified_at'] = now();
+            // Single-stage: Dosen PA approval is final
         } else {
-            $payload['status_kaprodi'] = 'ditolak';
-            $payload['status_kemahasiswaan'] = 'ditolak';
-            $payload['kaprodi_verified_by'] = null;
-            $payload['kaprodi_verified_at'] = null;
-            $payload['kemahasiswaan_verified_by'] = null;
-            $payload['kemahasiswaan_verified_at'] = null;
+            // Ditolak — no extra fields needed
         }
 
         $submission->update($payload);

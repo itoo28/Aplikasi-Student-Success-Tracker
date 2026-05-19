@@ -71,8 +71,8 @@
                     </a>
                     @elseif($skkmRole === 'kaprodi')
                     <a href="{{ route('skkm.kaprodi.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kaprodi.index') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
-                        <i data-lucide="clipboard-check" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kaprodi.index') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
-                        <span>Validasi Kaprodi</span>
+                        <i data-lucide="eye" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kaprodi.index') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Monitoring SKKM</span>
                     </a>
                     <a href="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kaprodi.mahasiswa.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
                         <i data-lucide="users" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kaprodi.mahasiswa.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
@@ -80,8 +80,8 @@
                     </a>
                     @elseif($skkmRole === 'kemahasiswaan')
                     <a href="{{ route('skkm.kemahasiswaan.index') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('skkm.kemahasiswaan.*') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">
-                        <i data-lucide="shield-check" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kemahasiswaan.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
-                        <span>Validasi Akhir</span>
+                        <i data-lucide="eye" class="w-5 h-5 mr-3 {{ request()->routeIs('skkm.kemahasiswaan.*') ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 transition-colors' }}"></i>
+                        <span>Monitoring SKKM</span>
                     </a>
                     @elseif($skkmRole === 'super_admin')
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3.5 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-white font-medium' }} rounded-2xl transition-all duration-200 group">

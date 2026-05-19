@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
             {{ __('Super Admin Dashboard') }}
@@ -21,9 +21,9 @@
                 <h3 class="mt-2 text-3xl font-extrabold text-slate-800">{{ $totalProgramStudi }}</h3>
             </div>
             <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <p class="text-sm font-semibold text-slate-500">Antrean Validasi</p>
-                <h3 class="mt-2 text-2xl font-extrabold text-slate-800">{{ $pendingDosen + $pendingKaprodi + $pendingKemahasiswaan }}</h3>
-                <p class="text-xs text-slate-500 mt-2">Dosen: {{ $pendingDosen }} · Kaprodi: {{ $pendingKaprodi }} · Kemahasiswaan: {{ $pendingKemahasiswaan }}</p>
+                <p class="text-sm font-semibold text-slate-500">Antrean Verifikasi</p>
+                <h3 class="mt-2 text-2xl font-extrabold text-slate-800">{{ $pendingDosen }}</h3>
+                <p class="text-xs text-slate-500 mt-2">Menunggu verifikasi Dosen PA</p>
             </div>
         </div>
 
@@ -33,7 +33,7 @@
                     <i data-lucide="users-cog" class="w-5 h-5"></i>
                 </div>
                 <h3 class="font-bold text-slate-800">Kelola User</h3>
-                <p class="text-sm text-slate-500 mt-1">CRUD semua akun: mahasiswa, dosen PA, kaprodi, kemahasiswaan, super admin.</p>
+                <p class="text-sm text-slate-500 mt-1">CRUD semua akun: mahasiswa, dosen PA, kaprodi, kemahasiswaan.</p>
             </a>
             <a href="{{ route('admin.fakultas.index') }}" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-indigo-200 hover:shadow-[0_8px_30px_rgb(79,70,229,0.15)] transition-all">
                 <div class="inline-flex p-3 rounded-2xl bg-indigo-50 text-indigo-600 mb-4">

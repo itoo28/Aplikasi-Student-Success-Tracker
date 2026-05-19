@@ -50,19 +50,19 @@ class UserManagementController extends Controller
         $validated['email_verified_at'] = now();
         $validated['role'] = $validated['skkm_role'] === 'mahasiswa' ? 'student' : 'lecturer';
 
-        if ($validated['skkm_role'] === 'kaprodi') {
+        if (in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
             $validated['jenjang_studi'] = ProgramStudi::whereKey($validated['program_studi_id'])->value('jenjang');
         }
 
         if ($validated['skkm_role'] !== 'mahasiswa') {
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
-            if ($validated['skkm_role'] !== 'kaprodi') {
+            if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
                 $validated['jenjang_studi'] = null;
             }
         }
 
-        if (! in_array($validated['skkm_role'], ['mahasiswa', 'kaprodi'], true)) {
+        if (! in_array($validated['skkm_role'], ['mahasiswa', 'kaprodi', 'dosen_pa'], true)) {
             $validated['program_studi_id'] = null;
         }
 
@@ -94,19 +94,19 @@ class UserManagementController extends Controller
 
         $validated['role'] = $validated['skkm_role'] === 'mahasiswa' ? 'student' : 'lecturer';
 
-        if ($validated['skkm_role'] === 'kaprodi') {
+        if (in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
             $validated['jenjang_studi'] = ProgramStudi::whereKey($validated['program_studi_id'])->value('jenjang');
         }
 
         if ($validated['skkm_role'] !== 'mahasiswa') {
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
-            if ($validated['skkm_role'] !== 'kaprodi') {
+            if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
                 $validated['jenjang_studi'] = null;
             }
         }
 
-        if (! in_array($validated['skkm_role'], ['mahasiswa', 'kaprodi'], true)) {
+        if (! in_array($validated['skkm_role'], ['mahasiswa', 'kaprodi', 'dosen_pa'], true)) {
             $validated['program_studi_id'] = null;
         }
 
@@ -158,7 +158,7 @@ class UserManagementController extends Controller
             'skkm_role' => ['required', Rule::in(array_keys($this->roleOptions()))],
             'program_studi_id' => [
                 'nullable',
-                Rule::requiredIf(fn () => in_array($request->input('skkm_role'), ['mahasiswa', 'kaprodi'], true)),
+                Rule::requiredIf(fn () => in_array($request->input('skkm_role'), ['mahasiswa', 'kaprodi', 'dosen_pa'], true)),
                 'exists:program_studis,id',
             ],
             'jenjang_studi' => [

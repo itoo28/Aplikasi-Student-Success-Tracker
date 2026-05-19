@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
-            {{ __('Validasi SKKM Kaprodi') }}
+            {{ __('Monitoring SKKM') }}
         </h2>
     </x-slot>
 
     <div class="space-y-8">
         <div class="bg-white rounded-3xl border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
             <div>
-                <h3 class="text-xl font-bold text-slate-800">Antrean Validasi Program Studi</h3>
+                <h3 class="text-xl font-bold text-slate-800">Monitoring Pengajuan SKKM</h3>
                 <p class="text-slate-500 mt-1">Scope verifikasi: <span class="font-semibold text-slate-700">{{ $scopeLabel }}</span></p>
             </div>
             <div class="inline-flex items-center px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 font-semibold">

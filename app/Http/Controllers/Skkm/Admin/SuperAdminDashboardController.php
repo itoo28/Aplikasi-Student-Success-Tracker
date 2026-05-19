@@ -33,19 +33,6 @@ class SuperAdminDashboardController extends Controller
             ->count();
 
         $pendingDosen = SkkmSubmission::query()->where('status_verifikasi', 'pending')->count();
-        $pendingKaprodi = SkkmSubmission::query()
-            ->where('status_verifikasi', 'disetujui')
-            ->where(function ($query) {
-                $query->whereNull('status_kaprodi')->orWhere('status_kaprodi', 'pending');
-            })
-            ->count();
-        $pendingKemahasiswaan = SkkmSubmission::query()
-            ->where('status_verifikasi', 'disetujui')
-            ->where('status_kaprodi', 'disetujui')
-            ->where(function ($query) {
-                $query->whereNull('status_kemahasiswaan')->orWhere('status_kemahasiswaan', 'pending');
-            })
-            ->count();
 
         $recentUsers = User::query()->latest()->take(6)->get();
 
@@ -56,8 +43,6 @@ class SuperAdminDashboardController extends Controller
             'totalFakultas' => Fakultas::count(),
             'totalProgramStudi' => ProgramStudi::count(),
             'pendingDosen' => $pendingDosen,
-            'pendingKaprodi' => $pendingKaprodi,
-            'pendingKemahasiswaan' => $pendingKemahasiswaan,
             'recentUsers' => $recentUsers,
         ]);
     }
