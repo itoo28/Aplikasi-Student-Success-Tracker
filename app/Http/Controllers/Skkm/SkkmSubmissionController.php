@@ -120,17 +120,25 @@ class SkkmSubmissionController extends Controller
     /**
      * Monitoring data mahasiswa bimbingan untuk Dosen PA
      */
-    public function monitoringIndex()
+    public function monitoringIndex(Request $request)
     {
         abort_unless(Auth::user()->hasSkkmRole('dosen_pa'), 403);
+
+        $search = $request->query('search');
 
         $students = Auth::user()
             ->adviseeStudents()
             ->with(['programStudi.fakultas', 'skkmProgress'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('identifier', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('name')
             ->get();
 
-        return view('skkm.dosen.mahasiswa', compact('students'));
+        return view('skkm.dosen.mahasiswa', compact('students', 'search'));
     }
 
     /**

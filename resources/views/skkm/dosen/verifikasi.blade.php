@@ -160,12 +160,12 @@
 
     <!-- Modal Verifikasi -->
     <div id="verifyModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
             <!-- Background overlay -->
-            <div class="fixed inset-0 bg-slate-900 bg-opacity-75 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeVerifyModal()"></div>
+            <div class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeVerifyModal()"></div>
 
             <!-- Modal panel -->
-            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-100">
+            <div class="relative bg-white rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg w-full border border-slate-100">
                 <form id="verifyForm" method="POST" action="">
                     @csrf
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -186,27 +186,41 @@
                                 
                                 <div class="mt-4">
                                     <label class="block text-sm font-semibold text-slate-700 mb-2">Keputusan Verifikasi</label>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <label class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus:outline-none hover:bg-slate-50 transition-colors">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <label class="relative block cursor-pointer hover:-translate-y-1 transition-transform duration-300">
                                             <input type="radio" name="status_verifikasi" value="disetujui" class="sr-only peer" required onchange="toggleCatatan()">
-                                            <div class="flex items-center">
-                                                <span class="h-4 w-4 rounded-full border border-slate-300 flex items-center justify-center peer-checked:border-emerald-500 peer-checked:bg-emerald-500 mr-3">
-                                                    <span class="h-1.5 w-1.5 rounded-full bg-white opacity-0 peer-checked:opacity-100"></span>
-                                                </span>
-                                                <span class="text-sm font-semibold text-slate-900">Setujui Poin</span>
+                                            
+                                            <div class="relative flex items-center p-4 rounded-2xl border-2 border-slate-200 bg-white shadow-sm transition-all duration-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:shadow-lg peer-checked:shadow-emerald-100/50 peer-checked:[&_.icon-box]:border-emerald-500 peer-checked:[&_.icon-box]:bg-emerald-500 peer-checked:[&_.icon-svg]:text-white peer-checked:[&_.title-text]:text-emerald-800 peer-checked:[&_.desc-text]:text-emerald-600 hover:border-emerald-300">
+                                                
+                                                <div class="icon-box flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-slate-200 bg-slate-50 transition-all duration-300">
+                                                    <svg class="icon-svg h-6 w-6 text-slate-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                                
+                                                <div class="ml-4">
+                                                    <span class="title-text block text-base font-bold text-slate-700 transition-colors duration-300">Setujui Poin</span>
+                                                    <span class="desc-text block text-xs font-medium text-slate-400 mt-0.5 transition-colors duration-300">Dokumen valid</span>
+                                                </div>
                                             </div>
-                                            <span class="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent peer-checked:border-emerald-500" aria-hidden="true"></span>
                                         </label>
 
-                                        <label class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus:outline-none hover:bg-slate-50 transition-colors">
+                                        <label class="relative block cursor-pointer hover:-translate-y-1 transition-transform duration-300">
                                             <input type="radio" name="status_verifikasi" value="ditolak" class="sr-only peer" required onchange="toggleCatatan()">
-                                            <div class="flex items-center">
-                                                <span class="h-4 w-4 rounded-full border border-slate-300 flex items-center justify-center peer-checked:border-rose-500 peer-checked:bg-rose-500 mr-3">
-                                                    <span class="h-1.5 w-1.5 rounded-full bg-white opacity-0 peer-checked:opacity-100"></span>
-                                                </span>
-                                                <span class="text-sm font-semibold text-slate-900">Tolak (Perbaikan)</span>
+                                            
+                                            <div class="relative flex items-center p-4 rounded-2xl border-2 border-slate-200 bg-white shadow-sm transition-all duration-300 peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:shadow-lg peer-checked:shadow-rose-100/50 peer-checked:[&_.icon-box]:border-rose-500 peer-checked:[&_.icon-box]:bg-rose-500 peer-checked:[&_.icon-svg]:text-white peer-checked:[&_.title-text]:text-rose-800 peer-checked:[&_.desc-text]:text-rose-600 hover:border-rose-300">
+                                                
+                                                <div class="icon-box flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-slate-200 bg-slate-50 transition-all duration-300">
+                                                    <svg class="icon-svg h-6 w-6 text-slate-300 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </div>
+                                                
+                                                <div class="ml-4">
+                                                    <span class="title-text block text-base font-bold text-slate-700 transition-colors duration-300">Tolak (Revisi)</span>
+                                                    <span class="desc-text block text-xs font-medium text-slate-400 mt-0.5 transition-colors duration-300">Perlu perbaikan</span>
+                                                </div>
                                             </div>
-                                            <span class="pointer-events-none absolute -inset-px rounded-xl border-2 border-transparent peer-checked:border-rose-500" aria-hidden="true"></span>
                                         </label>
                                     </div>
                                 </div>

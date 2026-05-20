@@ -8,9 +8,29 @@
     <div class="py-12 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
-                    <h3 class="text-lg font-bold text-slate-800">Ringkasan Poin SKKM</h3>
-                    <p class="text-sm text-slate-500 mt-1">Poin ditampilkan per blok semester (1-2, 3-4, 5-6, 7-8) dan total.</p>
+                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Ringkasan Poin SKKM</h3>
+                        <p class="text-sm text-slate-500 mt-1">Poin ditampilkan per blok semester (1-2, 3-4, 5-6, 7-8) dan total.</p>
+                    </div>
+                    <form method="GET" action="{{ route('skkm.monitoring.index') }}" class="flex flex-col sm:flex-row items-center w-full md:w-auto gap-2 mt-4 md:mt-0">
+                        <div class="relative w-full sm:w-64 md:w-80">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIM..." class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm">
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="submit" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white border border-transparent rounded-xl text-sm font-semibold transition-colors shadow-sm">
+                                Cari
+                            </button>
+                            @if(request('search'))
+                                <a href="{{ route('skkm.monitoring.index') }}" class="flex-1 sm:flex-none inline-flex justify-center items-center px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold transition-colors shadow-sm">
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
+                    </form>
                 </div>
 
                 <div class="overflow-x-auto">
