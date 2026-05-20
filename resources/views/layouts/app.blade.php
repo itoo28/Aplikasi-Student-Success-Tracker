@@ -16,7 +16,7 @@
         @livewireStyles
     </head>
     <body class="min-h-screen bg-zinc-50 text-zinc-900 antialiased">
-        <flux:accent color="indigo">
+        <flux:accent color="indigo" class="min-h-screen min-h-dvh">
             <x-banner />
 
             @php

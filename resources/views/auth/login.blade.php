@@ -1,113 +1,164 @@
-<x-guest-layout>
-    <div class="mx-auto flex min-h-screen w-full max-w-md items-center px-5 py-12">
-        <div class="w-full rounded-3xl border border-zinc-200/70 bg-white/95 p-8 shadow-xl shadow-zinc-200/50 backdrop-blur">
-            <div class="mb-8 text-center">
-                <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
-                    <flux:icon.academic-cap />
-                </div>
-                <flux:heading size="xl" level="1">SST Portal</flux:heading>
-                <flux:text class="mt-2">Masuk ke Student Success Tracker</flux:text>
-            </div>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-            @if ($errors->any())
-                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                    {{ $errors->first() }}
-                </div>
-            @endif
+    <title>{{ config('app.name', 'Student Success Tracker') }}</title>
 
-            @if (session('status'))
-                <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                    {{ session('status') }}
-                </div>
-            @endif
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900&display=swap" rel="stylesheet" />
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-5">
-                @csrf
-
-                <flux:field>
-                    <flux:label for="role">Masuk Sebagai</flux:label>
-                    <flux:select id="role" name="role" required>
-                        <flux:select.option value="mahasiswa" :selected="old('role', 'mahasiswa') === 'mahasiswa'">Mahasiswa</flux:select.option>
-                        <flux:select.option value="dosen_pa" :selected="old('role') === 'dosen_pa'">Dosen PA</flux:select.option>
-                        <flux:select.option value="kaprodi" :selected="old('role') === 'kaprodi'">Kaprodi</flux:select.option>
-                        <flux:select.option value="kemahasiswaan" :selected="old('role') === 'kemahasiswaan'">Kemahasiswaan</flux:select.option>
-                        <flux:select.option value="super_admin" :selected="old('role') === 'super_admin'">Super Admin</flux:select.option>
-                    </flux:select>
-                </flux:field>
-
-                <flux:field>
-                    <flux:label id="label-identifier" for="email">NIM / Email</flux:label>
-                    <flux:input
-                        id="email"
-                        name="email"
-                        type="text"
-                        :value="old('email')"
-                        required
-                        autofocus
-                        autocomplete="username"
-                        placeholder="Masukkan NIM atau Email"
-                    />
-                </flux:field>
-
-                <flux:field>
-                    <div class="mb-2 flex items-center justify-between">
-                        <flux:label for="password">Password</flux:label>
-                        @if (Route::has('password.request'))
-                            <flux:link :href="route('password.request')" variant="subtle">Lupa Password?</flux:link>
-                        @endif
-                    </div>
-                    <flux:input
-                        id="password"
-                        name="password"
-                        type="password"
-                        required
-                        autocomplete="current-password"
-                        viewable
-                        placeholder="Masukkan password"
-                    />
-                </flux:field>
-
-                <div class="flex items-center justify-between">
-                    <flux:field variant="inline">
-                        <flux:checkbox id="remember_me" name="remember" />
-                        <flux:label for="remember_me">Ingat saya</flux:label>
-                    </flux:field>
-                </div>
-
-                <flux:button type="submit" variant="primary" icon:trailing="arrow-right" class="w-full">
-                    Masuk ke Sistem
-                </flux:button>
-            </form>
-
-            <p class="mt-8 text-center text-xs text-zinc-500">&copy; {{ date('Y') }} Student Success Tracker</p>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://unpkg.com/lucide@latest"></script>
+    @fluxAppearance
+    @livewireStyles
+</head>
+<body class="font-sans antialiased text-slate-900 bg-slate-50 selection:bg-indigo-100 selection:text-indigo-900 relative overflow-x-hidden">
+    <flux:accent color="indigo">
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-[-20%] left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-400/20 blur-[120px]"></div>
+            <div class="absolute top-[30%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-400/20 blur-[120px]"></div>
+            <div class="absolute bottom-[-10%] left-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/10 blur-[100px]"></div>
         </div>
-    </div>
 
-    @push('scripts')
-        <script>
-            const roleInput = document.getElementById('role');
-            const identifierLabel = document.getElementById('label-identifier');
-            const identifierInput = document.getElementById('email');
+        <div class="relative z-10 grid min-h-screen lg:grid-cols-[60%_40%]">
+            <section class="flex min-h-screen flex-col overflow-hidden">
+                <nav class="w-full px-6 py-5 md:px-10 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                        </div>
+                        <span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">SST Portal</span>
+                    </div>
 
-            const updateRoleLabel = (role) => {
-                if (role === 'mahasiswa') {
-                    identifierLabel.textContent = 'NIM / Email';
-                    identifierInput.placeholder = 'Masukkan NIM atau Email';
-                    return;
-                }
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+                            Buka Dashboard <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                        </a>
+                    @endauth
+                </nav>
 
-                if (role === 'dosen_pa' || role === 'kaprodi') {
-                    identifierLabel.textContent = 'NIDN / Email';
-                    identifierInput.placeholder = 'Masukkan NIDN atau Email';
-                    return;
-                }
+                <main class="flex flex-1 flex-col items-center justify-center px-6 pt-4 pb-8 text-center">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-bold mb-5">
+                        <span class="flex w-2 h-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
+                        Versi 2.0 Resmi Dirilis
+                    </div>
 
-                identifierLabel.textContent = 'Email / Identifier';
-                identifierInput.placeholder = 'Masukkan Email atau Identifier';
-            };
+                    <h1 class="text-4xl md:text-5xl xl:text-6xl font-black text-slate-900 tracking-tight leading-[1.08] max-w-4xl mb-5">
+                        Platform Terpadu untuk <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Kesuksesan Mahasiswa.</span>
+                    </h1>
 
-            updateRoleLabel(roleInput.value);
-            roleInput.addEventListener('change', () => updateRoleLabel(roleInput.value));
-        </script>
-    @endpush
-</x-guest-layout>
+                    <p class="text-base xl:text-lg text-slate-500 font-medium max-w-2xl mb-6 leading-relaxed">
+                        SST Portal memudahkan mahasiswa dalam melacak poin Sistem Kredit Kegiatan Mahasiswa (SKKM) dan memonitor aktivitas bimbingan akademik bersama Dosen PA secara terpusat, digital, dan efisien.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl w-full mt-4 text-left">
+                        <div class="bg-white/60 backdrop-blur-xl border border-white p-5 xl:p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:shadow-[0_8px_40px_rgb(99,102,241,0.1)] transition-all">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="award" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2">Modul Poin SKKM</h3>
+                            <p class="text-sm xl:text-base text-slate-500 font-medium leading-relaxed">
+                                Ajukan sertifikat kegiatan Anda dengan mudah. Sistem akan menghitung otomatis poin Anda, dan Dosen PA dapat melakukan verifikasi langsung melalui dashboard khusus.
+                            </p>
+                        </div>
+
+                        <div class="bg-white/60 backdrop-blur-xl border border-white p-5 xl:p-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:shadow-[0_8px_40px_rgb(99,102,241,0.1)] transition-all">
+                            <div class="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <i data-lucide="book-open" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2">Logbook Bimbingan</h3>
+                            <p class="text-sm xl:text-base text-slate-500 font-medium leading-relaxed">
+                                Catat dan pantau seluruh sesi bimbingan akademik Anda. Dosen PA dapat memonitor mahasiswa berisiko berdasarkan riwayat aktivitas dan perolehan poin per semester.
+                            </p>
+                        </div>
+                    </div>
+                </main>
+            </section>
+
+            <aside class="border-t border-slate-200/70 bg-white/80 backdrop-blur-xl lg:border-l lg:border-t-0">
+                <div class="flex min-h-screen items-center px-6 py-10 lg:px-8">
+                    <div class="mx-auto w-full max-w-sm">
+                        <div class="rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] sm:p-7">
+                            <div class="mb-7">
+                                <div class="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
+                                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                                </div>
+                                <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Masuk Sistem</h2>
+                                <p class="mt-2 text-sm font-medium leading-relaxed text-slate-500">Gunakan akun yang sudah terdaftar untuk melanjutkan.</p>
+                            </div>
+
+                            @if ($errors->any())
+                                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                                    {{ $errors->first() }}
+                                </div>
+                            @endif
+
+                            @if (session('status'))
+                                <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                                @csrf
+
+                                <flux:field>
+                                    <flux:label for="email">Email / NIM / NIDN</flux:label>
+                                    <flux:input
+                                        id="email"
+                                        name="email"
+                                        type="text"
+                                        :value="old('email')"
+                                        required
+                                        autofocus
+                                        autocomplete="username"
+                                        placeholder="231234567 atau email kampus"
+                                    />
+                                </flux:field>
+
+                                <flux:field>
+                                    <div class="mb-2 flex items-center justify-between">
+                                        <flux:label for="password">Password</flux:label>
+                                        @if (Route::has('password.request'))
+                                            <flux:link :href="route('password.request')" variant="subtle">Lupa Password?</flux:link>
+                                        @endif
+                                    </div>
+                                    <flux:input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        autocomplete="current-password"
+                                        viewable
+                                        placeholder="Masukkan password"
+                                    />
+                                </flux:field>
+
+                                <flux:field variant="inline">
+                                    <flux:checkbox id="remember_me" name="remember" />
+                                    <flux:label for="remember_me">Ingat saya</flux:label>
+                                </flux:field>
+
+                                <flux:button type="submit" variant="primary" icon:trailing="arrow-right" class="w-full">
+                                    Masuk
+                                </flux:button>
+                            </form>
+                        </div>
+
+                        <p class="mt-6 text-center text-xs font-medium text-slate-500">&copy; {{ date('Y') }} Student Success Tracker</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </flux:accent>
+
+    @livewireScripts
+    @fluxScripts
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
