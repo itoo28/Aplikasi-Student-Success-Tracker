@@ -27,11 +27,11 @@
                 <flux:field>
                     <flux:label for="role">Masuk Sebagai</flux:label>
                     <flux:select id="role" name="role" required>
-                        <flux:select.option value="mahasiswa" @selected(old('role', 'mahasiswa') === 'mahasiswa')>Mahasiswa</flux:select.option>
-                        <flux:select.option value="dosen_pa" @selected(old('role') === 'dosen_pa')>Dosen PA</flux:select.option>
-                        <flux:select.option value="kaprodi" @selected(old('role') === 'kaprodi')>Kaprodi</flux:select.option>
-                        <flux:select.option value="kemahasiswaan" @selected(old('role') === 'kemahasiswaan')>Kemahasiswaan</flux:select.option>
-                        <flux:select.option value="super_admin" @selected(old('role') === 'super_admin')>Super Admin</flux:select.option>
+                        <flux:select.option value="mahasiswa" :selected="old('role', 'mahasiswa') === 'mahasiswa'">Mahasiswa</flux:select.option>
+                        <flux:select.option value="dosen_pa" :selected="old('role') === 'dosen_pa'">Dosen PA</flux:select.option>
+                        <flux:select.option value="kaprodi" :selected="old('role') === 'kaprodi'">Kaprodi</flux:select.option>
+                        <flux:select.option value="kemahasiswaan" :selected="old('role') === 'kemahasiswaan'">Kemahasiswaan</flux:select.option>
+                        <flux:select.option value="super_admin" :selected="old('role') === 'super_admin'">Super Admin</flux:select.option>
                     </flux:select>
                 </flux:field>
 

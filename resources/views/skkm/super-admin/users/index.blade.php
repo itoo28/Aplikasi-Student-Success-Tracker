@@ -29,7 +29,7 @@
                         <flux:select id="role" name="role">
                             <flux:select.option value="">Semua Role</flux:select.option>
                             @foreach ($roleOptions as $value => $label)
-                                <flux:select.option value="{{ $value }}" @selected($selectedRole === $value)>
+                                <flux:select.option value="{{ $value }}" :selected="$selectedRole === $value">
                                     {{ $label }}
                                 </flux:select.option>
                             @endforeach
