@@ -59,14 +59,43 @@
                     'super_admin' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Panel Admin', 'icon' => 'shield-check'],
-                        ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'CRUD User', 'icon' => 'users'],
-                        ['route' => 'admin.fakultas.index', 'active' => 'admin.fakultas.*', 'label' => 'CRUD Fakultas', 'icon' => 'building-office-2'],
-                        ['route' => 'admin.program-studi.index', 'active' => 'admin.program-studi.*', 'label' => 'CRUD Program Studi', 'icon' => 'book-open'],
+                        ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Manajemen User', 'icon' => 'users'],
+                        ['route' => 'admin.fakultas.index', 'active' => 'admin.fakultas.*', 'label' => 'Manajemen Fakultas', 'icon' => 'building-office-2'],
+                        ['route' => 'admin.program-studi.index', 'active' => 'admin.program-studi.*', 'label' => 'Manajemen Program Studi', 'icon' => 'book-open'],
                     ],
                     default => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                     ],
                 };
+
+                $toastNotifications = [];
+
+                if (session()->has('success')) {
+                    $toastNotifications[] = [
+                        'type' => 'success',
+                        'title' => 'Berhasil',
+                        'message' => (string) session('success'),
+                        'icon' => 'circle-check-big',
+                    ];
+                }
+
+                if (session()->has('error')) {
+                    $toastNotifications[] = [
+                        'type' => 'error',
+                        'title' => 'Terjadi Kesalahan',
+                        'message' => (string) session('error'),
+                        'icon' => 'octagon-alert',
+                    ];
+                }
+
+                if (session()->has('warning')) {
+                    $toastNotifications[] = [
+                        'type' => 'warning',
+                        'title' => 'Perhatian',
+                        'message' => (string) session('warning'),
+                        'icon' => 'triangle-alert',
+                    ];
+                }
             @endphp
 
             <flux:sidebar sticky collapsible="mobile" class="bg-white border-r border-zinc-200/70">
@@ -148,6 +177,110 @@
                 {{ $slot }}
             </flux:main>
         </flux:accent>
+
+        <div
+            id="appConfirmDialog"
+            class="fixed inset-0 z-[100] hidden items-center justify-center p-4 sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="appConfirmDialogTitle"
+            aria-describedby="appConfirmDialogMessage"
+        >
+            <div data-confirm-overlay class="absolute inset-0 bg-slate-950/45 backdrop-blur-sm confirm-dialog-backdrop"></div>
+
+            <div class="relative w-full max-w-md overflow-hidden rounded-3xl border border-rose-100 bg-white shadow-[0_24px_64px_rgba(15,23,42,0.32)] confirm-dialog-panel">
+                <div id="appConfirmDialogAccent" class="h-1.5 w-full bg-gradient-to-r from-rose-500 via-amber-400 to-orange-500"></div>
+
+                <div class="p-6 sm:p-7">
+                    <div id="appConfirmDialogIconWrap" class="inline-flex items-center justify-center rounded-2xl bg-rose-100 p-3 text-rose-700">
+                        <i data-lucide="triangle-alert" class="size-5"></i>
+                    </div>
+
+                    <h3 id="appConfirmDialogTitle" class="mt-4 text-lg font-bold text-slate-900">Konfirmasi Tindakan</h3>
+                    <p id="appConfirmDialogMessage" class="mt-2 text-sm leading-relaxed text-slate-600">
+                        Apakah Anda yakin ingin melanjutkan tindakan ini?
+                    </p>
+
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                        <button
+                            type="button"
+                            data-confirm-cancel
+                            class="inline-flex min-w-[96px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="button"
+                            data-confirm-approve
+                            class="inline-flex min-w-[144px] items-center justify-center rounded-xl bg-gradient-to-r from-rose-600 to-orange-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(244,63,94,0.35)] transition-all hover:from-rose-700 hover:to-orange-600"
+                        >
+                            Ya, Lanjutkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!empty($toastNotifications))
+            <div id="appToastRegion" class="fixed right-4 top-4 z-[95] flex w-[min(92vw,380px)] flex-col gap-3 pointer-events-none sm:right-6 sm:top-6">
+                @foreach ($toastNotifications as $toast)
+                    @php
+                        $isSuccess = $toast['type'] === 'success';
+                        $isError = $toast['type'] === 'error';
+                        $toastRootClass = $isSuccess
+                            ? 'border-emerald-100/90 bg-emerald-50/95 shadow-[0_14px_36px_rgba(16,185,129,0.24)]'
+                            : ($isError
+                                ? 'border-rose-100/90 bg-rose-50/95 shadow-[0_14px_36px_rgba(244,63,94,0.24)]'
+                                : 'border-amber-100/90 bg-amber-50/95 shadow-[0_14px_36px_rgba(245,158,11,0.24)]');
+                        $toastBadgeClass = $isSuccess
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : ($isError
+                                ? 'bg-rose-100 text-rose-700'
+                                : 'bg-amber-100 text-amber-700');
+                        $toastTitleClass = $isSuccess
+                            ? 'text-emerald-900'
+                            : ($isError
+                                ? 'text-rose-900'
+                                : 'text-amber-900');
+                        $toastMessageClass = $isSuccess
+                            ? 'text-emerald-800/90'
+                            : ($isError
+                                ? 'text-rose-800/90'
+                                : 'text-amber-800/90');
+                        $toastCloseClass = $isSuccess
+                            ? 'text-emerald-600 hover:bg-emerald-100'
+                            : ($isError
+                                ? 'text-rose-600 hover:bg-rose-100'
+                                : 'text-amber-600 hover:bg-amber-100');
+                    @endphp
+
+                    <div
+                        data-toast
+                        data-toast-duration="4800"
+                        role="status"
+                        class="pointer-events-auto app-toast rounded-2xl border px-4 py-3 backdrop-blur-sm {{ $toastRootClass }}"
+                    >
+                        <div class="flex items-start gap-3">
+                            <div class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-xl {{ $toastBadgeClass }}">
+                                <i data-lucide="{{ $toast['icon'] }}" class="size-4"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-bold {{ $toastTitleClass }}">{{ $toast['title'] }}</p>
+                                <p class="mt-1 text-sm leading-relaxed {{ $toastMessageClass }}">{{ $toast['message'] }}</p>
+                            </div>
+                            <button
+                                type="button"
+                                data-toast-close
+                                class="inline-flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors {{ $toastCloseClass }}"
+                                aria-label="Tutup notifikasi"
+                            >
+                                <i data-lucide="x" class="size-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         @stack('modals')
 

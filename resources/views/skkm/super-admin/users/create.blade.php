@@ -1,15 +1,23 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center gap-3">
-            <flux:button :href="route('admin.users.index')" variant="ghost" size="sm" icon="arrow-left" />
-            <flux:heading size="xl" level="1">{{ $isEdit ? 'Edit User' : 'Tambah User Baru' }}</flux:heading>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center justify-center rounded-lg bg-violet-100 p-2 text-violet-700 hover:bg-violet-200 transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div class="space-y-1">
+                <span class="inline-flex items-center rounded-lg bg-violet-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700">Manajemen User</span>
+                <flux:heading size="xl" level="1">{{ $isEdit ? 'Edit User' : 'Tambah User Baru' }}</flux:heading>
+            </div>
         </div>
     </x-slot>
 
-    <div class="max-w-5xl">
-        <div class="rounded-2xl border border-zinc-200/70 bg-white p-6 shadow-sm">
+    <div class="relative isolate max-w-5xl overflow-hidden rounded-[2rem] border border-violet-100/80 bg-gradient-to-br from-violet-50 via-indigo-50 to-sky-50 p-6 sm:p-8">
+        <div class="pointer-events-none absolute -left-20 top-6 h-52 w-52 rounded-full bg-violet-200/35 blur-3xl"></div>
+        <div class="pointer-events-none absolute -right-20 bottom-0 h-56 w-56 rounded-full bg-indigo-200/35 blur-3xl"></div>
+
+        <div class="relative rounded-2xl border border-violet-100/80 bg-white/90 p-6 shadow-[0_8px_30px_rgb(124,58,237,0.14)] backdrop-blur-sm">
             @if ($errors->any())
-                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-100/90 px-4 py-3 text-sm font-medium text-rose-800">
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -131,10 +139,10 @@
                 <flux:separator variant="subtle" />
 
                 <div class="flex items-center justify-end gap-2">
-                    <flux:button :href="route('admin.users.index')" variant="ghost">Batal</flux:button>
-                    <flux:button type="submit" variant="primary">
+                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">Batal</a>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-violet-700 hover:to-indigo-700 shadow-[0_8px_18px_rgb(124,58,237,0.30)] transition-all">
                         {{ $isEdit ? 'Simpan Perubahan' : 'Tambah User' }}
-                    </flux:button>
+                    </button>
                 </div>
             </form>
         </div>

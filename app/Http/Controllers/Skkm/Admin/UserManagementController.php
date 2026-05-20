@@ -16,10 +16,27 @@ class UserManagementController extends Controller
     public function index(Request $request): View
     {
         $role = $request->query('role');
+        $programStudiId = $request->query('program_studi_id');
+        $programStudiId = is_numeric($programStudiId) ? (int) $programStudiId : null;
+
+        $semester = $request->query('semester');
+        $semester = is_numeric($semester) ? (int) $semester : null;
+
+        if ($semester !== null && ($semester < 1 || $semester > 14)) {
+            $semester = null;
+        }
 
         $users = User::query()
             ->with(['programStudi.fakultas', 'lecturer'])
             ->when($role, fn ($query) => $query->where('skkm_role', $role))
+            ->when(
+                $role === 'mahasiswa' && $programStudiId,
+                fn ($query) => $query->where('program_studi_id', $programStudiId)
+            )
+            ->when(
+                $role === 'mahasiswa' && $semester !== null,
+                fn ($query) => $query->where('semester', $semester)
+            )
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
@@ -27,6 +44,10 @@ class UserManagementController extends Controller
         return view('skkm.super-admin.users.index', [
             'users' => $users,
             'selectedRole' => $role,
+            'selectedProgramStudi' => $programStudiId,
+            'selectedSemester' => $semester,
+            'semesterOptions' => range(1, 14),
+            'programStudis' => ProgramStudi::query()->orderBy('jenjang')->orderBy('nama')->get(),
             'roleOptions' => $this->roleOptions(),
         ]);
     }
@@ -118,7 +139,9 @@ class UserManagementController extends Controller
     public function destroy(User $user, Request $request): RedirectResponse
     {
         if ((int) $user->id === (int) $request->user()->id) {
-            return redirect()->back()->withErrors(['delete_user' => 'Akun super admin yang sedang aktif tidak bisa dihapus.']);
+            return redirect()
+                ->back()
+                ->with('error', 'Akun super admin yang sedang aktif tidak bisa dihapus.');
         }
 
         $user->delete();
