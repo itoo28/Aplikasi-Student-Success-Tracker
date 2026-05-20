@@ -1,5 +1,7 @@
 @props(['for'])
 
 @error($for)
-    <p {{ $attributes->merge(['class' => 'text-sm text-red-600']) }}>{{ $message }}</p>
+    <flux:text color="red" size="sm" {{ $attributes }}>
+        {{ $message }}
+    </flux:text>
 @enderror

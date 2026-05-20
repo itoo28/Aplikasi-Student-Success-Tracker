@@ -1,3 +1,6 @@
-@props(['disabled' => false])
+@props([
+    'disabled' => false,
+    'type' => 'text',
+])
 
-<input {{ $disabled ? 'disabled' : '' }} {!! $attributes->merge(['class' => 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm']) !!}>
+<flux:input :type="$type" :disabled="$disabled" {{ $attributes->class('w-full') }} />

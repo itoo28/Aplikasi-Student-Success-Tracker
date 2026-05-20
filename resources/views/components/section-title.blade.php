@@ -1,10 +1,10 @@
 <div class="md:col-span-1 flex justify-between">
     <div class="px-4 sm:px-0">
-        <h3 class="text-lg font-medium text-gray-900">{{ $title }}</h3>
+        <flux:heading size="lg">{{ $title }}</flux:heading>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <flux:text class="mt-2">
             {{ $description }}
-        </p>
+        </flux:text>
     </div>
 
     <div class="px-4 sm:px-0">
