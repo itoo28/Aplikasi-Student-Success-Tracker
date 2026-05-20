@@ -8,6 +8,7 @@
     <div class="space-y-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <p class="text-sm font-semibold text-slate-500">Jumlah Mahasiswa</p>
                 <h3 class="mt-2 text-3xl font-extrabold text-slate-800">{{ $submissions->total() }}</h3>
             </div>
             <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">

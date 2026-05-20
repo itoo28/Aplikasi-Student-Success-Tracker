@@ -28,6 +28,10 @@ Route::middleware([
         Route::get('/skkm', [SkkmSubmissionController::class, 'index'])->name('skkm.index');
         Route::get('/skkm/create', [SkkmSubmissionController::class, 'create'])->name('skkm.create');
         Route::post('/skkm', [SkkmSubmissionController::class, 'store'])->name('skkm.store');
+        
+        // Bimbingan Akademik
+        Route::get('/bimbingan', [\App\Http\Controllers\BimbinganAkademikController::class, 'mahasiswaIndex'])->name('bimbingan.mahasiswa.index');
+        Route::post('/bimbingan', [\App\Http\Controllers\BimbinganAkademikController::class, 'mahasiswaStore'])->name('bimbingan.mahasiswa.store');
     });
 
     // SKKM Module (Dosen PA)
@@ -35,6 +39,11 @@ Route::middleware([
         Route::get('/skkm/verifikasi', [SkkmSubmissionController::class, 'verifikasiIndex'])->name('skkm.verifikasi.index');
         Route::get('/skkm/monitoring', [SkkmSubmissionController::class, 'monitoringIndex'])->name('skkm.monitoring.index');
         Route::post('/skkm/{submission}/verify', [SkkmSubmissionController::class, 'verify'])->name('skkm.verify');
+
+        // Bimbingan Akademik
+        Route::get('/bimbingan/dosen', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenIndex'])->name('bimbingan.dosen.index');
+        Route::post('/bimbingan/dosen/{log}/update', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenUpdate'])->name('bimbingan.dosen.update');
+        Route::post('/bimbingan/dosen/store', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenStore'])->name('bimbingan.dosen.store');
     });
 
     // SKKM Module (Kaprodi)
@@ -46,6 +55,10 @@ Route::middleware([
             Route::get('/mahasiswa', [SkkmValidationController::class, 'kaprodiMahasiswaIndex'])->name('mahasiswa.index');
         });
 
+    Route::middleware('skkm.role:kaprodi')->group(function () {
+        Route::get('/bimbingan/rekapitulasi/kaprodi', [\App\Http\Controllers\BimbinganAkademikController::class, 'rekapitulasiIndex'])->name('bimbingan.rekapitulasi.kaprodi');
+    });
+
     // SKKM Module (Kemahasiswaan)
     Route::middleware('skkm.role:kemahasiswaan')
         ->prefix('/skkm/kemahasiswaan')
@@ -53,6 +66,10 @@ Route::middleware([
         ->group(function () {
             Route::get('/', [SkkmValidationController::class, 'kemahasiswaanIndex'])->name('index');
         });
+        
+    Route::middleware('skkm.role:kemahasiswaan')->group(function () {
+        Route::get('/bimbingan/rekapitulasi/kemahasiswaan', [\App\Http\Controllers\BimbinganAkademikController::class, 'rekapitulasiIndex'])->name('bimbingan.rekapitulasi.kemahasiswaan');
+    });
 
     // SKKM Module (Super Admin)
     Route::middleware('skkm.role:super_admin')
