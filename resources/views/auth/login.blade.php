@@ -41,11 +41,7 @@
                 </nav>
 
                 <main class="flex flex-1 flex-col items-center justify-center px-6 pt-4 pb-8 text-center">
-                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-sm font-bold mb-5">
-                        <span class="flex w-2 h-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
-                        Versi 2.0 Resmi Dirilis
-                    </div>
-
+                
                     <h1 class="text-4xl md:text-5xl xl:text-6xl font-black text-slate-900 tracking-tight leading-[1.08] max-w-4xl mb-5">
                         Platform Terpadu untuk <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">Kesuksesan Mahasiswa.</span>
                     </h1>
@@ -79,74 +75,72 @@
             </section>
 
             <aside class="border-t border-slate-200/70 bg-white/80 backdrop-blur-xl lg:border-l lg:border-t-0">
-                <div class="flex min-h-screen items-center px-6 py-10 lg:px-8">
-                    <div class="mx-auto w-full max-w-sm">
-                        <div class="rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] sm:p-7">
-                            <div class="mb-7">
-                                <div class="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
-                                    <i data-lucide="log-in" class="w-5 h-5"></i>
-                                </div>
-                                <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Masuk Sistem</h2>
-                                <p class="mt-2 text-sm font-medium leading-relaxed text-slate-500">Gunakan akun yang sudah terdaftar untuk melanjutkan.</p>
+                <div class="flex min-h-screen items-center px-6 py-10 sm:px-10 lg:px-10">
+                    <div class="mx-auto w-full max-w-md">
+                        <div class="mb-8">
+                            <div class="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
+                                <i data-lucide="log-in" class="w-5 h-5"></i>
                             </div>
-
-                            @if ($errors->any())
-                                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                                    {{ $errors->first() }}
-                                </div>
-                            @endif
-
-                            @if (session('status'))
-                                <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                                    {{ session('status') }}
-                                </div>
-                            @endif
-
-                            <form method="POST" action="{{ route('login') }}" class="space-y-5">
-                                @csrf
-
-                                <flux:field>
-                                    <flux:label for="email">Email / NIM / NIDN</flux:label>
-                                    <flux:input
-                                        id="email"
-                                        name="email"
-                                        type="text"
-                                        :value="old('email')"
-                                        required
-                                        autofocus
-                                        autocomplete="username"
-                                        placeholder="231234567 atau email kampus"
-                                    />
-                                </flux:field>
-
-                                <flux:field>
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <flux:label for="password">Password</flux:label>
-                                        @if (Route::has('password.request'))
-                                            <flux:link :href="route('password.request')" variant="subtle">Lupa Password?</flux:link>
-                                        @endif
-                                    </div>
-                                    <flux:input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        required
-                                        autocomplete="current-password"
-                                        viewable
-                                        placeholder="Masukkan password"
-                                    />
-                                </flux:field>
-
-                                <flux:field variant="inline">
-                                    <flux:checkbox id="remember_me" name="remember" />
-                                    <flux:label for="remember_me">Ingat saya</flux:label>
-                                </flux:field>
-
-                                <flux:button type="submit" variant="primary" icon:trailing="arrow-right" class="w-full">
-                                    Masuk
-                                </flux:button>
-                            </form>
+                            <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Masuk Sistem</h2>
+                            <p class="mt-2 text-sm font-medium leading-relaxed text-slate-500">Gunakan akun yang sudah terdaftar untuk melanjutkan.</p>
                         </div>
+
+                        @if ($errors->any())
+                            <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
+
+                        @if (session('status'))
+                            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                            @csrf
+
+                            <flux:field>
+                                <flux:label for="email">Email / NIM / NIDN</flux:label>
+                                <flux:input
+                                    id="email"
+                                    name="email"
+                                    type="text"
+                                    :value="old('email')"
+                                    required
+                                    autofocus
+                                    autocomplete="username"
+                                    placeholder="231234567 atau email kampus"
+                                />
+                            </flux:field>
+
+                            <flux:field>
+                                <div class="mb-2 flex items-center justify-between">
+                                    <flux:label for="password">Password</flux:label>
+                                    @if (Route::has('password.request'))
+                                        <flux:link :href="route('password.request')" variant="subtle">Lupa Password?</flux:link>
+                                    @endif
+                                </div>
+                                <flux:input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    autocomplete="current-password"
+                                    viewable
+                                    placeholder="Masukkan password"
+                                />
+                            </flux:field>
+
+                            <flux:field variant="inline">
+                                <flux:checkbox id="remember_me" name="remember" />
+                                <flux:label for="remember_me">Ingat saya</flux:label>
+                            </flux:field>
+
+                            <flux:button type="submit" variant="primary" icon:trailing="arrow-right" class="w-full">
+                                Masuk
+                            </flux:button>
+                        </form>
 
                         <p class="mt-6 text-center text-xs font-medium text-slate-500">&copy; {{ date('Y') }} Student Success Tracker</p>
                     </div>
