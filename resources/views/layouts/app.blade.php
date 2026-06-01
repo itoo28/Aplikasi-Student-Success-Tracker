@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Student Success Tracker') }}</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('brand/logo-uhb.svg') }}">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -48,20 +49,21 @@
                         ['route' => 'skkm.monitoring.index', 'active' => 'skkm.monitoring.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
                     ],
                     'kaprodi' => [
-                        ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
+                        ['route' => 'skkm.kaprodi.dashboard', 'active' => 'skkm.kaprodi.dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.kaprodi.index', 'active' => 'skkm.kaprodi.index', 'label' => 'Monitoring SKKM', 'icon' => 'chart-bar'],
                         ['route' => 'skkm.kaprodi.mahasiswa.index', 'active' => 'skkm.kaprodi.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
                     ],
                     'kemahasiswaan' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
-                        ['route' => 'skkm.kemahasiswaan.index', 'active' => 'skkm.kemahasiswaan.*', 'label' => 'Monitoring SKKM', 'icon' => 'chart-bar-square'],
+                        ['route' => 'skkm.kemahasiswaan.mahasiswa.index', 'active' => 'skkm.kemahasiswaan.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
+                        ['route' => 'skkm.point-rules.index', 'active' => 'skkm.point-rules.*', 'label' => 'Manajemen Poin SKKM', 'icon' => 'list-bullet'],
                     ],
                     'super_admin' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
-                        ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'Panel Admin', 'icon' => 'shield-check'],
                         ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Manajemen User', 'icon' => 'users'],
                         ['route' => 'admin.fakultas.index', 'active' => 'admin.fakultas.*', 'label' => 'Manajemen Fakultas', 'icon' => 'building-office-2'],
                         ['route' => 'admin.program-studi.index', 'active' => 'admin.program-studi.*', 'label' => 'Manajemen Program Studi', 'icon' => 'book-open'],
+                        ['route' => 'skkm.point-rules.index', 'active' => 'skkm.point-rules.*', 'label' => 'Manajemen Poin SKKM', 'icon' => 'list-bullet'],
                     ],
                     default => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
@@ -101,9 +103,11 @@
             <flux:sidebar sticky collapsible="mobile" class="bg-white border-r border-zinc-200/70">
                 <flux:sidebar.header>
                     <flux:sidebar.brand :href="route('dashboard')" name="SST Portal">
-                        <div class="flex size-6 items-center justify-center rounded-md bg-indigo-600 text-white">
-                            <flux:icon.academic-cap variant="mini" />
-                        </div>
+                        <img
+                            src="{{ asset('brand/logo-uhb.svg') }}"
+                            alt="{{ config('app.name', 'Student Success Tracker') }}"
+                            class="h-8 w-auto object-contain"
+                        />
                     </flux:sidebar.brand>
                     <flux:sidebar.collapse class="lg:hidden" />
                 </flux:sidebar.header>

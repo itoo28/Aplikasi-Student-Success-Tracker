@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Skkm\Admin\FakultasController;
 use App\Http\Controllers\Skkm\Admin\ProgramStudiController;
 use App\Http\Controllers\Skkm\Admin\SuperAdminDashboardController;
 use App\Http\Controllers\Skkm\Admin\UserManagementController;
+use App\Http\Controllers\Skkm\PointRuleController;
 use App\Http\Controllers\Skkm\SkkmSubmissionController;
 use App\Http\Controllers\Skkm\SkkmValidationController;
-use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +23,19 @@ Route::middleware([
     config('jetstream.auth_session'),
 ])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    // SKKM Module (Master Kategori Poin)
+    Route::middleware('skkm.role:super_admin,kemahasiswaan')
+        ->prefix('/skkm/poin')
+        ->name('skkm.point-rules.')
+        ->group(function () {
+            Route::get('/', [PointRuleController::class, 'index'])->name('index');
+            Route::get('/create', [PointRuleController::class, 'create'])->name('create');
+            Route::post('/', [PointRuleController::class, 'store'])->name('store');
+            Route::get('/{pointRule}/edit', [PointRuleController::class, 'edit'])->name('edit');
+            Route::put('/{pointRule}', [PointRuleController::class, 'update'])->name('update');
+            Route::delete('/{pointRule}', [PointRuleController::class, 'destroy'])->name('destroy');
+        });
 
     // SKKM Module (Mahasiswa)
     Route::middleware('skkm.role:student')->group(function () {
@@ -42,7 +56,9 @@ Route::middleware([
         ->prefix('/skkm/kaprodi')
         ->name('skkm.kaprodi.')
         ->group(function () {
-            Route::get('/', [SkkmValidationController::class, 'kaprodiIndex'])->name('index');
+            Route::get('/', fn () => redirect()->route('skkm.kaprodi.dashboard'))->name('home');
+            Route::get('/dashboard', [SkkmValidationController::class, 'kaprodiDashboard'])->name('dashboard');
+            Route::get('/monitoring', [SkkmValidationController::class, 'kaprodiIndex'])->name('index');
             Route::get('/mahasiswa', [SkkmValidationController::class, 'kaprodiMahasiswaIndex'])->name('mahasiswa.index');
         });
 
@@ -51,7 +67,9 @@ Route::middleware([
         ->prefix('/skkm/kemahasiswaan')
         ->name('skkm.kemahasiswaan.')
         ->group(function () {
-            Route::get('/', [SkkmValidationController::class, 'kemahasiswaanIndex'])->name('index');
+            Route::get('/', fn () => redirect()->route('dashboard'))->name('index');
+            Route::get('/mahasiswa', [SkkmValidationController::class, 'kemahasiswaanMahasiswaIndex'])->name('mahasiswa.index');
+            Route::get('/mahasiswa/export', [SkkmValidationController::class, 'kemahasiswaanMahasiswaExport'])->name('mahasiswa.export');
         });
 
     // SKKM Module (Super Admin)

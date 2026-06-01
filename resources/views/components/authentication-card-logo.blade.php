@@ -1,6 +1,7 @@
-<a href="/" class="group inline-flex items-center gap-3 rounded-xl px-3 py-2">
-    <span class="flex size-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/25">
-        <flux:icon.academic-cap />
-    </span>
-    <span class="text-sm font-semibold text-zinc-800 group-hover:text-indigo-600">SST Portal</span>
+<a href="/" class="group inline-flex items-center rounded-xl px-3 py-2">
+    <img
+        src="{{ asset('brand/logo-uhb.svg') }}"
+        alt="{{ config('app.name', 'Student Success Tracker') }}"
+        class="h-12 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+    />
 </a>

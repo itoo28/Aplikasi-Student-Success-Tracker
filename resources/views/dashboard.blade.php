@@ -199,67 +199,70 @@
         </div>
     @else
         <!-- LECTURER DASHBOARD -->
-        <div class="space-y-8">
+        <div class="relative isolate overflow-hidden rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-6 sm:p-8 space-y-8">
+            <div class="pointer-events-none absolute -left-20 top-8 h-48 w-48 rounded-full bg-indigo-300/30 blur-3xl"></div>
+            <div class="pointer-events-none absolute -right-24 top-16 h-56 w-56 rounded-full bg-cyan-300/35 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl"></div>
+
+            <div class="relative space-y-8">
             <!-- Greeting Row -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <div>
-                    <h3 class="text-2xl font-bold text-slate-800">Halo, {{ $lecturer->name }}</h3>
-                    <p class="text-slate-500 mt-1">Ringkasan aktivitas mahasiswa bimbingan akademik Anda.</p>
+            <div class="rounded-3xl p-8 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <p class="text-indigo-100 text-sm font-semibold uppercase tracking-wide">Dosen PA Dashboard</p>
+                        <h3 class="text-2xl font-extrabold mt-1">Halo, {{ $lecturer->name }}</h3>
+                        <p class="text-indigo-100 mt-2">Ringkasan aktivitas mahasiswa bimbingan akademik Anda.</p>
+                    </div>
+                    <span class="inline-flex items-center rounded-xl bg-white/15 px-3 py-1.5 text-xs font-semibold border border-white/20">
+                        {{ now()->format('d M Y') }}
+                    </span>
                 </div>
             </div>
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Total Mhs -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center">
-                    <div class="bg-blue-50 text-blue-600 p-4 rounded-2xl mr-4">
-                        <i data-lucide="users" class="w-6 h-6"></i>
-                    </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-[0_14px_35px_rgb(14,165,233,0.30)]">
+                    <p class="text-sm font-semibold text-sky-100 mb-2">Total Mahasiswa</p>
+                    <h4 class="text-3xl font-extrabold">{{ $totalStudents }}</h4>
                     <div>
-                        <p class="text-sm text-slate-500 font-semibold mb-1">Total Mahasiswa</p>
-                        <h4 class="text-2xl font-bold text-slate-800">{{ $totalStudents }}</h4>
+                        <i data-lucide="users" class="w-5 h-5 mt-3 text-sky-100"></i>
                     </div>
                 </div>
                 
                 <!-- Menunggu SKKM -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center">
-                    <div class="bg-amber-50 text-amber-600 p-4 rounded-2xl mr-4">
-                        <i data-lucide="file-clock" class="w-6 h-6"></i>
-                    </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
+                    <p class="text-sm font-semibold text-amber-100 mb-2">Antrean SKKM</p>
+                    <h4 class="text-3xl font-extrabold">{{ $pendingSkkmCount }}</h4>
                     <div>
-                        <p class="text-sm text-slate-500 font-semibold mb-1">Antrean SKKM</p>
-                        <h4 class="text-2xl font-bold text-slate-800">{{ $pendingSkkmCount }}</h4>
+                        <i data-lucide="file-clock" class="w-5 h-5 mt-3 text-amber-100"></i>
                     </div>
                 </div>
 
                 <!-- Bimbingan Hari Ini -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center">
-                    <div class="bg-emerald-50 text-emerald-600 p-4 rounded-2xl mr-4">
-                        <i data-lucide="calendar-clock" class="w-6 h-6"></i>
-                    </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
+                    <p class="text-sm font-semibold text-emerald-100 mb-2">Bimbingan Hari Ini</p>
+                    <h4 class="text-3xl font-extrabold">{{ $guidanceTodayCount }}</h4>
                     <div>
-                        <p class="text-sm text-slate-500 font-semibold mb-1">Bimbingan Hari Ini</p>
-                        <h4 class="text-2xl font-bold text-slate-800">{{ $guidanceTodayCount }}</h4>
+                        <i data-lucide="calendar-clock" class="w-5 h-5 mt-3 text-emerald-100"></i>
                     </div>
                 </div>
 
                 <!-- Mhs Beresiko -->
-                <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center">
-                    <div class="bg-rose-50 text-rose-600 p-4 rounded-2xl mr-4">
-                        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-                    </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-[0_14px_35px_rgb(244,63,94,0.30)]">
+                    <p class="text-sm font-semibold text-rose-100 mb-2">Mhs Beresiko</p>
+                    <h4 class="text-3xl font-extrabold">{{ $atRiskCount }}</h4>
                     <div>
-                        <p class="text-sm text-slate-500 font-semibold mb-1">Mhs Beresiko</p>
-                        <h4 class="text-2xl font-bold text-slate-800">{{ $atRiskCount }}</h4>
+                        <i data-lucide="alert-triangle" class="w-5 h-5 mt-3 text-rose-100"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Antrean Table -->
-            <div class="rounded-3xl bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div class="rounded-3xl border border-indigo-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(37,99,235,0.12)] overflow-hidden">
+                <div class="px-8 py-6 border-b border-indigo-100 flex justify-between items-center bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center">
-                        <i data-lucide="clock" class="w-5 h-5 text-amber-500 mr-2"></i>
+                        <i data-lucide="clock" class="w-5 h-5 text-indigo-500 mr-2"></i>
                         Antrean Verifikasi SKKM
                     </h3>
                     <a href="{{ route('skkm.verifikasi.index') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl transition-colors">
@@ -268,7 +271,7 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-slate-500">
-                        <thead class="text-xs text-slate-400 uppercase bg-slate-50">
+                        <thead class="text-xs text-indigo-700 uppercase bg-indigo-50/70">
                             <tr>
                                 <th class="px-8 py-4 font-semibold tracking-wider">Mahasiswa</th>
                                 <th class="px-8 py-4 font-semibold tracking-wider">Kegiatan</th>
@@ -276,9 +279,9 @@
                                 <th class="px-8 py-4 font-semibold tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-indigo-100/60">
                             @forelse ($approvalQueue as $item)
-                                <tr class="hover:bg-slate-50 transition-colors">
+                                <tr class="hover:bg-indigo-50/40 transition-colors">
                                     <td class="px-8 py-4">
                                         <div class="font-bold text-slate-800">{{ $item->mahasiswa?->name }}</div>
                                         <div class="text-xs text-slate-400 mt-0.5">{{ $item->mahasiswa?->identifier }}</div>
@@ -306,6 +309,7 @@
                     </table>
                 </div>
             </div>
+            </div>
         </div>
     @endif
 
@@ -322,6 +326,36 @@
                     if (Object.keys(pointsData).length > 0) {
                         const labels = Object.keys(pointsData).map(sem => 'Semester ' + sem);
                         const data = Object.values(pointsData);
+                        const backgroundColors = data.map((value) => {
+                            const numericValue = Number(value) || 0;
+                            if (numericValue === 0) {
+                                return 'rgba(239, 68, 68, 0.85)';
+                            }
+                            if (numericValue < 20) {
+                                return 'rgba(245, 158, 11, 0.85)';
+                            }
+                            return 'rgba(99, 102, 241, 0.85)';
+                        });
+                        const borderColors = data.map((value) => {
+                            const numericValue = Number(value) || 0;
+                            if (numericValue === 0) {
+                                return 'rgba(220, 38, 38, 1)';
+                            }
+                            if (numericValue < 20) {
+                                return 'rgba(217, 119, 6, 1)';
+                            }
+                            return 'rgba(79, 70, 229, 1)';
+                        });
+                        const hoverBackgroundColors = data.map((value) => {
+                            const numericValue = Number(value) || 0;
+                            if (numericValue === 0) {
+                                return 'rgba(220, 38, 38, 1)';
+                            }
+                            if (numericValue < 20) {
+                                return 'rgba(217, 119, 6, 1)';
+                            }
+                            return 'rgba(79, 70, 229, 1)';
+                        });
 
                         new Chart(ctx, {
                             type: 'bar',
@@ -330,11 +364,11 @@
                                 datasets: [{
                                     label: 'Poin SKKM',
                                     data: data,
-                                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                                    borderColor: 'rgba(79, 70, 229, 1)',
+                                    backgroundColor: backgroundColors,
+                                    borderColor: borderColors,
                                     borderWidth: 1,
                                     borderRadius: 6,
-                                    hoverBackgroundColor: 'rgba(79, 70, 229, 1)',
+                                    hoverBackgroundColor: hoverBackgroundColors,
                                     barPercentage: 0.6,
                                 }]
                             },

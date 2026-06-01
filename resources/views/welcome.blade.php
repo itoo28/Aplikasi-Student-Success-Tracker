@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Student Success Tracker') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('brand/logo-uhb.svg') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -27,9 +28,11 @@
     <!-- Navigation -->
     <nav class="relative z-50 w-full px-6 py-6 md:px-12 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-            </div>
+            <img
+                src="{{ asset('brand/logo-uhb.svg') }}"
+                alt="{{ config('app.name', 'Student Success Tracker') }}"
+                class="h-12 w-12 rounded-2xl bg-white/80 p-1 object-contain shadow-lg shadow-indigo-500/20"
+            />
             <span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">SST Portal</span>
         </div>
         

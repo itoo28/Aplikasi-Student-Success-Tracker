@@ -6,20 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Fakultas;
 use App\Models\ProgramStudi;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ProgramStudiController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim((string) $request->query('search', ''));
+        $search = $search !== '' ? $search : null;
+
         $programStudis = ProgramStudi::query()
             ->with('fakultas')
+            ->when($search, function (Builder $query, string $searchTerm) {
+                $safeSearchTerm = addcslashes($searchTerm, '\\%_');
+                $query->where(function (Builder $innerQuery) use ($safeSearchTerm) {
+                    $innerQuery
+                        ->where('nama', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('kode', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('jenjang', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhereHas('fakultas', function (Builder $fakultasQuery) use ($safeSearchTerm) {
+                            $fakultasQuery
+                                ->where('nama', 'like', '%' . $safeSearchTerm . '%')
+                                ->orWhere('kode', 'like', '%' . $safeSearchTerm . '%');
+                        });
+                });
+            })
             ->orderBy('nama')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('skkm.super-admin.program-studi.index', compact('programStudis'));
+        return view('skkm.super-admin.program-studi.index', compact('programStudis', 'search'));
     }
 
     public function create(): View

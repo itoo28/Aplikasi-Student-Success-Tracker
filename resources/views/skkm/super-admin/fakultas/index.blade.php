@@ -16,6 +16,30 @@
         <div class="pointer-events-none absolute -right-20 bottom-8 h-56 w-56 rounded-full bg-cyan-200/35 blur-3xl"></div>
 
         <div class="relative space-y-6">
+            <div class="rounded-2xl border border-emerald-100/80 bg-white/90 p-5 shadow-[0_8px_24px_rgb(16,185,129,0.14)] backdrop-blur-sm">
+                <form id="fakultasSearchForm" method="GET" action="{{ route('admin.fakultas.index') }}">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        <div class="w-full sm:max-w-md">
+                            <flux:field>
+                                <flux:label for="search">Cari Fakultas</flux:label>
+                                <flux:input
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Cari nama atau kode fakultas"
+                                />
+                            </flux:field>
+                        </div>
+
+                        @if (filled($search))
+                            <a href="{{ route('admin.fakultas.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="rounded-3xl border border-emerald-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(16,185,129,0.14)] overflow-hidden">
                 <div class="px-6 py-3 border-b border-emerald-100/70 bg-emerald-50/60">
                     @if ($fakultas->total() > 0)
@@ -96,4 +120,32 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            const fakultasSearchForm = document.getElementById('fakultasSearchForm');
+            const fakultasSearchInput = document.getElementById('search');
+
+            const debounce = (callback, delay = 450) => {
+                let timeoutId;
+                return (...args) => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => callback(...args), delay);
+                };
+            };
+
+            if (fakultasSearchForm && fakultasSearchInput) {
+                const submitSearch = () => fakultasSearchForm.requestSubmit();
+                const debouncedSubmit = debounce(submitSearch, 450);
+
+                fakultasSearchInput.addEventListener('input', debouncedSubmit);
+                fakultasSearchInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        submitSearch();
+                    }
+                });
+            }
+        </script>
+    @endpush
 </x-app-layout>

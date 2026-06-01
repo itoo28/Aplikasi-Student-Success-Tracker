@@ -8,6 +8,7 @@ use App\Models\SkkmProgress;
 use App\Models\SkkmSubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class SkkmSubmissionController extends Controller
 {
@@ -31,7 +32,7 @@ class SkkmSubmissionController extends Controller
         $statusYudisium = $approvedPoints >= $targetKelulusan ? 'memenuhi' : 'dalam_proses';
         $remainingPoints = max(0, $targetKelulusan - $approvedPoints);
 
-        $pendingCount  = $submissions->where('status_verifikasi', 'pending')->count();
+        $pendingCount = $submissions->where('status_verifikasi', 'pending')->count();
         $approvedCount = $submissions->where('status_verifikasi', 'disetujui')->count();
         $rejectedCount = $submissions->where('status_verifikasi', 'ditolak')->count();
         $pendingPoints = (int) $submissions->where('status_verifikasi', 'pending')->sum('poin_otomatis');
@@ -51,6 +52,7 @@ class SkkmSubmissionController extends Controller
 
         // Get available rules for the form
         $rules = PointRule::where('is_active', true)->get();
+
         return view('skkm.mahasiswa.create', compact('rules'));
     }
 
@@ -62,7 +64,7 @@ class SkkmSubmissionController extends Controller
         abort_unless(Auth::user()->hasSkkmRole('student'), 403);
 
         $request->validate([
-            'point_rule_id' => 'required|exists:point_rules,id',
+            'point_rule_id' => ['required', Rule::exists('point_rules', 'id')->where('is_active', true)],
             'nama_kegiatan' => 'required|string|max:255',
             'penyelenggara' => 'required|string|max:255',
             'tanggal_kegiatan' => 'required|date',
@@ -70,8 +72,10 @@ class SkkmSubmissionController extends Controller
             'semester_input' => 'required|integer|min:1|max:8',
         ]);
 
-        $pointRule = PointRule::findOrFail($request->point_rule_id);
-        
+        $pointRule = PointRule::query()
+            ->where('is_active', true)
+            ->findOrFail($request->point_rule_id);
+
         $path = $request->file('file_bukti')->store('bukti_skkm', 'public');
 
         SkkmSubmission::create([
@@ -100,13 +104,13 @@ class SkkmSubmissionController extends Controller
         // Menampilkan daftar pengajuan dari mahasiswa bimbingannya (dengan status pending)
         // Note: Asumsi User memiliki relasi adviseeStudents yang sudah ada
         $adviseeIds = Auth::user()->adviseeStudents()->pluck('id');
-        
+
         $pendingSubmissions = SkkmSubmission::whereIn('mahasiswa_id', $adviseeIds)
             ->where('status_verifikasi', 'pending')
             ->with(['mahasiswa', 'pointRule'])
             ->orderBy('created_at', 'asc')
             ->get();
-            
+
         $verifiedSubmissions = SkkmSubmission::whereIn('mahasiswa_id', $adviseeIds)
             ->whereIn('status_verifikasi', ['disetujui', 'ditolak'])
             ->with(['mahasiswa', 'pointRule'])
@@ -132,7 +136,7 @@ class SkkmSubmissionController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('identifier', 'like', "%{$search}%");
+                        ->orWhere('identifier', 'like', "%{$search}%");
                 });
             })
             ->orderBy('name')

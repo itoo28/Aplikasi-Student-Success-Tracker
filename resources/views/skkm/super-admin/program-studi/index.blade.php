@@ -16,6 +16,30 @@
         <div class="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-indigo-200/35 blur-3xl"></div>
 
         <div class="relative space-y-6">
+            <div class="rounded-2xl border border-sky-100/80 bg-white/90 p-5 shadow-[0_8px_24px_rgb(14,165,233,0.14)] backdrop-blur-sm">
+                <form id="programStudiSearchForm" method="GET" action="{{ route('admin.program-studi.index') }}">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        <div class="w-full sm:max-w-md">
+                            <flux:field>
+                                <flux:label for="search">Cari Program Studi</flux:label>
+                                <flux:input
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Cari nama, kode, jenjang, atau fakultas"
+                                />
+                            </flux:field>
+                        </div>
+
+                        @if (filled($search))
+                            <a href="{{ route('admin.program-studi.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="rounded-3xl border border-sky-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(14,165,233,0.14)] overflow-hidden">
                 <div class="px-6 py-3 border-b border-sky-100/70 bg-sky-50/60">
                     @if ($programStudis->total() > 0)
@@ -98,4 +122,32 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            const programStudiSearchForm = document.getElementById('programStudiSearchForm');
+            const programStudiSearchInput = document.getElementById('search');
+
+            const debounce = (callback, delay = 450) => {
+                let timeoutId;
+                return (...args) => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => callback(...args), delay);
+                };
+            };
+
+            if (programStudiSearchForm && programStudiSearchInput) {
+                const submitSearch = () => programStudiSearchForm.requestSubmit();
+                const debouncedSubmit = debounce(submitSearch, 450);
+
+                programStudiSearchInput.addEventListener('input', debouncedSubmit);
+                programStudiSearchInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        submitSearch();
+                    }
+                });
+            }
+        </script>
+    @endpush
 </x-app-layout>

@@ -11,6 +11,11 @@ class PointRule extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'poin' => 'integer',
+        'is_active' => 'boolean',
+    ];
+
     public function submissions()
     {
         return $this->hasMany(SkkmSubmission::class);

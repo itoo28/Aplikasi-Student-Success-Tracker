@@ -1,14 +1,38 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
-            Data Mahasiswa Bimbingan
-        </h2>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center rounded-xl bg-indigo-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-700">
+                Dosen PA
+            </span>
+            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+                Data Mahasiswa Bimbingan
+            </h2>
+        </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
-            <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="relative isolate overflow-hidden rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-6 sm:p-8">
+        <div class="pointer-events-none absolute -left-20 top-8 h-48 w-48 rounded-full bg-indigo-300/30 blur-3xl"></div>
+        <div class="pointer-events-none absolute -right-24 top-16 h-56 w-56 rounded-full bg-cyan-300/35 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl"></div>
+
+        <div class="relative space-y-8">
+            <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Total Mahasiswa</p>
+                    <h3 class="mt-2 text-3xl font-extrabold">{{ $students->count() }}</h3>
+                </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
+                    <p class="text-sm font-semibold text-emerald-100">Sudah Memenuhi</p>
+                    <h3 class="mt-2 text-3xl font-extrabold">{{ $students->filter(fn($student) => ($student->skkmProgress?->status_yudisium ?? null) === 'memenuhi')->count() }}</h3>
+                </div>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
+                    <p class="text-sm font-semibold text-amber-100">Belum Memenuhi</p>
+                    <h3 class="mt-2 text-3xl font-extrabold">{{ $students->filter(fn($student) => in_array(($student->skkmProgress?->status_yudisium ?? null), ['dalam_proses', 'belum_memenuhi'], true))->count() }}</h3>
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-indigo-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(37,99,235,0.12)] overflow-hidden">
+                <div class="px-8 py-6 border-b border-indigo-100 bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-800">Ringkasan Poin SKKM</h3>
                         <p class="text-sm text-slate-500 mt-1">Poin ditampilkan per blok semester (1-2, 3-4, 5-6, 7-8) dan total.</p>
@@ -35,7 +59,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-slate-500">
-                        <thead class="text-xs text-slate-400 uppercase bg-slate-50">
+                        <thead class="text-xs text-indigo-700 uppercase bg-indigo-50/70">
                             <tr>
                                 <th scope="col" class="px-6 py-4 font-semibold tracking-wider">Mahasiswa</th>
                                 <th scope="col" class="px-6 py-4 font-semibold tracking-wider">Program Studi</th>
@@ -48,7 +72,7 @@
                                 <th scope="col" class="px-6 py-4 font-semibold tracking-wider text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-indigo-100/60">
                             @forelse($students as $student)
                                 @php
                                     $progress = $student->skkmProgress;
@@ -72,7 +96,7 @@
                                         default => 'Belum ada data',
                                     };
                                 @endphp
-                                <tr class="hover:bg-slate-50/80 transition-colors duration-200">
+                                <tr class="hover:bg-indigo-50/40 transition-colors duration-200">
                                     <td class="px-6 py-5">
                                         <div class="font-semibold text-slate-800">{{ $student->name }}</div>
                                         <div class="text-xs text-slate-400 mt-1">{{ $student->identifier ?? 'Identifier tidak tersedia' }}</div>

@@ -5,17 +5,33 @@ namespace App\Http\Controllers\Skkm\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Fakultas;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class FakultasController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $fakultas = Fakultas::query()->withCount('programStudis')->orderBy('nama')->paginate(15);
+        $search = trim((string) $request->query('search', ''));
+        $search = $search !== '' ? $search : null;
 
-        return view('skkm.super-admin.fakultas.index', compact('fakultas'));
+        $fakultas = Fakultas::query()
+            ->withCount('programStudis')
+            ->when($search, function (Builder $query, string $searchTerm) {
+                $safeSearchTerm = addcslashes($searchTerm, '\\%_');
+                $query->where(function (Builder $innerQuery) use ($safeSearchTerm) {
+                    $innerQuery
+                        ->where('nama', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('kode', 'like', '%' . $safeSearchTerm . '%');
+                });
+            })
+            ->orderBy('nama')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('skkm.super-admin.fakultas.index', compact('fakultas', 'search'));
     }
 
     public function create(): View

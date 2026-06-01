@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Skkm\Admin\SuperAdminDashboardController;
+use App\Http\Controllers\Skkm\SkkmValidationController;
 use App\Models\GuidanceLog;
 use App\Models\SkkmSubmission;
-use App\Models\SkkmProgress;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -18,15 +19,15 @@ class DashboardController extends Controller
         $skkmRole = $user->resolvedSkkmRole();
 
         if ($skkmRole === 'super_admin') {
-            return redirect()->route('admin.dashboard');
+            return app(SuperAdminDashboardController::class)();
         }
 
         if ($skkmRole === 'kaprodi') {
-            return redirect()->route('skkm.kaprodi.index');
+            return redirect()->route('skkm.kaprodi.dashboard');
         }
 
         if ($skkmRole === 'kemahasiswaan') {
-            return redirect()->route('skkm.kemahasiswaan.index');
+            return app(SkkmValidationController::class)->kemahasiswaanDashboard($request);
         }
 
         if ($skkmRole === 'dosen_pa') {

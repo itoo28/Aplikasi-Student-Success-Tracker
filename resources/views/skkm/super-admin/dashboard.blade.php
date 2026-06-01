@@ -16,7 +16,7 @@
         <div class="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl"></div>
 
         <div class="relative space-y-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
                 <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
                     <p class="text-sm font-semibold text-indigo-100">Total User</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $totalUsers }}</h3>
@@ -37,10 +37,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <a href="{{ route('admin.users.index') }}" class="group rounded-3xl p-6 border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_8px_30px_rgb(99,102,241,0.14)] hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgb(79,70,229,0.18)] transition-all">
                     <div class="inline-flex p-3 rounded-2xl bg-indigo-100 text-indigo-700 mb-4">
-                        <i data-lucide="users-cog" class="w-5 h-5"></i>
+                        <i data-lucide="user-cog" class="w-5 h-5"></i>
                     </div>
                     <h3 class="font-bold text-slate-800">Kelola User</h3>
                     <p class="text-sm text-slate-600 mt-1">Kelola semua akun: mahasiswa, dosen PA, kaprodi, kemahasiswaan.</p>
@@ -58,6 +58,13 @@
                     </div>
                     <h3 class="font-bold text-slate-800">Kelola Program Studi</h3>
                     <p class="text-sm text-slate-600 mt-1">Master prodi dinamis yang terhubung ke akun pengguna sistem SKKM.</p>
+                </a>
+                <a href="{{ route('skkm.point-rules.index') }}" class="group rounded-3xl p-6 border border-white/80 bg-white/85 backdrop-blur-sm shadow-[0_8px_30px_rgb(124,58,237,0.14)] hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgb(124,58,237,0.20)] transition-all">
+                    <div class="inline-flex p-3 rounded-2xl bg-violet-100 text-violet-700 mb-4">
+                        <i data-lucide="list-plus" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800">Kelola Poin SKKM</h3>
+                    <p class="text-sm text-slate-600 mt-1">Atur kategori dan nilai poin yang langsung tersedia pada form mahasiswa.</p>
                 </a>
             </div>
 

@@ -162,7 +162,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registration is disabled. User provisioning is managed by Super Admin.
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

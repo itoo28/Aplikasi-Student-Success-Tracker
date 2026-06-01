@@ -141,7 +141,7 @@
                             {{-- Semester Input --}}
                             <div>
                                 <label for="semester_input" class="block text-sm font-semibold text-slate-700 mb-2">Semester Saat Kegiatan</label>
-                                <input type="number" name="semester_input" id="semester_input" min="1" max="8" required value="{{ old('semester_input') }}" class="block w-full rounded-xl border-slate-200 bg-slate-50 py-3 px-4 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:bg-white transition-colors" placeholder="Cth: 3">
+                                <input type="number" name="semester_input" id="semester_input" min="1" max="8" required value="{{ old('semester_input', auth()->user()->semester) }}" class="block w-full rounded-xl border-slate-200 bg-slate-50 py-3 px-4 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:bg-white transition-colors" placeholder="Cth: 3">
                             </div>
                         </div>
 
@@ -291,10 +291,10 @@
 
             // Get unique jenis_item values for the selected unsur
             const filtered = allRules.filter(r => r.unsur === selectedUnsur);
-            const jenisSet = [...new Set(filtered.map(r => r.sub_unsur + '||' + r.jenis_item))];
+            const jenisSet = [...new Set(filtered.map(r => JSON.stringify([r.sub_unsur, r.jenis_item])))];
 
             jenisSet.forEach(key => {
-                const [subUnsur, jenisItem] = key.split('||');
+                const [subUnsur, jenisItem] = JSON.parse(key);
                 const opt = document.createElement('option');
                 opt.value = key;
                 opt.textContent = jenisItem + ' (' + subUnsur.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ')';
@@ -307,7 +307,7 @@
         // When Jenis changes
         elJenis.addEventListener('change', function () {
             const selectedUnsur = elUnsur.value;
-            const [selectedSubUnsur, selectedJenis] = this.value.split('||');
+            const [selectedSubUnsur, selectedJenis] = JSON.parse(this.value);
 
             resetSelect(elTingkat, '-- Pilih Tingkat --');
             resetSelect(elPeranan, '-- Pilih Tingkat terlebih dahulu --');
@@ -347,7 +347,7 @@
         // When Tingkat changes
         elTingkat.addEventListener('change', function () {
             const selectedUnsur = elUnsur.value;
-            const [selectedSubUnsur, selectedJenis] = elJenis.value.split('||');
+            const [selectedSubUnsur, selectedJenis] = JSON.parse(elJenis.value);
             const selectedTingkat = this.value;
 
             resetSelect(elPeranan, '-- Pilih Peranan --');
@@ -388,7 +388,7 @@
         // When Peranan changes → find the exact rule
         elPeranan.addEventListener('change', function () {
             const selectedUnsur = elUnsur.value;
-            const [selectedSubUnsur, selectedJenis] = elJenis.value.split('||');
+            const [selectedSubUnsur, selectedJenis] = JSON.parse(elJenis.value);
             const selectedTingkat = elTingkat.value;
             const selectedPeranan = this.value;
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProgramStudi;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,13 @@ class UserManagementController extends Controller
 {
     public function index(Request $request): View
     {
+        $roleOptions = $this->roleOptions();
         $role = $request->query('role');
+        $role = is_string($role) && array_key_exists($role, $roleOptions) ? $role : null;
+
+        $search = trim((string) $request->query('search', ''));
+        $search = $search !== '' ? $search : null;
+
         $programStudiId = $request->query('program_studi_id');
         $programStudiId = is_numeric($programStudiId) ? (int) $programStudiId : null;
 
@@ -26,7 +33,20 @@ class UserManagementController extends Controller
             $semester = null;
         }
 
-        $users = User::query()
+        if ($role !== 'mahasiswa') {
+            $programStudiId = null;
+            $semester = null;
+        }
+
+        $sortOptions = $this->sortOptions();
+        $sort = (string) $request->query('sort', 'name_asc');
+        $sort = array_key_exists($sort, $sortOptions) ? $sort : 'name_asc';
+
+        $perPageOptions = [15, 30, 50, 100];
+        $perPage = (int) $request->query('per_page', 15);
+        $perPage = in_array($perPage, $perPageOptions, true) ? $perPage : 15;
+
+        $usersQuery = User::query()
             ->with(['programStudi.fakultas', 'lecturer'])
             ->when($role, fn ($query) => $query->where('skkm_role', $role))
             ->when(
@@ -37,18 +57,35 @@ class UserManagementController extends Controller
                 $role === 'mahasiswa' && $semester !== null,
                 fn ($query) => $query->where('semester', $semester)
             )
-            ->orderBy('name')
-            ->paginate(15)
+            ->when($search, function (Builder $query, string $searchTerm) {
+                $safeSearchTerm = addcslashes($searchTerm, '\\%_');
+                $query->where(function (Builder $innerQuery) use ($safeSearchTerm) {
+                    $innerQuery
+                        ->where('name', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('identifier', 'like', '%' . $safeSearchTerm . '%');
+                });
+            });
+
+        $this->applySorting($usersQuery, $sort);
+
+        $users = $usersQuery
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('skkm.super-admin.users.index', [
             'users' => $users,
+            'selectedSearch' => $search,
             'selectedRole' => $role,
             'selectedProgramStudi' => $programStudiId,
             'selectedSemester' => $semester,
+            'selectedSort' => $sort,
+            'sortOptions' => $sortOptions,
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
             'semesterOptions' => range(1, 14),
             'programStudis' => ProgramStudi::query()->orderBy('jenjang')->orderBy('nama')->get(),
-            'roleOptions' => $this->roleOptions(),
+            'roleOptions' => $roleOptions,
         ]);
     }
 
@@ -161,6 +198,46 @@ class UserManagementController extends Controller
             'kemahasiswaan' => 'Kemahasiswaan',
             'super_admin' => 'Super Admin',
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function sortOptions(): array
+    {
+        return [
+            'name_asc' => 'Nama (A-Z)',
+            'name_desc' => 'Nama (Z-A)',
+            'created_desc' => 'Terbaru Dibuat',
+            'created_asc' => 'Terlama Dibuat',
+            'role_asc' => 'Role (A-Z)',
+            'role_desc' => 'Role (Z-A)',
+            'program_studi_asc' => 'Program Studi (A-Z)',
+            'program_studi_desc' => 'Program Studi (Z-A)',
+        ];
+    }
+
+    private function applySorting(Builder $query, string $sort): void
+    {
+        $programStudiSortSubquery = ProgramStudi::query()
+            ->select('nama')
+            ->whereColumn('program_studis.id', 'users.program_studi_id')
+            ->limit(1);
+
+        match ($sort) {
+            'name_desc' => $query->orderBy('name', 'desc'),
+            'created_desc' => $query->orderBy('created_at', 'desc')->orderBy('name', 'asc'),
+            'created_asc' => $query->orderBy('created_at', 'asc')->orderBy('name', 'asc'),
+            'role_asc' => $query->orderBy('skkm_role', 'asc')->orderBy('name', 'asc'),
+            'role_desc' => $query->orderBy('skkm_role', 'desc')->orderBy('name', 'asc'),
+            'program_studi_asc' => $query
+                ->orderBy($programStudiSortSubquery, 'asc')
+                ->orderBy('name', 'asc'),
+            'program_studi_desc' => $query
+                ->orderBy($programStudiSortSubquery, 'desc')
+                ->orderBy('name', 'asc'),
+            default => $query->orderBy('name', 'asc'),
+        };
     }
 
     /**
