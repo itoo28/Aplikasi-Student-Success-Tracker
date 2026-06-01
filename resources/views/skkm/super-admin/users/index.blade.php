@@ -49,7 +49,7 @@
                                     id="search"
                                     name="search"
                                     value="{{ $selectedSearch }}"
-                                    placeholder="Nama, email, atau NIM/NIDN"
+                                    placeholder="Nama, email, NIM/NIDN, atau nomor HP"
                                 />
                             </flux:field>
                         </div>
@@ -201,7 +201,7 @@
                     @endif
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1060px] text-sm text-left text-slate-600">
+                    <table class="w-full min-w-[1180px] text-sm text-left text-slate-600">
                         <thead class="sticky top-0 z-10 text-xs text-emerald-700 uppercase bg-emerald-50/90 backdrop-blur">
                             <tr>
                                 <th class="w-[72px] px-6 py-4 font-semibold tracking-wider">No</th>
@@ -209,6 +209,7 @@
                                 <th class="px-6 py-4 font-semibold tracking-wider">Role</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Program Studi</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Identifier</th>
+                                <th class="px-6 py-4 font-semibold tracking-wider">Nomor HP</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Status</th>
                                 <th class="w-[220px] px-6 py-4 font-semibold tracking-wider text-right">Aksi</th>
                             </tr>
@@ -249,6 +250,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4">{{ $user->identifier ?? '-' }}</td>
+                                    <td class="px-6 py-4">{{ $user->phone_number ?? '-' }}</td>
                                     <td class="px-6 py-4">
                                         @if ($user->is_active)
                                             <span class="inline-flex rounded-lg border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">Aktif</span>
@@ -285,7 +287,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">
+                                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
                                         Belum ada data user.
                                     </td>
                                 </tr>

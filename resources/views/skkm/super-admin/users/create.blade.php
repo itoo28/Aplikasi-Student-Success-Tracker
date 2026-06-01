@@ -91,6 +91,15 @@
 
                 <div id="studentFields" class="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <flux:input
+                        id="phone_number"
+                        name="phone_number"
+                        label="Nomor HP / WhatsApp"
+                        type="tel"
+                        placeholder="Contoh: 081234567890"
+                        :value="old('phone_number', $user->phone_number)"
+                    />
+
+                    <flux:input
                         id="semester"
                         name="semester"
                         label="Semester Aktif"

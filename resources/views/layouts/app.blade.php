@@ -42,20 +42,24 @@
                     'mahasiswa' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.index', 'active' => 'skkm.*', 'label' => 'Poin SKKM', 'icon' => 'academic-cap'],
+                        ['route' => 'bimbingan.mahasiswa.index', 'active' => 'bimbingan.mahasiswa.*', 'label' => 'Bimbingan Akademik', 'icon' => 'book-open'],
                     ],
                     'dosen_pa' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.verifikasi.index', 'active' => 'skkm.verifikasi.*', 'label' => 'Antrean SKKM', 'icon' => 'clipboard-document-check'],
                         ['route' => 'skkm.monitoring.index', 'active' => 'skkm.monitoring.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
+                        ['route' => 'bimbingan.dosen.index', 'active' => 'bimbingan.dosen.*', 'label' => 'Bimbingan Akademik', 'icon' => 'book-open'],
                     ],
                     'kaprodi' => [
                         ['route' => 'skkm.kaprodi.dashboard', 'active' => 'skkm.kaprodi.dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.kaprodi.index', 'active' => 'skkm.kaprodi.index', 'label' => 'Monitoring SKKM', 'icon' => 'chart-bar'],
                         ['route' => 'skkm.kaprodi.mahasiswa.index', 'active' => 'skkm.kaprodi.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
+                        ['route' => 'bimbingan.rekapitulasi.kaprodi', 'active' => 'bimbingan.rekapitulasi.kaprodi', 'label' => 'Rekap Bimbingan', 'icon' => 'document-chart-bar'],
                     ],
                     'kemahasiswaan' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.kemahasiswaan.mahasiswa.index', 'active' => 'skkm.kemahasiswaan.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
+                        ['route' => 'bimbingan.rekapitulasi.kemahasiswaan', 'active' => 'bimbingan.rekapitulasi.kemahasiswaan', 'label' => 'Rekap Bimbingan', 'icon' => 'document-chart-bar'],
                         ['route' => 'skkm.point-rules.index', 'active' => 'skkm.point-rules.*', 'label' => 'Manajemen Poin SKKM', 'icon' => 'list-bullet'],
                     ],
                     'super_admin' => [

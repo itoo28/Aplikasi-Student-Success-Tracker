@@ -33,6 +33,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone_number',
         'role',
         'skkm_role',
         'identifier',
@@ -113,6 +114,35 @@ class User extends Authenticatable
     public function guidanceLogs(): HasMany
     {
         return $this->hasMany(GuidanceLog::class);
+    }
+
+    public function bimbingans(): HasMany
+    {
+        return $this->hasMany(Bimbingan::class, 'mahasiswa_id');
+    }
+
+    public function whatsappPhoneNumber(): ?string
+    {
+        return self::normalizeWhatsappPhoneNumber($this->phone_number);
+    }
+
+    public static function normalizeWhatsappPhoneNumber(?string $phoneNumber): ?string
+    {
+        $phone = preg_replace('/\D+/', '', (string) $phoneNumber);
+
+        if (! $phone) {
+            return null;
+        }
+
+        if (str_starts_with($phone, '620')) {
+            $phone = '62' . substr($phone, 3);
+        } elseif (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        } elseif (str_starts_with($phone, '8')) {
+            $phone = '62' . $phone;
+        }
+
+        return preg_match('/^\d{10,15}$/', $phone) ? $phone : null;
     }
 
     public function lecturerGuidanceLogs(): HasMany

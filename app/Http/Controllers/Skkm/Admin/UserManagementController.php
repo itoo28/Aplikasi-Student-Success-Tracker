@@ -63,7 +63,8 @@ class UserManagementController extends Controller
                     $innerQuery
                         ->where('name', 'like', '%' . $safeSearchTerm . '%')
                         ->orWhere('email', 'like', '%' . $safeSearchTerm . '%')
-                        ->orWhere('identifier', 'like', '%' . $safeSearchTerm . '%');
+                        ->orWhere('identifier', 'like', '%' . $safeSearchTerm . '%')
+                        ->orWhere('phone_number', 'like', '%' . $safeSearchTerm . '%');
                 });
             });
 
@@ -113,6 +114,7 @@ class UserManagementController extends Controller
         }
 
         if ($validated['skkm_role'] !== 'mahasiswa') {
+            $validated['phone_number'] = null;
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
             if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
@@ -157,6 +159,7 @@ class UserManagementController extends Controller
         }
 
         if ($validated['skkm_role'] !== 'mahasiswa') {
+            $validated['phone_number'] = null;
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
             if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
@@ -265,6 +268,18 @@ class UserManagementController extends Controller
                 'nullable',
                 Rule::requiredIf(fn () => $request->input('skkm_role') === 'mahasiswa'),
                 Rule::in(['S1', 'D4', 'D3']),
+            ],
+            'phone_number' => [
+                'nullable',
+                Rule::requiredIf(fn () => $request->input('skkm_role') === 'mahasiswa'),
+                'string',
+                'max:25',
+                'regex:/^\+?[0-9][0-9\s().-]{7,24}$/',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    if (! User::normalizeWhatsappPhoneNumber((string) $value)) {
+                        $fail('Nomor HP / WhatsApp harus berisi 10 sampai 15 digit yang valid.');
+                    }
+                },
             ],
             'semester' => [
                 'nullable',
