@@ -13,6 +13,10 @@
     @php
         $studentsFulfilled = $students->filter(fn($student) => ($student->skkmProgress?->status_yudisium ?? null) === 'memenuhi')->count();
         $studentsInProgress = $students->filter(fn($student) => in_array(($student->skkmProgress?->status_yudisium ?? null), ['dalam_proses', 'belum_memenuhi'], true))->count();
+        $hasActiveFilters = filled($search ?? '')
+            || filled($selectedSemester ?? null)
+            || filled($selectedStatusYudisium ?? '')
+            || filled($selectedLecturer ?? null);
     @endphp
 
     <div class="relative isolate overflow-hidden rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-6 sm:p-8">
@@ -37,30 +41,64 @@
             </div>
 
             <div class="rounded-3xl border border-indigo-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(37,99,235,0.12)] overflow-hidden">
-                <div class="px-8 py-6 border-b border-indigo-100 bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70 flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800">Poin per Blok Semester</h3>
-                        <p class="text-sm text-slate-500 mt-1">Poin ditampilkan per blok semester (1-2, 3-4, 5-6, 7-8) dan total.</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                        <form method="GET" action="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="flex flex-col sm:flex-row items-center gap-2">
-                            <div class="relative w-full sm:w-72">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                    <i data-lucide="search" class="h-4 w-4"></i>
-                                </div>
-                                <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Cari nama, NIM, dosen PA" class="block w-full rounded-xl border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <div class="px-8 py-6 border-b border-indigo-100 bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70">
+                    <div class="flex flex-col gap-5">
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800">Poin per Blok Semester</h3>
+                                <p class="text-sm text-slate-500 mt-1">Poin ditampilkan per blok semester (1-2, 3-4, 5-6, 7-8) dan total.</p>
                             </div>
-                            <div class="flex w-full sm:w-auto items-center gap-2">
-                                <button type="submit" class="inline-flex w-full justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 sm:w-auto">Cari</button>
-                                @if($search)
-                                    <a href="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="inline-flex w-full justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:w-auto">Reset</a>
+                            <div class="inline-flex items-center rounded-xl bg-indigo-50 px-4 py-2 font-semibold text-indigo-700 w-fit">
+                                <i data-lucide="users" class="mr-2 h-4 w-4"></i>
+                                {{ $students->count() }} mahasiswa
+                            </div>
+                        </div>
+
+                        <form id="kaprodiMahasiswaFilterForm" method="GET" action="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="space-y-3">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                <div class="relative xl:col-span-2">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                        <i data-lucide="search" class="h-4 w-4"></i>
+                                    </div>
+                                    <input id="kaprodi-filter-search" type="text" name="q" value="{{ $search ?? '' }}" placeholder="Cari nama, NIM, dosen PA" class="block w-full rounded-xl border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+
+                                <select id="kaprodi-filter-semester" name="semester" class="block w-full rounded-xl border-slate-200 bg-white py-2.5 px-3 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Semua Semester</option>
+                                    @foreach($semesterOptions as $semesterOption)
+                                        <option value="{{ $semesterOption }}" @selected((int) ($selectedSemester ?? 0) === (int) $semesterOption)>
+                                            Semester {{ $semesterOption }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <select id="kaprodi-filter-status" name="status_yudisium" class="block w-full rounded-xl border-slate-200 bg-white py-2.5 px-3 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Semua Status</option>
+                                    @foreach($statusYudisiumOptions as $statusValue => $statusLabel)
+                                        <option value="{{ $statusValue }}" @selected(($selectedStatusYudisium ?? '') === $statusValue)>
+                                            {{ $statusLabel }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <select id="kaprodi-filter-lecturer" name="lecturer_id" class="block w-full rounded-xl border-slate-200 bg-white py-2.5 px-3 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Semua Dosen PA</option>
+                                    @foreach($lecturerOptions as $lecturerOption)
+                                        <option value="{{ $lecturerOption->id }}" @selected((int) ($selectedLecturer ?? 0) === (int) $lecturerOption->id)>
+                                            {{ $lecturerOption->name }}{{ $lecturerOption->identifier ? ' - ' . $lecturerOption->identifier : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if($hasActiveFilters)
+                                    <a href="{{ route('skkm.kaprodi.mahasiswa.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+                                        Reset Filter
+                                    </a>
                                 @endif
                             </div>
                         </form>
-                        <div class="inline-flex items-center rounded-xl bg-indigo-50 px-4 py-2 font-semibold text-indigo-700">
-                            <i data-lucide="users" class="mr-2 h-4 w-4"></i>
-                            {{ $students->count() }} mahasiswa
-                        </div>
                     </div>
                 </div>
 
@@ -157,4 +195,49 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const filterForm = document.getElementById('kaprodiMahasiswaFilterForm');
+                const searchInput = document.getElementById('kaprodi-filter-search');
+                const semesterSelect = document.getElementById('kaprodi-filter-semester');
+                const statusSelect = document.getElementById('kaprodi-filter-status');
+                const lecturerSelect = document.getElementById('kaprodi-filter-lecturer');
+
+                if (!filterForm) {
+                    return;
+                }
+
+                const debounce = (callback, delay = 450) => {
+                    let timeoutId;
+                    return (...args) => {
+                        window.clearTimeout(timeoutId);
+                        timeoutId = window.setTimeout(() => callback(...args), delay);
+                    };
+                };
+
+                const submitFilter = () => filterForm.requestSubmit();
+                const debouncedSubmit = debounce(submitFilter, 450);
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', debouncedSubmit);
+                    searchInput.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            submitFilter();
+                        }
+                    });
+                }
+
+                [semesterSelect, statusSelect, lecturerSelect].forEach((selectElement) => {
+                    if (!selectElement) {
+                        return;
+                    }
+
+                    selectElement.addEventListener('change', submitFilter);
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>

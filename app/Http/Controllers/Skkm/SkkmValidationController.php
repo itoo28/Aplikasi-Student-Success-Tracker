@@ -77,11 +77,39 @@ class SkkmValidationController extends Controller
         $kaprodi = $request->user();
         $scopeLabel = $kaprodi->programStudi?->nama ?? 'Program Studi belum diatur';
         $search = trim((string) $request->query('q', ''));
+        $selectedSemester = $request->query('semester');
+        $selectedStatusYudisium = trim((string) $request->query('status_yudisium', ''));
+        $selectedLecturer = $request->query('lecturer_id');
+        $semesterOptions = range(1, 14);
+        $statusYudisiumOptions = [
+            'memenuhi' => 'Memenuhi',
+            'dalam_proses' => 'Dalam proses',
+            'belum_memenuhi' => 'Belum memenuhi',
+            'belum_ada' => 'Belum ada progres',
+        ];
+        $allowedStatusYudisium = array_keys($statusYudisiumOptions);
+
+        $selectedSemester = is_numeric($selectedSemester) ? (int) $selectedSemester : null;
+        if (! in_array($selectedSemester, $semesterOptions, true)) {
+            $selectedSemester = null;
+        }
+
+        $selectedLecturer = is_numeric($selectedLecturer) ? (int) $selectedLecturer : null;
+        if (! in_array($selectedStatusYudisium, $allowedStatusYudisium, true)) {
+            $selectedStatusYudisium = '';
+        }
 
         if (! $kaprodi->program_studi_id) {
             return view('skkm.kaprodi.mahasiswa', [
                 'students' => collect(),
                 'scopeLabel' => $scopeLabel,
+                'search' => $search,
+                'selectedSemester' => $selectedSemester,
+                'selectedStatusYudisium' => $selectedStatusYudisium,
+                'selectedLecturer' => $selectedLecturer,
+                'semesterOptions' => $semesterOptions,
+                'statusYudisiumOptions' => $statusYudisiumOptions,
+                'lecturerOptions' => collect(),
             ]);
         }
 
@@ -97,14 +125,48 @@ class SkkmValidationController extends Controller
                         });
                 });
             })
+            ->when($selectedSemester, function (Builder $query, int $semester) {
+                $query->where(function (Builder $semesterQuery) use ($semester) {
+                    $semesterQuery->where('semester', $semester)
+                        ->orWhereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('semester_aktif', $semester));
+                });
+            })
+            ->when($selectedLecturer, fn (Builder $query, int $lecturerId) => $query->where('lecturer_id', $lecturerId))
+            ->when($selectedStatusYudisium !== '', function (Builder $query) use ($selectedStatusYudisium) {
+                if ($selectedStatusYudisium === 'belum_ada') {
+                    $query->whereDoesntHave('skkmProgress');
+
+                    return;
+                }
+
+                $query->whereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('status_yudisium', $selectedStatusYudisium));
+            })
             ->with(['programStudi.fakultas', 'skkmProgress', 'lecturer'])
             ->orderBy('name')
             ->get();
+
+        $lecturerOptions = User::query()
+            ->where('program_studi_id', $kaprodi->program_studi_id)
+            ->where(function (Builder $query) {
+                $query->where('skkm_role', 'dosen_pa')
+                    ->orWhere(function (Builder $fallbackQuery) {
+                        $fallbackQuery->whereNull('skkm_role')
+                            ->where('role', 'lecturer');
+                    });
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'identifier']);
 
         return view('skkm.kaprodi.mahasiswa', [
             'students' => $students,
             'scopeLabel' => $scopeLabel,
             'search' => $search,
+            'selectedSemester' => $selectedSemester,
+            'selectedStatusYudisium' => $selectedStatusYudisium,
+            'selectedLecturer' => $selectedLecturer,
+            'semesterOptions' => $semesterOptions,
+            'statusYudisiumOptions' => $statusYudisiumOptions,
+            'lecturerOptions' => $lecturerOptions,
         ]);
     }
 

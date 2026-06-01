@@ -10,9 +10,6 @@
 
     @php
         $totalSubmissions = (int) ($statusSummary->total_submissions ?? 0);
-        $pendingSubmissions = (int) ($statusSummary->pending_submissions ?? 0);
-        $approvedSubmissions = (int) ($statusSummary->approved_submissions ?? 0);
-        $rejectedSubmissions = (int) ($statusSummary->rejected_submissions ?? 0);
     @endphp
 
     <div class="relative isolate overflow-hidden rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-6 sm:p-8">
@@ -40,24 +37,9 @@
                     <p class="text-sm font-semibold text-amber-100">Dalam Proses</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsInProgress }}</h3>
                 </div>
-                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-600 p-6 text-white shadow-[0_14px_35px_rgb(37,99,235,0.30)]">
-                    <p class="text-sm font-semibold text-indigo-100">Total Pengajuan</p>
+                <div class="rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-6 text-white shadow-[0_14px_35px_rgb(124,58,237,0.30)]">
+                    <p class="text-sm font-semibold text-violet-100">Total Pengajuan</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $totalSubmissions }}</h3>
-                </div>
-            </div>
-
-            <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-                <div class="rounded-3xl border border-amber-100/80 bg-white/90 p-5 shadow-[0_8px_24px_rgb(245,158,11,0.14)] backdrop-blur-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Pending</p>
-                    <h4 class="mt-2 text-2xl font-extrabold text-slate-800">{{ $pendingSubmissions }}</h4>
-                </div>
-                <div class="rounded-3xl border border-emerald-100/80 bg-white/90 p-5 shadow-[0_8px_24px_rgb(16,185,129,0.14)] backdrop-blur-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Disetujui</p>
-                    <h4 class="mt-2 text-2xl font-extrabold text-slate-800">{{ $approvedSubmissions }}</h4>
-                </div>
-                <div class="rounded-3xl border border-rose-100/80 bg-white/90 p-5 shadow-[0_8px_24px_rgb(244,63,94,0.14)] backdrop-blur-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-rose-700">Ditolak</p>
-                    <h4 class="mt-2 text-2xl font-extrabold text-slate-800">{{ $rejectedSubmissions }}</h4>
                 </div>
             </div>
 
