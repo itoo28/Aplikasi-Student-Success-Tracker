@@ -34,8 +34,8 @@
                     <form action="{{ route('bimbingan.mahasiswa.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <flux:input type="date" name="guidance_date" label="Tanggal Bimbingan" required />
-                            <flux:input type="text" name="topic" label="Topik/Kendala Bimbingan" placeholder="Contoh: Konsultasi KRS, Kesulitan Belajar" required />
+                            <flux:input type="date" name="tanggal" label="Tanggal Bimbingan" required />
+                            <flux:input type="text" name="topik" label="Topik/Kendala Bimbingan" placeholder="Contoh: Konsultasi KRS, Kesulitan Belajar" required />
                         </div>
                         <div class="mt-6">
                             <flux:input type="file" name="document" label="Dokumen Pendukung (Opsional, PDF/JPG)" />
@@ -78,11 +78,11 @@
 
                             {{-- Info --}}
                             <div class="min-w-0 flex-1">
-                                <h4 class="font-semibold text-slate-800 text-sm truncate">{{ $log->topic }}</h4>
+                                <h4 class="font-semibold text-slate-800 text-sm truncate">{{ $log->topik }}</h4>
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
                                     <span class="inline-flex items-center text-xs text-slate-500">
                                         <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        {{ $log->guidance_date->format('d M Y') }}
+                                        {{ $log->tanggal->format('d M Y') }}
                                     </span>
                                     <span class="inline-flex items-center text-xs text-slate-500">
                                         <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -90,10 +90,10 @@
                                     </span>
                                 </div>
 
-                                @if($log->notes && $log->notes !== '-')
+                                @if($log->catatan && $log->catatan !== '-')
                                     <div class="mt-2 inline-flex items-start gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
                                         <svg class="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
-                                        <span class="text-[11px] text-slate-600 leading-relaxed">{{ $log->notes }}</span>
+                                        <span class="text-[11px] text-slate-600 leading-relaxed">{{ $log->catatan }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -122,6 +122,16 @@
                                 @endif
                             </div>
                         </div>
+
+                        @if($log->is_completed)
+                            <div class="mt-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                                <h4 class="text-sm font-semibold text-emerald-800 mb-2">Laporan Bimbingan Selesai</h4>
+                                <p class="text-sm text-slate-700 mb-3">{{ $log->resolution }}</p>
+                                @if($log->activity_photo_path)
+                                    <a href="{{ Storage::url($log->activity_photo_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-700 bg-white border border-emerald-200 rounded-xl hover:bg-emerald-100">Lihat Foto Kegiatan</a>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                     @empty
                     <div class="px-8 py-16 text-center">

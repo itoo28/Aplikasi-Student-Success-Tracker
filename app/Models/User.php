@@ -33,6 +33,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone_number',
         'role',
         'skkm_role',
         'identifier',
@@ -115,6 +116,11 @@ class User extends Authenticatable
         return $this->hasMany(GuidanceLog::class);
     }
 
+    public function bimbingans(): HasMany
+    {
+        return $this->hasMany(Bimbingan::class, 'mahasiswa_id');
+    }
+
     public function lecturerGuidanceLogs(): HasMany
     {
         return $this->hasMany(GuidanceLog::class, 'lecturer_id');
@@ -138,5 +144,13 @@ class User extends Authenticatable
         }
 
         return $storedRole === 'student' ? 'mahasiswa' : $storedRole;
+    }
+
+    public function getAngkatanAttribute(): ?string
+    {
+        if (!$this->identifier) {
+            return null;
+        }
+        return '20' . substr($this->identifier, 0, 2);
     }
 }

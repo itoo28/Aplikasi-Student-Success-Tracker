@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GuidanceLog;
+use App\Models\Bimbingan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 
 class BimbinganAkademikController extends Controller
 {
@@ -15,25 +14,25 @@ class BimbinganAkademikController extends Controller
     public function mahasiswaIndex()
     {
         $mahasiswa = Auth::user();
-        $semesterAktif = $mahasiswa->semester ?? 1; // Fallback ke semester 1 jika null
-        
-        $riwayat = GuidanceLog::where('user_id', $mahasiswa->id)->latest()->get();
-        // Ambil data dosen PA berdasarkan relasi lecturer di model User
-        $dosen_pa = $mahasiswa->lecturer; 
-        
-        $bimbinganSemesterIni = GuidanceLog::where('user_id', $mahasiswa->id)
+        $semesterAktif = $mahasiswa->semester ?? 1;
+
+        $riwayat = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->latest()
+            ->get();
+
+        $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->where('semester', $semesterAktif)
             ->count();
-        
-        return view('bimbingan.mahasiswa', compact('riwayat', 'dosen_pa', 'bimbinganSemesterIni', 'semesterAktif'));
+
+        return view('bimbingan.mahasiswa', compact('riwayat', 'bimbinganSemesterIni', 'semesterAktif'));
     }
 
     public function mahasiswaStore(Request $request)
     {
         $mahasiswa = Auth::user();
         $semesterAktif = $mahasiswa->semester ?? 1;
-        
-        $bimbinganSemesterIni = GuidanceLog::where('user_id', $mahasiswa->id)
+
+        $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->where('semester', $semesterAktif)
             ->count();
 
@@ -42,8 +41,8 @@ class BimbinganAkademikController extends Controller
         }
 
         $request->validate([
-            'guidance_date' => 'required|date',
-            'topic' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'topik' => 'required|string|max:255',
             'document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
@@ -52,130 +51,241 @@ class BimbinganAkademikController extends Controller
             $path = $request->file('document')->store('bimbingan_dokumen', 'public');
         }
 
-        GuidanceLog::create([
-            'user_id' => $mahasiswa->id,
-            'lecturer_id' => $mahasiswa->lecturer_id, 
+        Bimbingan::create([
+            'mahasiswa_id' => $mahasiswa->id,
+            'dosen_id' => $mahasiswa->lecturer_id,
             'semester' => $semesterAktif,
-            'guidance_date' => $request->guidance_date,
-            'topic' => $request->topic,
-            'document_path' => $path,
+            'tanggal' => $request->tanggal,
+            'topik' => $request->topik,
+            'catatan' => '-',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
             'status' => 'pending',
-            'notes' => '-',
+            'document_path' => $path,
         ]);
 
         return redirect()->route('bimbingan.mahasiswa.index')->with('success', 'Pengajuan bimbingan berhasil dikirim.');
     }
 
     // --- ROLE: DOSEN PA ---
-    public function dosenIndex()
+    public function dosenIndex(Request $request)
     {
         $dosen = Auth::user();
-        
-        // Statistik dinamis berdasarkan 2 digit awal identifier (NIM)
+        $filterType = $request->query('filter_type', 'all');
+        $filterValue = $request->query('filter_value');
+
         $statistikAngkatan = $dosen->adviseeStudents()
-            ->selectRaw("SUBSTRING(identifier, 1, 2) as angkatan_kode, COUNT(*) as total_anak")
-            ->groupBy('angkatan_kode')
+            ->whereNotNull('identifier')
+            ->selectRaw("DISTINCT SUBSTRING(identifier, 1, 2) as angkatan_kode")
             ->get()
             ->map(function ($item) {
-                return [
-                    'angkatan' => '20' . $item->angkatan_kode,
-                    'total' => $item->total_anak
-                ];
+                return '20' . $item->angkatan_kode;
+            })
+            ->filter()
+            ->values();
+
+        $mahasiswaBimbingan = $dosen->adviseeStudents()->with('programStudi')->get();
+        $angkatanOptions = $statistikAngkatan;
+
+        $pendingRequestsQuery = Bimbingan::where('dosen_id', $dosen->id)
+            ->where('tipe_pengajuan', 'mandiri_mahasiswa')
+            ->with('mahasiswa');
+
+        if ($filterType === 'angkatan' && $filterValue) {
+            $angkatanCode = substr($filterValue, 2);
+            $pendingRequestsQuery->whereHas('mahasiswa', function ($query) use ($angkatanCode) {
+                $query->whereRaw('SUBSTRING(identifier, 1, 2) = ?', [$angkatanCode]);
             });
+        }
 
-        // Daftar pengajuan mahasiswa bimbingannya
-        $pengajuan = GuidanceLog::where('lecturer_id', $dosen->id)
-            ->with('student')
-            ->latest()
+        if ($filterType === 'individu' && $filterValue) {
+            $pendingRequestsQuery->where('mahasiswa_id', $filterValue);
+        }
+
+        $pendingRequests = $pendingRequestsQuery->latest()->get();
+
+        $scheduledBimbinganRaw = Bimbingan::where('dosen_id', $dosen->id)
+            ->where('tipe_pengajuan', 'undangan_dosen')
+            ->with(['mahasiswa.programStudi'])
+            ->orderBy('tanggal', 'asc')
             ->get();
-            
-        $mahasiswaBimbingan = $dosen->adviseeStudents()->get();
 
-        return view('bimbingan.dosen', compact('statistikAngkatan', 'pengajuan', 'mahasiswaBimbingan'));
+        $scheduledBimbingan = $scheduledBimbinganRaw->groupBy(function ($item) {
+            return $item->group_id ?? 'ind_' . $item->id;
+        })->map(function ($group) {
+            $first = $group->first();
+            $first->is_group = $first->group_id && in_array($first->group_type, ['all', 'angkatan']);
+            $first->group_students = $group->map(fn($b) => $b->mahasiswa);
+            $first->group_bimbingan_ids = $group->pluck('id')->toArray();
+            return $first;
+        })->values();
+
+        return view('bimbingan.dosen', compact(
+            'statistikAngkatan',
+            'pendingRequests',
+            'scheduledBimbingan',
+            'mahasiswaBimbingan',
+            'angkatanOptions',
+            'filterType',
+            'filterValue'
+        ));
     }
 
-    public function dosenUpdate(Request $request, GuidanceLog $log)
+    public function dosenStore(Request $request)
     {
-        // Pastikan dosen yang mengubah adalah dosen yang bersangkutan
-        if ($log->lecturer_id !== Auth::id()) {
+        $dosen = Auth::user();
+
+        $request->validate([
+            'filter_type' => 'required|in:all,angkatan,individu',
+            'filter_value' => 'nullable',
+            'tanggal' => 'required|date',
+            'topik' => 'required|string|max:255',
+            'catatan' => 'nullable|string',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
+
+        if ($request->filter_type === 'angkatan' && ! $request->filter_value) {
+            return redirect()->back()->with('error', 'Silakan pilih filter yang sesuai sebelum menyimpan bimbingan.');
+        }
+
+        if ($request->filter_type === 'individu' && ! $request->user_id) {
+            return redirect()->back()->with('error', 'Silakan pilih mahasiswa terlebih dahulu.');
+        }
+
+        $studentsQuery = $dosen->adviseeStudents();
+
+        if ($request->filter_type === 'angkatan') {
+            $angkatanCode = substr($request->filter_value, 2);
+            $studentsQuery->whereRaw('SUBSTRING(identifier, 1, 2) = ?', [$angkatanCode]);
+        }
+
+        if ($request->filter_type === 'individu') {
+            $studentsQuery->where('id', $request->user_id);
+        }
+
+        $students = $studentsQuery->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ditemukan mahasiswa untuk filter yang dipilih.');
+        }
+
+        $created = [];
+        $skipped = [];
+
+        $groupId = null;
+        if (in_array($request->filter_type, ['all', 'angkatan'])) {
+            $groupId = uniqid('grp_', true);
+        }
+
+        foreach ($students as $mahasiswa) {
+            $semesterAktif = $mahasiswa->semester ?? 1;
+            $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+                ->where('semester', $semesterAktif)
+                ->count();
+
+            if ($bimbinganSemesterIni >= 3) {
+                $skipped[] = $mahasiswa->name;
+                continue;
+            }
+
+            Bimbingan::create([
+                'mahasiswa_id' => $mahasiswa->id,
+                'dosen_id' => $dosen->id,
+                'semester' => $semesterAktif,
+                'tanggal' => $request->tanggal,
+                'topik' => $request->topik,
+                'catatan' => $request->catatan ?? '-',
+                'tipe_pengajuan' => 'undangan_dosen',
+                'status' => 'validated',
+                'group_id' => $groupId,
+                'group_type' => $request->filter_type,
+                'group_value' => $request->filter_type === 'angkatan' ? $request->filter_value : null,
+            ]);
+
+            $created[] = $mahasiswa->name;
+        }
+
+        if (empty($created)) {
+            return redirect()->back()->with('error', 'Semua mahasiswa terpilih telah mencapai batas maksimal bimbingan semester ini.');
+        }
+
+        $message = 'Bimbingan berhasil ditambahkan untuk ' . count($created) . ' mahasiswa.';
+        if (! empty($skipped)) {
+            $message .= ' Beberapa mahasiswa tidak ditambahkan karena sudah mencapai batas: ' . implode(', ', $skipped) . '.';
+        }
+
+        return redirect()->route('bimbingan.dosen.index')->with('success', $message);
+    }
+
+    public function dosenUpdate(Request $request, Bimbingan $bimbingan)
+    {
+        if ($bimbingan->dosen_id !== Auth::id()) {
             abort(403);
         }
 
         $request->validate([
-            'status' => 'required|in:validated,revised', // validated = Disetujui, revised = Ditolak
-            'notes' => 'required|string',
+            'status' => 'required|in:validated,revised',
+            'catatan' => 'required|string',
         ]);
 
-        $log->update([
+        $bimbingan->update([
             'status' => $request->status,
-            'notes' => $request->notes,
+            'catatan' => $request->catatan,
         ]);
 
         return redirect()->route('bimbingan.dosen.index')->with('success', 'Status pengajuan berhasil diperbarui.');
     }
-    
-    public function dosenStore(Request $request)
+
+    public function dosenReport(Request $request, Bimbingan $bimbingan)
     {
-        $dosen = Auth::user();
-        
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'guidance_date' => 'required|date',
-            'topic' => 'required|string|max:255',
-            'notes' => 'required|string',
-        ]);
-        
-        $mahasiswa = User::findOrFail($request->user_id);
-        
-        if ($mahasiswa->lecturer_id !== $dosen->id) {
+        if ($bimbingan->dosen_id !== Auth::id()) {
             abort(403);
         }
-        
-        $semesterAktif = $mahasiswa->semester ?? 1;
-        
-        $bimbinganSemesterIni = GuidanceLog::where('user_id', $mahasiswa->id)
-            ->where('semester', $semesterAktif)
-            ->count();
 
-        if ($bimbinganSemesterIni >= 3) {
-            return redirect()->back()->with('error', 'Mahasiswa ini sudah mencapai batas maksimal 3 kali bimbingan di semester aktifnya.');
-        }
-
-        GuidanceLog::create([
-            'user_id' => $mahasiswa->id,
-            'lecturer_id' => $dosen->id,
-            'semester' => $semesterAktif,
-            'guidance_date' => $request->guidance_date,
-            'topic' => $request->topic,
-            'document_path' => null,
-            'status' => 'validated', // Langsung disetujui jika dosen yang input
-            'notes' => $request->notes,
+        $request->validate([
+            'resolution' => 'required|string|max:1000',
+            'activity_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        return redirect()->route('bimbingan.dosen.index')->with('success', 'Bimbingan berhasil ditambahkan secara manual.');
+        $photoPath = $bimbingan->activity_photo_path;
+        if ($request->hasFile('activity_photo')) {
+            $photoPath = $request->file('activity_photo')->store('bimbingan_foto', 'public');
+        }
+
+        if ($bimbingan->group_id) {
+            Bimbingan::where('group_id', $bimbingan->group_id)
+                ->where('dosen_id', Auth::id())
+                ->update([
+                    'resolution' => $request->resolution,
+                    'activity_photo_path' => $photoPath,
+                    'status' => 'completed',
+                ]);
+        } else {
+            $bimbingan->update([
+                'resolution' => $request->resolution,
+                'activity_photo_path' => $photoPath,
+                'status' => 'completed',
+            ]);
+        }
+
+        return redirect()->route('bimbingan.dosen.index')->with('success', 'Laporan bimbingan berhasil disimpan.');
     }
 
     // --- ROLE: KAPRODI & KEMAHASISWAAN ---
     public function rekapitulasiIndex()
     {
-        // Mendapatkan seluruh mahasiswa yang memiliki dosen pembimbing
         $mahasiswaList = User::whereNotNull('lecturer_id')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('role', 'student')
                       ->orWhere('skkm_role', 'student')
                       ->orWhere('skkm_role', 'mahasiswa');
             })
-            ->withCount(['guidanceLogs' => function($query) {
-                // Sesuai prompt: hitung bimbingan di semester aktif
-                $query->whereColumn('guidance_logs.semester', 'users.semester');
+            ->withCount(['bimbingans as bimbingan_semester_count' => function ($query) {
+                $query->whereColumn('bimbingans.semester', 'users.semester');
             }])
             ->get();
-            
-        // Rekap total
+
         $totalMahasiswa = $mahasiswaList->count();
-        
-        // Mahasiswa yang memenuhi syarat (>= 1 bimbingan di semester aktif)
-        $memenuhiSyarat = $mahasiswaList->where('guidance_logs_count', '>=', 1)->count();
+        $memenuhiSyarat = $mahasiswaList->where('bimbingan_semester_count', '>=', 1)->count();
         $belumBimbingan = $totalMahasiswa - $memenuhiSyarat;
 
         return view('bimbingan.rekapitulasi', compact('mahasiswaList', 'totalMahasiswa', 'memenuhiSyarat', 'belumBimbingan'));

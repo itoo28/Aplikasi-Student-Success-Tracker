@@ -19,6 +19,7 @@ class DummyUserSeeder extends Seeder
         $dosenInf = \App\Models\User::create([
             'name' => 'Dosen PA Informatika, M.Kom.',
             'email' => 'dosen.inf@example.com',
+            'phone_number' => '+628111234001',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
             'identifier' => 'NIDNINF01',
@@ -33,6 +34,7 @@ class DummyUserSeeder extends Seeder
         $dosenSi1 = \App\Models\User::create([
             'name' => 'Dosen PA SI 1, M.Kom.',
             'email' => 'dosen.si1@example.com',
+            'phone_number' => '+628111234002',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
             'identifier' => 'NIDNSI01',
@@ -46,6 +48,7 @@ class DummyUserSeeder extends Seeder
         $dosenSi2 = \App\Models\User::create([
             'name' => 'Dosen PA SI 2, M.Kom.',
             'email' => 'dosen.si2@example.com',
+            'phone_number' => '+628111234003',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
             'identifier' => 'NIDNSI02',
@@ -61,6 +64,7 @@ class DummyUserSeeder extends Seeder
             \App\Models\User::create([
                 'name' => $faker->name,
                 'email' => 'mhs.inf' . $i . '@example.com',
+                'phone_number' => '+62811000' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'role' => 'student',
                 'skkm_role' => 'mahasiswa',
                 'identifier' => '10010' . str_pad($i, 3, '0', STR_PAD_LEFT),
@@ -79,6 +83,7 @@ class DummyUserSeeder extends Seeder
             \App\Models\User::create([
                 'name' => $faker->name,
                 'email' => 'mhs.si' . $i . '@example.com',
+                'phone_number' => '+62812000' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'role' => 'student',
                 'skkm_role' => 'mahasiswa',
                 'identifier' => '20010' . str_pad($i, 3, '0', STR_PAD_LEFT),

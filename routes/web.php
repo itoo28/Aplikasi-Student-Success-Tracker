@@ -42,7 +42,8 @@ Route::middleware([
 
         // Bimbingan Akademik
         Route::get('/bimbingan/dosen', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenIndex'])->name('bimbingan.dosen.index');
-        Route::post('/bimbingan/dosen/{log}/update', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenUpdate'])->name('bimbingan.dosen.update');
+        Route::post('/bimbingan/dosen/{bimbingan}/update', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenUpdate'])->name('bimbingan.dosen.update');
+        Route::post('/bimbingan/dosen/{bimbingan}/report', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenReport'])->name('bimbingan.dosen.report');
         Route::post('/bimbingan/dosen/store', [\App\Http\Controllers\BimbinganAkademikController::class, 'dosenStore'])->name('bimbingan.dosen.store');
     });
 

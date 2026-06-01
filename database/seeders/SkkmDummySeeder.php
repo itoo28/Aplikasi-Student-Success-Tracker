@@ -21,6 +21,7 @@ class SkkmDummySeeder extends Seeder
             ['email' => 'dosen@example.com'],
             [
                 'name' => 'Dr. Budi Santoso, M.Kom',
+                'phone_number' => '+628115678901',
                 'role' => 'lecturer',
                 'skkm_role' => 'dosen_pa',
                 'identifier' => '198501012010011001',
@@ -35,6 +36,7 @@ class SkkmDummySeeder extends Seeder
             ['email' => 'student@example.com'],
             [
                 'name' => 'Ahmad Rendy',
+                'phone_number' => '+628116789012',
                 'role' => 'student',
                 'skkm_role' => 'mahasiswa',
                 'identifier' => '220101001',
