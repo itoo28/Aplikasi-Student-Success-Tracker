@@ -249,7 +249,10 @@
                 </div>
 
                 <!-- Mhs Beresiko -->
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-[0_14px_35px_rgb(244,63,94,0.30)]">
+                <div
+                    class="rounded-3xl p-6 text-white shadow-[0_14px_35px_rgb(244,63,94,0.30)]"
+                    style="background-image: linear-gradient(135deg, #f43f5e 0%, #e11d48 52%, #9f1239 100%);"
+                >
                     <p class="text-sm font-semibold text-rose-100 mb-2">Mhs Beresiko</p>
                     <h4 class="text-3xl font-extrabold">{{ $atRiskCount }}</h4>
                     <div>
