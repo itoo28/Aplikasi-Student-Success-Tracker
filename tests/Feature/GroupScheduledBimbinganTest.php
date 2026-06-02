@@ -177,4 +177,33 @@ class GroupScheduledBimbinganTest extends TestCase
         // Assert record is deleted
         $this->assertDatabaseMissing('bimbingans', ['id' => $b->id]);
     }
+
+    public function test_bimbingan_dosen_whatsapp_link_generation(): void
+    {
+        $dosen = User::factory()->create([
+            'role' => 'lecturer',
+            'phone_number' => '0899-8888-7777',
+        ]);
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'name' => 'Budi Santoso',
+            'identifier' => '22010101',
+        ]);
+
+        $b = Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => $dosen->id,
+            'tanggal' => '2026-06-05',
+            'topik' => 'Pengajuan Skripsi',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
+            'status' => 'pending',
+            'semester' => 4,
+        ]);
+
+        $this->assertNotNull($b->dosen_whatsapp_link);
+        $this->assertStringStartsWith('https://wa.me/6289988887777?text=', $b->dosen_whatsapp_link);
+        $this->assertStringContainsString(rawurlencode('Budi Santoso'), $b->dosen_whatsapp_link);
+        $this->assertStringContainsString(rawurlencode('Pengajuan Skripsi'), $b->dosen_whatsapp_link);
+    }
 }

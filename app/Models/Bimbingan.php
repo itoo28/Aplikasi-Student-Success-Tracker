@@ -56,6 +56,22 @@ class Bimbingan extends Model
         return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
     }
 
+    public function getDosenWhatsappLinkAttribute(): ?string
+    {
+        if (! $this->dosen || ! $this->dosen->phone_number) {
+            return null;
+        }
+
+        $phone = $this->dosen->whatsappPhoneNumber();
+        if (! $phone) {
+            return null;
+        }
+
+        $text = "Halo Bapak/Ibu {$this->dosen->name}, saya {$this->mahasiswa->name} ({$this->mahasiswa->identifier}) telah mengajukan bimbingan akademik untuk tanggal {$this->tanggal->format('d M Y')} dengan topik: \"{$this->topik}\". Mohon kesediaan Bapak/Ibu untuk memeriksa dan memvalidasi pengajuan tersebut. Terima kasih.";
+
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
+    }
+
     public function getTipePengajuanLabelAttribute(): string
     {
         return match ($this->tipe_pengajuan) {

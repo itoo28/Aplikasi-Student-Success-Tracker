@@ -117,6 +117,12 @@
                         {{-- Actions / Status --}}
                         <div class="flex items-center gap-3 sm:flex-shrink-0">
                             @if($log->status === 'pending')
+                                @if($log->dosen_whatsapp_link)
+                                    <a href="{{ $log->dosen_whatsapp_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors border border-emerald-100/50" title="Hubungi Dosen PA via WA">
+                                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.79 11.79 0 0012.03.007 11.875 11.875 0 002.5 11.89 11.6 11.6 0 001.77 16.4l.03.41 2.69-.87a.62.62 0 01.45.02l2.82 1.02a.61.61 0 01.34.3l.3.72a.6.6 0 01-.1.66l-1.42 1.76a.63.63 0 01-.58.24 12.32 12.32 0 01-4.18-.97 12.15 12.15 0 01-2.77-2.09C.47 16.99 1.73 9.77 6.75 4.76A11.688 11.688 0 0112.03 1.5c3.13 0 6.05 1.22 8.24 3.43a11.64 11.64 0 013.44 8.25c0 3.09-1.2 5.99-3.38 8.18l-.42.41-2.8-1.01a.62.62 0 01-.33-.28l-.21-.35a.59.59 0 01.1-.63l1.4-1.74a.6.6 0 01.29-.2l.63-.2a.6.6 0 00.36-.27l.95-1.39c1.57-1.91 2.44-4.37 2.44-6.99a11.68 11.68 0 00-3.38-8.23zm-6.44 12.65c-.24.65-1.4 1.25-1.92 1.31-.52.05-1.14.08-2.31-.54-1.17-.61-2.21-1.77-2.56-1.89-.36-.12-.79-.19-1.34.19-.55.38-2.08 1.56-2.08 1.56s-1.17-.33-2.25-1.11c-1.06-.77-1.62-1.93-1.82-2.37-.2-.44-.02-.69.39-.95.4-.25.85-.63 1.2-.95.38-.34.47-.56.7-.94.23-.39.12-.72-.06-.99-.17-.27-1.4-3.4-1.92-4.63-.5-1.23-.99-1.07-1.37-1.09-.35-.02-.76-.02-1.17-.02-.39 0-.99.14-1.5.7-.51.57-1.91 1.86-1.91 4.54 0 2.69 1.96 5.28 2.24 5.64.27.35 3.87 5.96 9.4 8.1 5.83 2.24 5.83 1.48 6.88 1.39 1.05-.1 3.94-1.6 4.5-3.15.56-1.55.56-2.88.39-3.16-.17-.28-1.69-.53-3.31-1.18a5.31 5.31 0 01-1.67-.86c-.47-.4-.79-.87-.99-1.36z"/></svg>
+                                        <span>Hubungi Dosen</span>
+                                    </a>
+                                @endif
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-semibold ring-1 ring-inset ring-amber-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
                                 </span>
