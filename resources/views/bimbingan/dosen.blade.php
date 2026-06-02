@@ -1,6 +1,13 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
+                {{ __('Bimbingan Akademik (Dosen PA)') }}
+            </h2>
+        </div>
+    </x-slot>
+
+    <div class="space-y-8">
 
             <!-- Statistik Angkatan -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -346,5 +353,4 @@
             </div>
 
         </div>
-    </div>
 </x-app-layout>
