@@ -21,6 +21,7 @@ class BimbinganAkademikController extends Controller
 
         $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->where('semester', $semesterAktif)
+            ->where('status', 'completed')
             ->count();
 
         return view('bimbingan.mahasiswa', compact('riwayat', 'bimbinganSemesterIni', 'semesterAktif'));
@@ -37,6 +38,7 @@ class BimbinganAkademikController extends Controller
 
         $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->where('semester', $semesterAktif)
+            ->where('status', 'completed')
             ->count();
 
         if ($bimbinganSemesterIni >= 3) {
@@ -179,6 +181,7 @@ class BimbinganAkademikController extends Controller
             $semesterAktif = $mahasiswa->semester ?? 1;
             $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
                 ->where('semester', $semesterAktif)
+                ->where('status', 'completed')
                 ->count();
 
             if ($bimbinganSemesterIni >= 3) {
@@ -294,7 +297,8 @@ class BimbinganAkademikController extends Controller
                       ->orWhere('skkm_role', 'mahasiswa');
             })
             ->withCount(['bimbingans as bimbingan_semester_count' => function ($query) {
-                $query->whereColumn('bimbingans.semester', 'users.semester');
+                $query->whereColumn('bimbingans.semester', 'users.semester')
+                    ->where('status', 'completed');
             }])
             ->with('programStudi.fakultas')
             ->get();

@@ -19,7 +19,7 @@
                     <span class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">Status Kelayakan Bimbingan Akademik</span>
                     <h3 class="text-2xl font-extrabold mt-1">Informasi Bimbingan Semester {{ $semesterAktif }}</h3>
                     <p class="text-indigo-200 text-sm mt-2">
-                        Anda telah melakukan pengajuan bimbingan sebanyak <strong class="text-white">{{ $bimbinganSemesterIni }} kali</strong> dari batas maksimal 3 kali.
+                        Anda telah menyelesaikan bimbingan sebanyak <strong class="text-white">{{ $bimbinganSemesterIni }} kali</strong> dari batas maksimal 3 kali semester ini.
                     </p>
                 </div>
                 <div class="flex-shrink-0">
@@ -44,7 +44,7 @@
             
             @if($bimbinganSemesterIni >= 3)
                 <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-5 text-sm">
-                    Anda sudah mencapai batas maksimal pengajuan bimbingan untuk semester ini (3 kali). Form pengajuan telah dinonaktifkan.
+                    Anda sudah menyelesaikan batas maksimal bimbingan untuk semester ini (3 kali). Form pengajuan baru telah dinonaktifkan.
                 </div>
             @else
                 <form action="{{ route('bimbingan.mahasiswa.store') }}" method="POST" enctype="multipart/form-data">

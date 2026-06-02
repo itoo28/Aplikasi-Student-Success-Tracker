@@ -206,4 +206,91 @@ class GroupScheduledBimbinganTest extends TestCase
         $this->assertStringContainsString(rawurlencode('Budi Santoso'), $b->dosen_whatsapp_link);
         $this->assertStringContainsString(rawurlencode('Pengajuan Skripsi'), $b->dosen_whatsapp_link);
     }
+
+    public function test_only_completed_bimbingans_count_towards_the_limit(): void
+    {
+        $dosen = User::factory()->create([
+            'role' => 'lecturer',
+            'skkm_role' => 'dosen_pa',
+        ]);
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'skkm_role' => 'mahasiswa',
+            'lecturer_id' => $dosen->id,
+            'identifier' => '23010001',
+            'semester' => 4,
+        ]);
+
+        // Create 2 pending bimbingans and 1 revised (rejected) bimbingan
+        Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => $dosen->id,
+            'tanggal' => '2026-06-05',
+            'topik' => 'Pending Topic 1',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
+            'status' => 'pending',
+            'semester' => 4,
+        ]);
+
+        Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => $dosen->id,
+            'tanggal' => '2026-06-06',
+            'topik' => 'Pending Topic 2',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
+            'status' => 'pending',
+            'semester' => 4,
+        ]);
+
+        Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => $dosen->id,
+            'tanggal' => '2026-06-07',
+            'topik' => 'Rejected Topic',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
+            'status' => 'revised',
+            'semester' => 4,
+        ]);
+
+        // Access student index and verify that count (bimbinganSemesterIni) is 0, meaning pending/rejected does not count
+        $response = $this->actingAs($student)->get(route('bimbingan.mahasiswa.index'));
+        $response->assertStatus(200);
+        $response->assertViewHas('bimbinganSemesterIni', 0);
+
+        // Student can still submit another bimbingan because completed count is 0
+        $response2 = $this->actingAs($student)->post(route('bimbingan.mahasiswa.store'), [
+            'tanggal' => '2026-06-08',
+            'topik' => 'Valid Submission',
+        ]);
+        $response2->assertRedirect(route('bimbingan.mahasiswa.index'));
+
+        // Now create 3 completed bimbingans
+        Bimbingan::query()->delete(); // Clear previous ones for clean test
+        
+        for ($i = 1; $i <= 3; $i++) {
+            Bimbingan::create([
+                'mahasiswa_id' => $student->id,
+                'dosen_id' => $dosen->id,
+                'tanggal' => '2026-06-08',
+                'topik' => "Completed Topic $i",
+                'tipe_pengajuan' => 'mandiri_mahasiswa',
+                'status' => 'completed',
+                'semester' => 4,
+            ]);
+        }
+
+        // Student index should show count is 3
+        $response3 = $this->actingAs($student)->get(route('bimbingan.mahasiswa.index'));
+        $response3->assertStatus(200);
+        $response3->assertViewHas('bimbinganSemesterIni', 3);
+
+        // Attempting to submit another bimbingan should fail
+        $response4 = $this->actingAs($student)->post(route('bimbingan.mahasiswa.store'), [
+            'tanggal' => '2026-06-09',
+            'topik' => 'Should Fail',
+        ]);
+        $response4->assertRedirect();
+        $response4->assertSessionHas('error', 'Anda sudah mencapai batas maksimal 3 kali bimbingan semester ini.');
+    }
 }
