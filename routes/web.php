@@ -60,6 +60,7 @@ Route::middleware([
         Route::post('/bimbingan/dosen/store', [BimbinganAkademikController::class, 'dosenStore'])->name('bimbingan.dosen.store');
         Route::post('/bimbingan/dosen/{bimbingan}/update', [BimbinganAkademikController::class, 'dosenUpdate'])->name('bimbingan.dosen.update');
         Route::post('/bimbingan/dosen/{bimbingan}/report', [BimbinganAkademikController::class, 'dosenReport'])->name('bimbingan.dosen.report');
+        Route::delete('/bimbingan/dosen/{bimbingan}', [BimbinganAkademikController::class, 'dosenDestroy'])->name('bimbingan.dosen.destroy');
     });
 
     // SKKM Module (Kaprodi)

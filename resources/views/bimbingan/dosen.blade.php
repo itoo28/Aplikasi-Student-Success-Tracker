@@ -82,79 +82,141 @@
                     <p class="text-sm text-slate-500 mt-1">Semua sesi bimbingan yang Anda jadwalkan untuk mahasiswa bimbingan.</p>
                 </div>
                 <div class="divide-y divide-slate-100">
-                    @forelse ($scheduledBimbingan as $bimbingan)
-                    <div class="px-8 py-5 hover:bg-slate-50/60 transition-colors">
-                        <div class="flex flex-col gap-4">
-                            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <div class="flex items-center gap-3 w-48 shrink-0">
-                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                                        {{ substr($bimbingan->mahasiswa->name, 0, 1) }}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h4 class="font-semibold text-slate-800 text-sm truncate">{{ $bimbingan->mahasiswa->name }}</h4>
-                                        <p class="text-xs text-slate-500">{{ $bimbingan->mahasiswa->identifier }} (Smt {{ $bimbingan->semester }})</p>
-                                        <p class="text-xs text-slate-500">{{ optional($bimbingan->mahasiswa->programStudi)->nama ?? 'Program Studi belum terdaftar' }}</p>
-                                    </div>
-                                </div>
-                                <div class="min-w-0 flex-1 pl-0 sm:pl-4 sm:border-l sm:border-slate-100">
-                                    <h4 class="font-semibold text-slate-800 text-sm">{{ $bimbingan->topik }}</h4>
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                                        <span class="inline-flex items-center text-xs text-slate-500">
-                                            <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                            {{ $bimbingan->tanggal->format('d M Y') }}
-                                        </span>
-                                        <span class="inline-flex items-center text-xs text-slate-500">
-                                            <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            Status: <strong class="ml-1">{{ ucfirst($bimbingan->status) }}</strong>
-                                        </span>
-                                    </div>
-                                    @if($bimbingan->catatan && $bimbingan->catatan !== '-')
-                                        <div class="mt-2 inline-flex items-start gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
-                                            <span class="text-[11px] text-slate-600 leading-relaxed">{{ $bimbingan->catatan }}</span>
+                    @forelse ($scheduledBimbinganGrouped as $key => $group)
+                        @php
+                            $firstBimbingan = $group->first();
+                            $isGroup = $firstBimbingan->group_key !== null;
+                            $bimbingan = $firstBimbingan;
+                        @endphp
+                        <div class="px-8 py-5 hover:bg-slate-50/60 transition-colors" x-data="{ showMembers: false }">
+                            <div class="flex flex-col gap-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                                    @if($isGroup)
+                                        <div class="flex items-center gap-3 w-48 shrink-0">
+                                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold border border-indigo-100/50">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h4 class="font-bold text-slate-800 text-sm">Bimbingan Kelompok</h4>
+                                                <p class="text-xs text-indigo-600 font-semibold mt-0.5">{{ $group->count() }} Mahasiswa</p>
+                                                <button @click="showMembers = !showMembers" class="text-[10px] text-slate-500 hover:text-indigo-600 font-semibold flex items-center gap-0.5 mt-1 focus:outline-none transition-colors">
+                                                    <span x-text="showMembers ? 'Sembunyikan' : 'Lihat Anggota'"></span>
+                                                    <svg class="w-2.5 h-2.5 transition-transform duration-200" :class="showMembers ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-3 w-48 shrink-0">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
+                                                {{ substr($bimbingan->mahasiswa->name, 0, 1) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <h4 class="font-semibold text-slate-800 text-sm truncate">{{ $bimbingan->mahasiswa->name }}</h4>
+                                                <p class="text-xs text-slate-500">{{ $bimbingan->mahasiswa->identifier }} (Smt {{ $bimbingan->semester }})</p>
+                                                <p class="text-xs text-slate-500">{{ optional($bimbingan->mahasiswa->programStudi)->nama ?? 'Program Studi belum terdaftar' }}</p>
+                                            </div>
                                         </div>
                                     @endif
+
+                                    <div class="min-w-0 flex-1 pl-0 sm:pl-4 sm:border-l sm:border-slate-100">
+                                        <h4 class="font-semibold text-slate-800 text-sm">{{ $bimbingan->topik }}</h4>
+                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                                            <span class="inline-flex items-center text-xs text-slate-500">
+                                                <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                {{ $bimbingan->tanggal->format('d M Y') }}
+                                            </span>
+                                            <span class="inline-flex items-center text-xs text-slate-500">
+                                                <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Status: <strong class="ml-1">{{ ucfirst($bimbingan->status) }}</strong>
+                                            </span>
+                                        </div>
+                                        @if($bimbingan->catatan && $bimbingan->catatan !== '-')
+                                            <div class="mt-2 inline-flex items-start gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                                                <span class="text-[11px] text-slate-600 leading-relaxed">{{ $bimbingan->catatan }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-col items-end gap-3 sm:flex-shrink-0">
+                                        @if(!$isGroup && $bimbingan->status === 'validated' && $bimbingan->whatsapp_link)
+                                            <a href="{{ $bimbingan->whatsapp_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors">
+                                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.79 11.79 0 0012.03.007 11.875 11.875 0 002.5 11.89 11.6 11.6 0 001.77 16.4l.03.41 2.69-.87a.62.62 0 01.45.02l2.82 1.02a.61.61 0 01.34.3l.3.72a.6.6 0 01-.1.66l-1.42 1.76a.63.63 0 01-.58.24 12.32 12.32 0 01-4.18-.97 12.15 12.15 0 01-2.77-2.09C.47 16.99 1.73 9.77 6.75 4.76A11.688 11.688 0 0112.03 1.5c3.13 0 6.05 1.22 8.24 3.43a11.64 11.64 0 013.44 8.25c0 3.09-1.2 5.99-3.38 8.18l-.42.41-2.8-1.01a.62.62 0 01-.33-.28l-.21-.35a.59.59 0 01.1-.63l1.4-1.74a.6.6 0 01.29-.2l.63-.2a.6.6 0 00.36-.27l.95-1.39c1.57-1.91 2.44-4.37 2.44-6.99a11.68 11.68 0 00-3.38-8.23zm-6.44 12.65c-.24.65-1.4 1.25-1.92 1.31-.52.05-1.14.08-2.31-.54-1.17-.61-2.21-1.77-2.56-1.89-.36-.12-.79-.19-1.34.19-.55.38-2.08 1.56-2.08 1.56s-1.17-.33-2.25-1.11c-1.06-.77-1.62-1.93-1.82-2.37-.2-.44-.02-.69.39-.95.4-.25.85-.63 1.2-.95.38-.34.47-.56.7-.94.23-.39.12-.72-.06-.99-.17-.27-1.4-3.4-1.92-4.63-.5-1.23-.99-1.07-1.37-1.09-.35-.02-.76-.02-1.17-.02-.39 0-.99.14-1.5.7-.51.57-1.91 1.86-1.91 4.54 0 2.69 1.96 5.28 2.24 5.64.27.35 3.87 5.96 9.4 8.1 5.83 2.24 5.83 1.48 6.88 1.39 1.05-.1 3.94-1.6 4.5-3.15.56-1.55.56-2.88.39-3.16-.17-.28-1.69-.53-3.31-1.18a5.31 5.31 0 01-1.67-.86c-.47-.4-.79-.87-.99-1.36z"/></svg>
+                                                Kirim WhatsApp
+                                            </a>
+                                        @endif
+
+                                        @if($bimbingan->status === 'validated')
+                                            <form action="{{ route('bimbingan.dosen.destroy', $bimbingan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan/menghapus jadwal bimbingan ini?');" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors focus:outline-none">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    Batalkan Jadwal
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="flex flex-col items-end gap-3 sm:flex-shrink-0">
-                                    @if($bimbingan->status === 'validated' && $bimbingan->whatsapp_link)
-                                        <a href="{{ $bimbingan->whatsapp_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors">
-                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.79 11.79 0 0012.03.007 11.875 11.875 0 002.5 11.89 11.6 11.6 0 001.77 16.4l.03.41 2.69-.87a.62.62 0 01.45.02l2.82 1.02a.61.61 0 01.34.3l.3.72a.6.6 0 01-.1.66l-1.42 1.76a.63.63 0 01-.58.24 12.32 12.32 0 01-4.18-.97 12.15 12.15 0 01-2.77-2.09C.47 16.99 1.73 9.77 6.75 4.76A11.688 11.688 0 0112.03 1.5c3.13 0 6.05 1.22 8.24 3.43a11.64 11.64 0 013.44 8.25c0 3.09-1.2 5.99-3.38 8.18l-.42.41-2.8-1.01a.62.62 0 01-.33-.28l-.21-.35a.59.59 0 01.1-.63l1.4-1.74a.6.6 0 01.29-.2l.63-.2a.6.6 0 00.36-.27l.95-1.39c1.57-1.91 2.44-4.37 2.44-6.99a11.68 11.68 0 00-3.38-8.23zm-6.44 12.65c-.24.65-1.4 1.25-1.92 1.31-.52.05-1.14.08-2.31-.54-1.17-.61-2.21-1.77-2.56-1.89-.36-.12-.79-.19-1.34.19-.55.38-2.08 1.56-2.08 1.56s-1.17-.33-2.25-1.11c-1.06-.77-1.62-1.93-1.82-2.37-.2-.44-.02-.69.39-.95.4-.25.85-.63 1.2-.95.38-.34.47-.56.7-.94.23-.39.12-.72-.06-.99-.17-.27-1.4-3.4-1.92-4.63-.5-1.23-.99-1.07-1.37-1.09-.35-.02-.76-.02-1.17-.02-.39 0-.99.14-1.5.7-.51.57-1.91 1.86-1.91 4.54 0 2.69 1.96 5.28 2.24 5.64.27.35 3.87 5.96 9.4 8.1 5.83 2.24 5.83 1.48 6.88 1.39 1.05-.1 3.94-1.6 4.5-3.15.56-1.55.56-2.88.39-3.16-.17-.28-1.69-.53-3.31-1.18a5.31 5.31 0 01-1.67-.86c-.47-.4-.79-.87-.99-1.36z"/></svg>
-                                            Kirim WhatsApp
-                                        </a>
-                                    @endif
-                                </div>
+
+                                @if($isGroup)
+                                    <div x-show="showMembers" x-collapse class="mt-2 pl-4 border-l-2 border-indigo-200 space-y-2 bg-slate-50/40 p-4 rounded-2xl border border-slate-100" x-cloak>
+                                        <h5 class="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider">Daftar Anggota Bimbingan</h5>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            @foreach($group as $item)
+                                                <div class="flex items-center justify-between text-xs bg-white p-3 rounded-xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-indigo-100 transition-colors">
+                                                    <div class="min-w-0 pr-2">
+                                                        <p class="font-semibold text-slate-800 truncate">{{ $item->mahasiswa->name }}</p>
+                                                        <p class="text-[10px] text-slate-500 mt-0.5">{{ $item->mahasiswa->identifier }} @if($item->mahasiswa->programStudi) • {{ $item->mahasiswa->programStudi->nama }} @endif</p>
+                                                    </div>
+                                                    @if($item->status === 'validated' && $item->whatsapp_link)
+                                                        <a href="{{ $item->whatsapp_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border border-emerald-100/50 flex-shrink-0">
+                                                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.79 11.79 0 0012.03.007 11.875 11.875 0 002.5 11.89 11.6 11.6 0 001.77 16.4l.03.41 2.69-.87a.62.62 0 01.45.02l2.82 1.02a.61.61 0 01.34.3l.3.72a.6.6 0 01-.1.66l-1.42 1.76a.63.63 0 01-.58.24 12.32 12.32 0 01-4.18-.97 12.15 12.15 0 01-2.77-2.09C.47 16.99 1.73 9.77 6.75 4.76A11.688 11.688 0 0112.03 1.5c3.13 0 6.05 1.22 8.24 3.43a11.64 11.64 0 013.44 8.25c0 3.09-1.2 5.99-3.38 8.18l-.42.41-2.8-1.01a.62.62 0 01-.33-.28l-.21-.35a.59.59 0 01.1-.63l1.4-1.74a.6.6 0 01.29-.2l.63-.2a.6.6 0 00.36-.27l.95-1.39c1.57-1.91 2.44-4.37 2.44-6.99a11.68 11.68 0 00-3.38-8.23zm-6.44 12.65c-.24.65-1.4 1.25-1.92 1.31-.52.05-1.14.08-2.31-.54-1.17-.61-2.21-1.77-2.56-1.89-.36-.12-.79-.19-1.34.19-.55.38-2.08 1.56-2.08 1.56s-1.17-.33-2.25-1.11c-1.06-.77-1.62-1.93-1.82-2.37-.2-.44-.02-.69.39-.95.4-.25.85-.63 1.2-.95.38-.34.47-.56.7-.94.23-.39.12-.72-.06-.99-.17-.27-1.4-3.4-1.92-4.63-.5-1.23-.99-1.07-1.37-1.09-.35-.02-.76-.02-1.17-.02-.39 0-.99.14-1.5.7-.51.57-1.91 1.86-1.91 4.54 0 2.69 1.96 5.28 2.24 5.64.27.35 3.87 5.96 9.4 8.1 5.83 2.24 5.83 1.48 6.88 1.39 1.05-.1 3.94-1.6 4.5-3.15.56-1.55.56-2.88.39-3.16-.17-.28-1.69-.53-3.31-1.18a5.31 5.31 0 01-1.67-.86c-.47-.4-.79-.87-.99-1.36z"/></svg>
+                                                            <span>Chat WA</span>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($bimbingan->status === 'validated')
+                                    <div class="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                                        <h4 class="text-sm font-semibold text-slate-800 mb-3">Catat Laporan Selesai @if($isGroup) Kelompok @endif</h4>
+                                        <form action="{{ route('bimbingan.dosen.report', $bimbingan->id) }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            @csrf
+                                            <div class="sm:col-span-2">
+                                                <label class="block text-sm font-semibold text-slate-700 mb-2">Ringkasan Penyelesaian</label>
+                                                <textarea name="resolution" rows="3" required class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Catat hasil diskusi kelompok bimbingan..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-semibold text-slate-700 mb-2">Foto Kegiatan @if($isGroup) (Satu foto untuk seluruh kelompok) @endif</label>
+                                                <input type="file" name="activity_photo" accept="image/*" class="w-full text-sm text-slate-700" />
+                                            </div>
+                                            <div class="sm:col-span-2 flex justify-end">
+                                                <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 hover:scale-105 transition-all shadow-md shadow-emerald-100">Simpan Laporan @if($isGroup) Kelompok @endif</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @endif
+
+                                @if($bimbingan->status === 'completed')
+                                    <div class="mt-4 rounded-3xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
+                                        <h4 class="text-sm font-bold text-emerald-800 mb-2">Laporan Bimbingan Selesai @if($isGroup) Kelompok @endif</h4>
+                                        <p class="text-sm text-slate-700 mb-3 leading-relaxed">{{ $bimbingan->resolution }}</p>
+                                        @if($bimbingan->activity_photo_path)
+                                            <a href="{{ Storage::url($bimbingan->activity_photo_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-emerald-700 bg-white border border-emerald-200 rounded-xl hover:bg-emerald-100 shadow-sm transition-all">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                Lihat Foto Kegiatan
+                                            </a>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
-
-                            @if($bimbingan->status === 'validated')
-                                <div class="mt-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                    <h4 class="text-sm font-semibold text-slate-800 mb-3">Catat Laporan Selesai</h4>
-                                    <form action="{{ route('bimbingan.dosen.report', $bimbingan->id) }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        @csrf
-                                        <div class="sm:col-span-2">
-                                            <label class="block text-sm font-semibold text-slate-700 mb-2">Ringkasan Penyelesaian</label>
-                                            <textarea name="resolution" rows="3" required class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-semibold text-slate-700 mb-2">Foto Kegiatan</label>
-                                            <input type="file" name="activity_photo" accept="image/*" class="w-full text-sm text-slate-700" />
-                                        </div>
-                                        <div class="sm:col-span-2 flex justify-end">
-                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-bold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-all">Simpan Laporan</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            @endif
-
-                            @if($bimbingan->status === 'completed')
-                                <div class="mt-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                                    <h4 class="text-sm font-semibold text-emerald-800 mb-2">Laporan Bimbingan selesai</h4>
-                                    <p class="text-sm text-slate-700 mb-3">{{ $bimbingan->resolution }}</p>
-                                    @if($bimbingan->activity_photo_path)
-                                        <a href="{{ Storage::url($bimbingan->activity_photo_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-700 bg-white border border-emerald-200 rounded-xl hover:bg-emerald-100">Lihat Foto Kegiatan</a>
-                                    @endif
-                                </div>
-                            @endif
                         </div>
-                    </div>
                     @empty
                     <div class="px-8 py-16 text-center">
                         <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 mb-5">

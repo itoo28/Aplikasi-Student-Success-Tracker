@@ -22,6 +22,7 @@ class Bimbingan extends Model
         'document_path',
         'resolution',
         'activity_photo_path',
+        'group_key',
     ];
 
     protected $casts = [

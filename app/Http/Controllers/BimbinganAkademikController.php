@@ -112,10 +112,15 @@ class BimbinganAkademikController extends Controller
             ->orderBy('tanggal', 'asc')
             ->get();
 
+        // Kelompokkan bimbingan terjadwal berdasarkan group_key
+        $scheduledBimbinganGrouped = $scheduledBimbingan->groupBy(function ($item) {
+            return $item->group_key ?? 'individual_' . $item->id;
+        });
+
         return view('bimbingan.dosen', compact(
             'statistikAngkatan',
             'pendingRequests',
-            'scheduledBimbingan',
+            'scheduledBimbinganGrouped',
             'mahasiswaBimbingan',
             'angkatanOptions',
             'filterType',
@@ -164,6 +169,12 @@ class BimbinganAkademikController extends Controller
         $created = [];
         $skipped = [];
 
+        // Generate group_key jika tipe filter adalah kelompok (all / angkatan)
+        $groupKey = null;
+        if (in_array($request->filter_type, ['all', 'angkatan'])) {
+            $groupKey = 'grp_' . uniqid() . '_' . time();
+        }
+
         foreach ($students as $mahasiswa) {
             $semesterAktif = $mahasiswa->semester ?? 1;
             $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
@@ -184,6 +195,7 @@ class BimbinganAkademikController extends Controller
                 'catatan' => $request->catatan ?? '-',
                 'tipe_pengajuan' => 'undangan_dosen',
                 'status' => 'validated',
+                'group_key' => $groupKey,
             ]);
 
             $created[] = $mahasiswa->name;
@@ -236,13 +248,40 @@ class BimbinganAkademikController extends Controller
             $photoPath = $request->file('activity_photo')->store('bimbingan_foto', 'public');
         }
 
-        $bimbingan->update([
-            'resolution' => $request->resolution,
-            'activity_photo_path' => $photoPath,
-            'status' => 'completed',
-        ]);
+        if ($bimbingan->group_key) {
+            Bimbingan::where('group_key', $bimbingan->group_key)
+                ->where('dosen_id', Auth::id())
+                ->update([
+                    'resolution' => $request->resolution,
+                    'activity_photo_path' => $photoPath,
+                    'status' => 'completed',
+                ]);
+        } else {
+            $bimbingan->update([
+                'resolution' => $request->resolution,
+                'activity_photo_path' => $photoPath,
+                'status' => 'completed',
+            ]);
+        }
 
         return redirect()->route('bimbingan.dosen.index')->with('success', 'Laporan bimbingan berhasil disimpan.');
+    }
+
+    public function dosenDestroy(Bimbingan $bimbingan)
+    {
+        if ($bimbingan->dosen_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($bimbingan->group_key) {
+            Bimbingan::where('group_key', $bimbingan->group_key)
+                ->where('dosen_id', Auth::id())
+                ->delete();
+        } else {
+            $bimbingan->delete();
+        }
+
+        return redirect()->route('bimbingan.dosen.index')->with('success', 'Jadwal bimbingan berhasil dibatalkan/dihapus.');
     }
 
     // --- ROLE: KAPRODI & KEMAHASISWAAN ---
