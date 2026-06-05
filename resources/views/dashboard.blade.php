@@ -6,7 +6,19 @@
     </x-slot>
 
     @if ($dashboardType === 'student')
-        <div class="space-y-8">
+        <div x-data="{ showGuidanceDetail: false }" class="space-y-8">
+            @php
+                $latestBimbinganStatus = null;
+
+                if ($latestBimbingan) {
+                    $latestBimbinganStatus = match ($latestBimbingan->status) {
+                        'validated' => ['label' => 'Disetujui', 'class' => 'bg-emerald-100 text-emerald-700 ring-emerald-200'],
+                        'completed' => ['label' => 'Selesai', 'class' => 'bg-cyan-100 text-cyan-700 ring-cyan-200'],
+                        'revised' => ['label' => 'Ditolak', 'class' => 'bg-rose-100 text-rose-700 ring-rose-200'],
+                        default => ['label' => 'Menunggu', 'class' => 'bg-amber-100 text-amber-700 ring-amber-200'],
+                    };
+                }
+            @endphp
 
             {{-- Hero Greeting --}}
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-8 text-white shadow-2xl shadow-indigo-300/30">
@@ -108,20 +120,24 @@
                     <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center">
                         <i data-lucide="book-open" class="w-5 h-5 text-cyan-500 mr-2"></i> Bimbingan Terakhir
                     </h4>
-                    @if ($latestGuidance)
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    @if ($latestBimbingan)
+                        <button type="button" @click="showGuidanceDetail = true" class="group w-full bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left transition-all hover:border-cyan-200 hover:bg-cyan-50/50 hover:shadow-sm">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs font-semibold text-slate-500">{{ $latestGuidance->guidance_date?->format('d M Y') }}</span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md {{ $latestGuidance->status === 'validated' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                                    {{ $latestGuidance->status === 'validated' ? 'Divalidasi' : 'Menunggu' }}
+                                <span class="text-xs font-semibold text-slate-500">{{ $latestBimbingan->tanggal?->format('d M Y') }}</span>
+                                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ring-inset {{ $latestBimbinganStatus['class'] }}">
+                                    {{ $latestBimbinganStatus['label'] }}
                                 </span>
                             </div>
-                            <p class="text-slate-800 font-medium text-sm line-clamp-2 mb-3">{{ $latestGuidance->topic }}</p>
+                            <p class="text-slate-800 font-medium text-sm line-clamp-2 mb-3">{{ $latestBimbingan->topik }}</p>
                             <div class="flex items-center text-xs text-slate-500">
                                 <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5"></i>
-                                {{ $latestGuidance->lecturer?->name ?? '-' }}
+                                {{ $latestBimbingan->dosen?->name ?? '-' }}
                             </div>
-                        </div>
+                            <div class="mt-4 flex items-center text-xs font-semibold text-cyan-700">
+                                Lihat detail dan ringkasan
+                                <i data-lucide="arrow-right" class="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-1"></i>
+                            </div>
+                        </button>
                     @else
                         <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-center">
                             <i data-lucide="file-x" class="w-8 h-8 text-slate-300 mx-auto mb-2"></i>
@@ -180,7 +196,7 @@
                                     @endif
                                 </div>
                             </div>
-                            @if(in_array($item['status'], ['approved', 'validated', 'disetujui']))
+                            @if(in_array($item['status'], ['approved', 'validated', 'completed', 'disetujui']))
                                 <span class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Disetujui</span>
                             @elseif(in_array($item['status'], ['pending', 'menunggu_dosen']))
                                 <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Menunggu</span>
@@ -196,6 +212,111 @@
                     @endforelse
                 </div>
             </div>
+
+            @if ($latestBimbingan && $latestBimbinganStatus)
+                <div
+                    x-show="showGuidanceDetail"
+                    x-cloak
+                    @keydown.escape.window="showGuidanceDetail = false"
+                    class="fixed inset-0 z-[150] overflow-y-auto"
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    <div class="min-h-full px-4 py-6 sm:px-6 sm:py-10">
+                        <button type="button" @click="showGuidanceDetail = false" class="fixed inset-0 bg-slate-950/55 backdrop-blur-md" aria-label="Tutup detail bimbingan"></button>
+
+                        <div
+                            x-show="showGuidanceDetail"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
+                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                            x-transition:leave-end="opacity-0 translate-y-4 sm:scale-95"
+                            @click.stop
+                            class="relative z-[151] mx-auto w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/60 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.30)] ring-1 ring-slate-900/5"
+                        >
+                            <div class="relative overflow-hidden bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 px-6 py-6 text-white sm:px-8">
+                                <div class="absolute -left-10 top-0 h-24 w-24 rounded-full bg-white/10 blur-2xl"></div>
+                                <div class="absolute -right-8 bottom-0 h-28 w-28 rounded-full bg-cyan-300/20 blur-2xl"></div>
+                                <div class="relative flex items-start justify-between gap-4">
+                                    <div class="max-w-2xl">
+                                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-sky-100">Detail Bimbingan Akademik</p>
+                                        <h3 class="mt-2 text-xl font-extrabold leading-tight sm:text-2xl">{{ $latestBimbingan->topik }}</h3>
+                                        <p class="mt-2 text-sm text-sky-100/90">
+                                            Detail sesi bimbingan terakhir Anda bersama dosen PA.
+                                        </p>
+                                    </div>
+                                    <button type="button" @click="showGuidanceDetail = false" class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white transition hover:bg-white/25" aria-label="Tutup detail bimbingan">
+                                        <i data-lucide="x" class="h-4 w-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="max-h-[calc(100vh-7rem)] overflow-y-auto bg-gradient-to-b from-slate-50/70 to-white px-6 py-6 sm:px-8 sm:py-7">
+                                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Tanggal</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-800">{{ $latestBimbingan->tanggal?->format('d M Y') }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Semester</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-800">Semester {{ $latestBimbingan->semester ?? '-' }}</p>
+                                    </div>
+                                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Status</p>
+                                        <span class="mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset {{ $latestBimbinganStatus['class'] }}">{{ $latestBimbinganStatus['label'] }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                                            <i data-lucide="user-check" class="h-5 w-5"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Dosen Pembimbing</p>
+                                            <p class="mt-1 text-sm font-semibold text-slate-800">{{ $latestBimbingan->dosen?->name ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 grid grid-cols-1 gap-4">
+                                    @if($latestBimbingan->catatan && $latestBimbingan->catatan !== '-')
+                                        <section class="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-5 shadow-sm">
+                                            <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-700">Catatan Dosen</p>
+                                            <p class="mt-3 text-sm leading-7 text-slate-700">{{ $latestBimbingan->catatan }}</p>
+                                        </section>
+                                    @endif
+
+                                    <section class="rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-5 shadow-sm">
+                                        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-700">Ringkasan Pembahasan</p>
+                                        <p class="mt-3 text-sm leading-7 text-slate-700">
+                                            {{ $latestBimbingan->resolution ?: 'Ringkasan pembahasan belum tersedia. Dosen PA akan mengisinya setelah sesi bimbingan selesai.' }}
+                                        </p>
+                                    </section>
+                                </div>
+
+                                <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
+                                    @if($latestBimbingan->document_path)
+                                        <a href="{{ Storage::url($latestBimbingan->document_path) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100">
+                                            <i data-lucide="file-text" class="h-4 w-4"></i> Dokumen Pendukung
+                                        </a>
+                                    @endif
+                                    @if($latestBimbingan->activity_photo_path)
+                                        <a href="{{ Storage::url($latestBimbingan->activity_photo_path) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100">
+                                            <i data-lucide="image" class="h-4 w-4"></i> Foto Kegiatan
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('bimbingan.mahasiswa.index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50">
+                                        <i data-lucide="history" class="h-4 w-4"></i> Lihat Riwayat Lengkap
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     @else
         <!-- LECTURER DASHBOARD -->

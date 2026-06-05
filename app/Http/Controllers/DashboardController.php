@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Skkm\Admin\SuperAdminDashboardController;
 use App\Http\Controllers\Skkm\SkkmValidationController;
+use App\Models\Bimbingan;
 use App\Models\GuidanceLog;
 use App\Models\SkkmSubmission;
 use App\Models\User;
@@ -55,9 +56,10 @@ class DashboardController extends Controller
             : 0;
         $progressDegree = (int) round(($progressPercent / 100) * 360);
 
-        $latestGuidance = $student->guidanceLogs()
-            ->with('lecturer')
-            ->latest('guidance_date')
+        $latestBimbingan = $student->bimbingans()
+            ->with('dosen')
+            ->latest('tanggal')
+            ->latest('id')
             ->first();
 
         $maxSemester = ($student->jenjang_studi ?? 'S1') === 'D3' ? 6 : 8;
@@ -100,18 +102,19 @@ class DashboardController extends Controller
                 ];
             });
 
-        $guidanceActivities = $student->guidanceLogs()
-            ->latest('guidance_date')
+        $guidanceActivities = $student->bimbingans()
+            ->latest('tanggal')
+            ->latest('id')
             ->take(5)
             ->get()
-            ->map(function (GuidanceLog $item) {
-                $activityDate = $item->guidance_date;
+            ->map(function (Bimbingan $item) {
+                $activityDate = $item->tanggal;
 
                 return [
                     'date' => optional($activityDate)->format('d M Y'),
                     'sort_date' => $activityDate?->timestamp ?? 0,
                     'category' => 'Bimbingan',
-                    'activity' => $item->topic,
+                    'activity' => $item->topik,
                     'points' => null,
                     'status' => $item->status,
                 ];
@@ -138,7 +141,7 @@ class DashboardController extends Controller
             'approvedPoints' => $approvedPoints,
             'progressPercent' => $progressPercent,
             'progressDegree' => $progressDegree,
-            'latestGuidance' => $latestGuidance,
+            'latestBimbingan' => $latestBimbingan,
             'pointsPerSemester' => $pointsPerSemester,
             'activities' => $activities,
             'pendingCount' => $pendingCount,

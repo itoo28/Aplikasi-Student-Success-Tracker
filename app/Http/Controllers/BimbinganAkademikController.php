@@ -16,6 +16,7 @@ class BimbinganAkademikController extends Controller
         $semesterAktif = $mahasiswa->semester ?? 1;
 
         $riwayat = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->with(['mahasiswa', 'dosen'])
             ->latest()
             ->get();
 
@@ -54,7 +55,7 @@ class BimbinganAkademikController extends Controller
             $path = $request->file('document')->store('bimbingan_dokumen', 'public');
         }
 
-        Bimbingan::create([
+        $bimbingan = Bimbingan::create([
             'mahasiswa_id' => $mahasiswa->id,
             'dosen_id' => $mahasiswa->lecturer_id,
             'semester' => $semesterAktif,
@@ -66,7 +67,15 @@ class BimbinganAkademikController extends Controller
             'document_path' => $path,
         ]);
 
-        return redirect()->route('bimbingan.mahasiswa.index')->with('success', 'Pengajuan bimbingan berhasil dikirim.');
+        $bimbingan->loadMissing(['mahasiswa', 'dosen']);
+
+        return redirect()->route('bimbingan.mahasiswa.index')->with([
+            'success' => 'Pengajuan bimbingan berhasil dikirim. Saat ini pengajuan Anda menunggu validasi dosen PA.',
+            'submitted_bimbingan_whatsapp_link' => $bimbingan->dosen_whatsapp_link,
+            'submitted_bimbingan_dosen_name' => $bimbingan->dosen?->name,
+            'submitted_bimbingan_topik' => $bimbingan->topik,
+            'submitted_bimbingan_tanggal' => $bimbingan->tanggal?->format('d M Y'),
+        ]);
     }
 
     // --- ROLE: DOSEN PA ---
