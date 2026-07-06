@@ -25,7 +25,7 @@
         </div>
 
         <div class="relative z-10 grid min-h-screen lg:grid-cols-[60%_40%]">
-            <section class="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-950 text-white">
+            <section class="hidden lg:flex relative min-h-screen flex-col overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-950 text-white">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_50%)] pointer-events-none"></div>
                 
                 <nav class="relative z-10 w-full px-6 py-5 md:px-10 flex items-center justify-between">
@@ -83,6 +83,19 @@
                 <div class="flex min-h-screen items-center px-6 py-10 sm:px-10 lg:px-10">
                     <div class="mx-auto w-full max-w-md">
                         <div class="mb-8">
+                            {{-- Mobile Logo & Brief Intro (Only visible on screens below lg) --}}
+                            <div class="flex items-center space-x-3 mb-6 lg:hidden">
+                                <img
+                                    src="{{ asset('brand/logo-uhb.svg') }}"
+                                    alt="SST Portal"
+                                    class="h-10 w-10 rounded-xl bg-slate-50 p-1 object-contain shadow-md"
+                                />
+                                <div class="min-w-0">
+                                    <span class="font-black text-lg tracking-tight text-slate-900 block leading-none">SST Portal</span>
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mt-1">Student Success Tracker</span>
+                                </div>
+                            </div>
+
                             <div class="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
                                 <i data-lucide="log-in" class="w-5 h-5"></i>
                             </div>
