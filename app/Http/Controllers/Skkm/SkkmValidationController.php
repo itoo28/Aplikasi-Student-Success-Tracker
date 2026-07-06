@@ -56,6 +56,7 @@ class SkkmValidationController extends Controller
     {
         $kaprodi = $request->user();
 
+        // 1. Ambil data pengajuan SKKM (Submissions)
         $query = SkkmSubmission::query()
             ->with(['mahasiswa.programStudi.fakultas', 'pointRule', 'verifiedBy'])
             ->latest();
@@ -66,20 +67,19 @@ class SkkmValidationController extends Controller
 
         $submissions = $query->paginate(20);
 
-        return view('skkm.kaprodi.index', [
-            'submissions' => $submissions,
-            'scopeLabel' => $kaprodi->programStudi?->nama ?? 'Seluruh Program Studi',
-        ]);
-    }
-
-    public function kaprodiMahasiswaIndex(Request $request): View
-    {
-        $kaprodi = $request->user();
+        // 2. Ambil data progres mahasiswa (Students)
         $scopeLabel = $kaprodi->programStudi?->nama ?? 'Program Studi belum diatur';
-        $search = trim((string) $request->query('q', ''));
+        $search = trim((string) $request->query('q', $request->query('search', '')));
         $selectedSemester = $request->query('semester');
         $selectedStatusYudisium = trim((string) $request->query('status_yudisium', ''));
         $selectedLecturer = $request->query('lecturer_id');
+        $perPage = (int) $request->query('per_page', 25);
+        $perPageOptions = [15, 25, 50];
+
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = 25;
+        }
+
         $semesterOptions = range(1, 14);
         $statusYudisiumOptions = [
             'memenuhi' => 'Memenuhi',
@@ -100,17 +100,115 @@ class SkkmValidationController extends Controller
         }
 
         if (! $kaprodi->program_studi_id) {
-            return view('skkm.kaprodi.mahasiswa', [
-                'students' => collect(),
-                'scopeLabel' => $scopeLabel,
-                'search' => $search,
-                'selectedSemester' => $selectedSemester,
-                'selectedStatusYudisium' => $selectedStatusYudisium,
-                'selectedLecturer' => $selectedLecturer,
-                'semesterOptions' => $semesterOptions,
-                'statusYudisiumOptions' => $statusYudisiumOptions,
-                'lecturerOptions' => collect(),
-            ]);
+            $students = User::whereRaw('1 = 0')->paginate($perPage, ['*'], 'students_page');
+            $studentsFulfilled = 0;
+            $studentsInProgress = 0;
+            $lecturerOptions = collect();
+        } else {
+            $studentsQuery = $this->applyStudentScope(User::query())
+                ->where('program_studi_id', $kaprodi->program_studi_id)
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where(function ($subQuery) use ($search) {
+                        $subQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('identifier', 'like', "%{$search}%")
+                            ->orWhereHas('lecturer', function ($lecturerQuery) use ($search) {
+                                $lecturerQuery->where('name', 'like', "%{$search}%")
+                                    ->orWhere('identifier', 'like', "%{$search}%");
+                            });
+                    });
+                })
+                ->when($selectedSemester, function (Builder $query, int $semester) {
+                    $query->where(function (Builder $semesterQuery) use ($semester) {
+                        $semesterQuery->where('semester', $semester)
+                            ->orWhereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('semester_aktif', $semester));
+                    });
+                })
+                ->when($selectedLecturer, fn (Builder $query, int $lecturerId) => $query->where('lecturer_id', $lecturerId))
+                ->when($selectedStatusYudisium !== '', function (Builder $query) use ($selectedStatusYudisium) {
+                    if ($selectedStatusYudisium === 'belum_ada') {
+                        $query->whereDoesntHave('skkmProgress');
+
+                        return;
+                    }
+
+                    $query->whereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('status_yudisium', $selectedStatusYudisium));
+                });
+
+            // Hitung statistik berdasarkan filter aktif (sebelum dipaginasi)
+            $studentsFulfilled = (clone $studentsQuery)
+                ->whereHas('skkmProgress', fn ($q) => $q->where('status_yudisium', 'memenuhi'))
+                ->count();
+
+            $studentsInProgress = (clone $studentsQuery)
+                ->whereHas('skkmProgress', fn ($q) => $q->whereIn('status_yudisium', ['dalam_proses', 'belum_memenuhi']))
+                ->count();
+
+            $students = $studentsQuery
+                ->with(['programStudi.fakultas', 'skkmProgress', 'lecturer'])
+                ->orderBy('name')
+                ->paginate($perPage, ['*'], 'students_page')
+                ->withQueryString();
+
+            $lecturerOptions = User::query()
+                ->where('program_studi_id', $kaprodi->program_studi_id)
+                ->where(function (Builder $query) {
+                    $query->where('skkm_role', 'dosen_pa')
+                        ->orWhere(function (Builder $fallbackQuery) {
+                            $fallbackQuery->whereNull('skkm_role')
+                                ->where('role', 'lecturer');
+                        });
+                })
+                ->orderBy('name')
+                ->get(['id', 'name', 'identifier']);
+        }
+
+        return view('skkm.kaprodi.index', [
+            'submissions' => $submissions,
+            'scopeLabel' => $scopeLabel,
+            'students' => $students,
+            'studentsFulfilled' => $studentsFulfilled,
+            'studentsInProgress' => $studentsInProgress,
+            'search' => $search,
+            'selectedSemester' => $selectedSemester,
+            'selectedStatusYudisium' => $selectedStatusYudisium,
+            'selectedLecturer' => $selectedLecturer,
+            'semesterOptions' => $semesterOptions,
+            'statusYudisiumOptions' => $statusYudisiumOptions,
+            'lecturerOptions' => $lecturerOptions,
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
+        ]);
+    }
+
+    public function kaprodiMahasiswaExport(Request $request)
+    {
+        $kaprodi = $request->user();
+
+        if (! $kaprodi->program_studi_id) {
+            abort(403, 'Program studi belum diatur.');
+        }
+
+        $search = trim((string) $request->query('q', $request->query('search', '')));
+        $selectedSemester = $request->query('semester');
+        $selectedStatusYudisium = trim((string) $request->query('status_yudisium', ''));
+        $selectedLecturer = $request->query('lecturer_id');
+        $semesterOptions = range(1, 14);
+        $statusYudisiumOptions = [
+            'memenuhi' => 'Memenuhi',
+            'dalam_proses' => 'Dalam proses',
+            'belum_memenuhi' => 'Belum memenuhi',
+            'belum_ada' => 'Belum ada progres',
+        ];
+        $allowedStatusYudisium = array_keys($statusYudisiumOptions);
+
+        $selectedSemester = is_numeric($selectedSemester) ? (int) $selectedSemester : null;
+        if (! in_array($selectedSemester, $semesterOptions, true)) {
+            $selectedSemester = null;
+        }
+
+        $selectedLecturer = is_numeric($selectedLecturer) ? (int) $selectedLecturer : null;
+        if (! in_array($selectedStatusYudisium, $allowedStatusYudisium, true)) {
+            $selectedStatusYudisium = '';
         }
 
         $students = $this->applyStudentScope(User::query())
@@ -145,28 +243,79 @@ class SkkmValidationController extends Controller
             ->orderBy('name')
             ->get();
 
-        $lecturerOptions = User::query()
-            ->where('program_studi_id', $kaprodi->program_studi_id)
-            ->where(function (Builder $query) {
-                $query->where('skkm_role', 'dosen_pa')
-                    ->orWhere(function (Builder $fallbackQuery) {
-                        $fallbackQuery->whereNull('skkm_role')
-                            ->where('role', 'lecturer');
-                    });
-            })
-            ->orderBy('name')
-            ->get(['id', 'name', 'identifier']);
+        $fileName = 'poin-skkm-mahasiswa-' . now()->format('Ymd-His') . '.csv';
 
-        return view('skkm.kaprodi.mahasiswa', [
-            'students' => $students,
-            'scopeLabel' => $scopeLabel,
-            'search' => $search,
-            'selectedSemester' => $selectedSemester,
-            'selectedStatusYudisium' => $selectedStatusYudisium,
-            'selectedLecturer' => $selectedLecturer,
-            'semesterOptions' => $semesterOptions,
-            'statusYudisiumOptions' => $statusYudisiumOptions,
-            'lecturerOptions' => $lecturerOptions,
+        return response()->streamDownload(function () use ($students) {
+            $output = fopen('php://output', 'w');
+            if ($output === false) {
+                return;
+            }
+
+            // BOM untuk kompatibilitas UTF-8 di Microsoft Excel
+            fwrite($output, "\xEF\xBB\xBF");
+            fwrite($output, "sep=;\r\n");
+
+            fputcsv($output, [
+                'No',
+                'Nama Mahasiswa',
+                'NIM',
+                'Fakultas',
+                'Program Studi',
+                'Semester',
+                'Dosen PA',
+                'NIDN Dosen PA',
+                'Poin Semester 1-2',
+                'Poin Semester 3-4',
+                'Poin Semester 5-6',
+                'Poin Semester 7-8',
+                'Total Poin SKKM',
+                'Status SKKM (Yudisium)',
+            ], ';');
+
+            foreach ($students as $index => $student) {
+                $progress = $student->skkmProgress;
+                $p12 = (int) ($progress->poin_smt_1_2 ?? 0);
+                $p34 = (int) ($progress->poin_smt_3_4 ?? 0);
+                $p56 = (int) ($progress->poin_smt_5_6 ?? 0);
+                $p78 = (int) ($progress->poin_smt_7_8 ?? 0);
+                $total = (int) ($progress->total_poin ?? ($p12 + $p34 + $p56 + $p78));
+                $semesterAktif = $progress->semester_aktif ?? $student->semester;
+                $status = $progress->status_yudisium ?? null;
+                $statusLabel = match ($status) {
+                    'memenuhi' => 'Memenuhi',
+                    'belum_memenuhi' => 'Belum Memenuhi',
+                    'dalam_proses' => 'Dalam Proses',
+                    default => 'Belum Ada Progres',
+                };
+
+                // Format identifier (NIM & NIDN) agar tidak terpotong leading zero di Excel
+                $nim = $student->identifier;
+                $formattedNim = $nim ? '="' . $nim . '"' : '-';
+
+                $nidn = $student->lecturer?->identifier;
+                $formattedNidn = $nidn ? '="' . $nidn . '"' : '-';
+
+                fputcsv($output, [
+                    $index + 1,
+                    trim($student->name),
+                    $formattedNim,
+                    trim($student->programStudi?->fakultas?->nama ?? '-'),
+                    trim((string) (($student->programStudi?->jenjang ?? '') . ' ' . ($student->programStudi?->nama ?? '-'))),
+                    $semesterAktif ?? '-',
+                    trim($student->lecturer?->name ?? '-'),
+                    $formattedNidn,
+                    $p12,
+                    $p34,
+                    $p56,
+                    $p78,
+                    $total,
+                    $statusLabel,
+                ], ';');
+            }
+
+            fclose($output);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 
@@ -424,7 +573,7 @@ class SkkmValidationController extends Controller
             ->orderBy('name')
             ->get();
 
-        $fileName = 'data-mahasiswa-kemahasiswaan-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'poin-skkm-mahasiswa-' . now()->format('Ymd-His') . '.csv';
 
         return response()->streamDownload(function () use ($students) {
             $output = fopen('php://output', 'w');
@@ -434,22 +583,23 @@ class SkkmValidationController extends Controller
 
             // BOM untuk kompatibilitas UTF-8 di Microsoft Excel
             fwrite($output, "\xEF\xBB\xBF");
+            fwrite($output, "sep=;\r\n");
 
             fputcsv($output, [
                 'No',
                 'Nama Mahasiswa',
                 'NIM',
-                'Dosen PA',
-                'Identifier Dosen PA',
                 'Fakultas',
                 'Program Studi',
-                'Semester Aktif',
-                'Poin Smt 1-2',
-                'Poin Smt 3-4',
-                'Poin Smt 5-6',
-                'Poin Smt 7-8',
-                'Total Poin',
-                'Status Yudisium',
+                'Semester',
+                'Dosen PA',
+                'NIDN Dosen PA',
+                'Poin Semester 1-2',
+                'Poin Semester 3-4',
+                'Poin Semester 5-6',
+                'Poin Semester 7-8',
+                'Total Poin SKKM',
+                'Status SKKM (Yudisium)',
             ], ';');
 
             foreach ($students as $index => $student) {
@@ -463,20 +613,27 @@ class SkkmValidationController extends Controller
                 $status = $progress->status_yudisium ?? null;
                 $statusLabel = match ($status) {
                     'memenuhi' => 'Memenuhi',
-                    'belum_memenuhi' => 'Belum memenuhi',
-                    'dalam_proses' => 'Dalam proses',
-                    default => 'Belum ada progres',
+                    'belum_memenuhi' => 'Belum Memenuhi',
+                    'dalam_proses' => 'Dalam Proses',
+                    default => 'Belum Ada Progres',
                 };
+
+                // Format identifier (NIM & NIDN) agar tidak terpotong leading zero di Excel
+                $nim = $student->identifier;
+                $formattedNim = $nim ? '="' . $nim . '"' : '-';
+
+                $nidn = $student->lecturer?->identifier;
+                $formattedNidn = $nidn ? '="' . $nidn . '"' : '-';
 
                 fputcsv($output, [
                     $index + 1,
-                    $student->name,
-                    $student->identifier ?? '-',
-                    $student->lecturer?->name ?? '-',
-                    $student->lecturer?->identifier ?? '-',
-                    $student->programStudi?->fakultas?->nama ?? '-',
+                    trim($student->name),
+                    $formattedNim,
+                    trim($student->programStudi?->fakultas?->nama ?? '-'),
                     trim((string) (($student->programStudi?->jenjang ?? '') . ' ' . ($student->programStudi?->nama ?? '-'))),
                     $semesterAktif ?? '-',
+                    trim($student->lecturer?->name ?? '-'),
+                    $formattedNidn,
                     $p12,
                     $p34,
                     $p56,

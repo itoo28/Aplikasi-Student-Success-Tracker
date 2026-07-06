@@ -5,10 +5,6 @@
                 <span class="inline-flex items-center rounded-xl bg-sky-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-sky-700">Master Data</span>
                 <h2 class="font-semibold text-2xl text-slate-800 leading-tight">Manajemen Poin SKKM</h2>
             </div>
-            <a href="{{ route('skkm.point-rules.create') }}" class="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-[0_8px_20px_rgb(14,165,233,0.35)] transition-all">
-                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                Tambah Kategori Poin
-            </a>
         </div>
     </x-slot>
 
@@ -20,7 +16,7 @@
         <div class="pointer-events-none absolute -left-24 top-6 h-56 w-56 rounded-full bg-sky-200/35 blur-3xl"></div>
         <div class="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-indigo-200/35 blur-3xl"></div>
 
-        <div class="relative space-y-6">
+        <div class="relative space-y-8">
             @if ($errors->any())
                 <div class="rounded-xl border border-rose-200 bg-rose-100/90 px-4 py-3 text-sm font-semibold text-rose-800">
                     {{ $errors->first() }}
@@ -69,19 +65,27 @@
             </div>
 
             <div class="rounded-3xl border border-sky-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(14,165,233,0.14)] overflow-hidden">
-                <div class="px-6 py-3 border-b border-sky-100/70 bg-sky-50/60">
-                    @if ($pointRules->total() > 0)
-                        <p class="text-xs font-semibold text-sky-700">
-                            Data yang terlihat sekarang: {{ $pointRules->count() }} data, dari total {{ $pointRules->total() }} data.
-                        </p>
-                        <p class="mt-1 text-xs text-sky-600">
-                            Di halaman ini menampilkan data nomor {{ $pointRules->firstItem() }} sampai {{ $pointRules->lastItem() }}.
-                        </p>
-                    @else
-                        <p class="text-xs font-semibold text-sky-700">
-                            Belum ada data untuk ditampilkan.
-                        </p>
-                    @endif
+                <div class="px-6 py-4 border-b border-sky-100/70 bg-sky-50/60 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        @if ($pointRules->total() > 0)
+                            <p class="text-xs font-semibold text-sky-700">
+                                Data yang terlihat sekarang: {{ $pointRules->count() }} data, dari total {{ $pointRules->total() }} data.
+                            </p>
+                            <p class="mt-1 text-xs text-sky-600">
+                                Di halaman ini menampilkan data nomor {{ $pointRules->firstItem() }} sampai {{ $pointRules->lastItem() }}.
+                            </p>
+                        @else
+                            <p class="text-xs font-semibold text-sky-700">
+                                Belum ada data untuk ditampilkan.
+                            </p>
+                        @endif
+                    </div>
+                    <div class="shrink-0">
+                        <a href="{{ route('skkm.point-rules.create') }}" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-[0_6px_16px_rgb(14,165,233,0.25)] transition-all hover:shadow-lg hover:-translate-y-px active:translate-y-0">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                            Tambah Kategori Poin
+                        </a>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[1080px] text-left text-sm text-slate-600">
@@ -112,9 +116,13 @@
                                     <td class="max-w-sm px-6 py-4 text-xs leading-relaxed text-slate-600">{{ $pointRule->bukti_fisik_required }}</td>
                                     <td class="px-6 py-4">
                                         @if ($pointRule->is_active)
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">Aktif</span>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                            </span>
                                         @else
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Nonaktif</span>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Nonaktif
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="w-[220px] whitespace-nowrap px-6 py-4">

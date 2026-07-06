@@ -60,6 +60,12 @@
                 </div>
 
                 <div>
+                    <label for="registration_code" class="block text-sm font-semibold text-slate-700 mb-2">Kode Unik Pendaftaran</label>
+                    <input id="registration_code" type="text" name="registration_code" value="{{ old('registration_code', $programStudi->registration_code) }}" placeholder="Contoh: INF-2026" class="block w-full rounded-xl border-slate-200 bg-white py-2.5 px-3 text-sm focus:border-sky-500 focus:ring-sky-500">
+                    <p class="mt-1 text-xs text-slate-500">Kode unik ini digunakan mahasiswa untuk mendaftar akun pada Program Studi ini. Biarkan kosong jika prodi ini tidak memerlukan verifikasi kode registrasi.</p>
+                </div>
+
+                <div>
                     <label class="inline-flex items-center gap-3 text-sm font-semibold text-slate-700">
                         <input type="hidden" name="is_active" value="0">
                         <input type="checkbox" name="is_active" value="1" @checked((int) old('is_active', $programStudi->is_active ?? 1) === 1) class="rounded border-slate-300 text-sky-600 focus:ring-sky-500">

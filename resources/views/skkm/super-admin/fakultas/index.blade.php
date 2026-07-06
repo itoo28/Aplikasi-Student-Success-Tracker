@@ -5,9 +5,6 @@
                 <span class="inline-flex items-center rounded-xl bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">Master Data</span>
                 <h2 class="font-semibold text-2xl text-slate-800 leading-tight">Manajemen Fakultas</h2>
             </div>
-            <a href="{{ route('admin.fakultas.create') }}" class="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-[0_8px_20px_rgb(16,185,129,0.35)] transition-all">
-                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Fakultas
-            </a>
         </div>
     </x-slot>
 
@@ -41,19 +38,29 @@
             </div>
 
             <div class="rounded-3xl border border-emerald-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(16,185,129,0.14)] overflow-hidden">
-                <div class="px-6 py-3 border-b border-emerald-100/70 bg-emerald-50/60">
-                    @if ($fakultas->total() > 0)
-                        <p class="text-xs font-semibold text-emerald-700">
-                            Data yang terlihat sekarang: {{ $fakultas->count() }} data, dari total {{ $fakultas->total() }} data.
-                        </p>
-                        <p class="mt-1 text-xs text-emerald-600">
-                            Di halaman ini menampilkan data nomor {{ $fakultas->firstItem() }} sampai {{ $fakultas->lastItem() }}.
-                        </p>
-                    @else
-                        <p class="text-xs font-semibold text-emerald-700">
-                            Belum ada data untuk ditampilkan.
-                        </p>
-                    @endif
+                <div class="px-6 py-4 border-b border-emerald-100/70 bg-emerald-50/60 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        @if ($fakultas->total() > 0)
+                            <p class="text-xs font-semibold text-emerald-700">
+                                Data yang terlihat sekarang: {{ $fakultas->count() }} data, dari total {{ $fakultas->total() }} data.
+                            </p>
+                            <p class="mt-1 text-xs text-emerald-600">
+                                Di halaman ini menampilkan data nomor {{ $fakultas->firstItem() }} sampai {{ $fakultas->lastItem() }}.
+                            </p>
+                        @else
+                            <p class="text-xs font-semibold text-emerald-700">
+                                Belum ada data untuk ditampilkan.
+                            </p>
+                        @endif
+                    </div>
+                    <div class="shrink-0">
+                        <a
+                            href="{{ route('admin.fakultas.create') }}"
+                            class="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-[0_2px_8px_rgb(16,185,129,0.4)] transition-all hover:shadow-[0_4px_12px_rgb(16,185,129,0.5)] hover:-translate-y-px active:translate-y-0"
+                        >
+                            <i data-lucide="plus" class="h-3.5 w-3.5"></i> Tambah Fakultas
+                        </a>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[860px] text-sm text-left text-slate-600">
@@ -74,14 +81,21 @@
                                     <td class="px-6 py-4 text-center">{{ $item->program_studis_count }}</td>
                                     <td class="px-6 py-4">
                                         @if ($item->is_active)
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">Aktif</span>
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                            </span>
                                         @else
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Nonaktif</span>
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Nonaktif
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="w-[220px] px-6 py-4 whitespace-nowrap">
                                         <div class="flex flex-nowrap items-center justify-end gap-2">
-                                            <a href="{{ route('admin.fakultas.edit', $item) }}" class="inline-flex min-w-[86px] items-center justify-center gap-1 px-3 py-2 rounded-lg border border-amber-200 bg-amber-100 text-amber-800 text-xs font-semibold hover:bg-amber-200 transition-colors">
+                                            <a
+                                                href="{{ route('admin.fakultas.edit', $item) }}"
+                                                class="inline-flex min-w-[80px] items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs font-semibold hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                                            >
                                                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                                                 Edit
                                             </a>
@@ -98,7 +112,10 @@
                                             >
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex min-w-[86px] items-center justify-center gap-1 px-3 py-2 rounded-lg border border-rose-200 bg-rose-100 text-rose-700 text-xs font-semibold hover:bg-rose-200 transition-colors">
+                                                <button
+                                                    type="submit"
+                                                    class="inline-flex min-w-[80px] items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 text-xs font-semibold hover:bg-rose-100 hover:border-rose-300 transition-colors"
+                                                >
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     Hapus
                                                 </button>

@@ -18,27 +18,27 @@
         <div class="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl"></div>
 
         <div class="relative space-y-8">
-            <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-8 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
+            <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-8 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
                 <p class="text-sm font-semibold uppercase tracking-wide text-indigo-100">Scope Monitoring</p>
                 <h3 class="mt-2 text-2xl font-extrabold">{{ $scopeLabel }}</h3>
                 <p class="mt-2 text-sm text-indigo-100">Pantau progres mahasiswa, status verifikasi, dan kondisi akhir poin SKKM pada program studi Anda.</p>
             </div>
 
             <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-                <div class="rounded-3xl bg-gradient-to-br from-sky-500 to-cyan-500 p-6 text-white shadow-[0_14px_35px_rgb(14,165,233,0.30)]">
-                    <p class="text-sm font-semibold text-sky-100">Total Mahasiswa</p>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Total Mahasiswa</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $totalStudents }}</h3>
                 </div>
-                <div class="rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 p-6 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
-                    <p class="text-sm font-semibold text-emerald-100">Sudah Memenuhi</p>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Sudah Memenuhi</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsFulfilled }}</h3>
                 </div>
-                <div class="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
+                <div class="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-[0_14px_35px_rgba(245,158,11,0.30)]">
                     <p class="text-sm font-semibold text-amber-100">Dalam Proses</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsInProgress }}</h3>
                 </div>
-                <div class="rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-6 text-white shadow-[0_14px_35px_rgb(124,58,237,0.30)]">
-                    <p class="text-sm font-semibold text-violet-100">Total Pengajuan</p>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Total Pengajuan</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $totalSubmissions }}</h3>
                 </div>
             </div>

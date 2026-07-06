@@ -119,6 +119,22 @@ if (confirmDialog) {
         approveButton.classList.add('opacity-70', 'cursor-not-allowed');
 
         const targetForm = activeForm;
+
+        // Open WhatsApp links if present (used by bimbingan cancel flow)
+        const waLinksJson = targetForm.dataset.confirmWaLinks;
+        if (waLinksJson) {
+            try {
+                const links = JSON.parse(waLinksJson);
+                links.forEach(link => {
+                    if (link) {
+                        window.open(link, '_blank');
+                    }
+                });
+            } catch (e) {
+                console.error('Error opening WhatsApp links:', e);
+            }
+        }
+
         closeDialog({ restoreFocus: false });
         targetForm.submit();
     });

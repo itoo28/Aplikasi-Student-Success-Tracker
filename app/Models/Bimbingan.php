@@ -72,6 +72,45 @@ class Bimbingan extends Model
         return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
     }
 
+    public function getWhatsappCancelLinkAttribute(): ?string
+    {
+        if (! $this->mahasiswa || ! $this->mahasiswa->phone_number) {
+            return null;
+        }
+
+        $phone = $this->mahasiswa->whatsappPhoneNumber();
+        if (! $phone) {
+            return null;
+        }
+
+        $text = "Bimbingan dibatalkan. Silakan menghubungi dosen pembimbing untuk penjadwalan ulang. Terima kasih.";
+
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
+    }
+
+    public function getWhatsappValidationLinkAttribute(): ?string
+    {
+        if (! $this->mahasiswa || ! $this->mahasiswa->phone_number) {
+            return null;
+        }
+
+        $phone = $this->mahasiswa->whatsappPhoneNumber();
+        if (! $phone) {
+            return null;
+        }
+
+        $statusLabel = $this->status === 'validated' ? 'DISETUJUI' : 'DITOLAK';
+        $tanggalFormatted = $this->tanggal->format('d M Y');
+        
+        $text = "Halo {$this->mahasiswa->name}, pengajuan bimbingan akademik Anda pada tanggal {$tanggalFormatted} dengan topik: \"{$this->topik}\" telah {$statusLabel}.";
+        if ($this->catatan && $this->catatan !== '-') {
+            $text .= " Catatan dosen: \"{$this->catatan}\".";
+        }
+        $text .= " Terima kasih.";
+
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($text);
+    }
+
     public function getTipePengajuanLabelAttribute(): string
     {
         return match ($this->tipe_pengajuan) {

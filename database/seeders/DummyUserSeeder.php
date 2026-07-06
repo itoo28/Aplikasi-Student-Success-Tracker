@@ -21,6 +21,7 @@ class DummyUserSeeder extends Seeder
             'email' => 'dosen.inf@example.com',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
+            'phone_number' => '081234567890',
             'identifier' => 'NIDNINF01',
             'program_studi_id' => 1, // Informatika
             'jenjang_studi' => 'S1',
@@ -35,6 +36,7 @@ class DummyUserSeeder extends Seeder
             'email' => 'dosen.si1@example.com',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
+            'phone_number' => '081234567891',
             'identifier' => 'NIDNSI01',
             'program_studi_id' => 2, // Sistem Informasi
             'jenjang_studi' => 'S1',
@@ -48,6 +50,7 @@ class DummyUserSeeder extends Seeder
             'email' => 'dosen.si2@example.com',
             'role' => 'lecturer',
             'skkm_role' => 'dosen_pa',
+            'phone_number' => '081234567892',
             'identifier' => 'NIDNSI02',
             'program_studi_id' => 2, // Sistem Informasi
             'jenjang_studi' => 'S1',
@@ -63,6 +66,7 @@ class DummyUserSeeder extends Seeder
                 'email' => 'mhs.inf' . $i . '@example.com',
                 'role' => 'student',
                 'skkm_role' => 'mahasiswa',
+                'phone_number' => '0812' . str_pad($i, 8, '0', STR_PAD_LEFT),
                 'identifier' => '10010' . str_pad($i, 3, '0', STR_PAD_LEFT),
                 'program_studi_id' => 1,
                 'jenjang_studi' => 'S1',
@@ -81,6 +85,7 @@ class DummyUserSeeder extends Seeder
                 'email' => 'mhs.si' . $i . '@example.com',
                 'role' => 'student',
                 'skkm_role' => 'mahasiswa',
+                'phone_number' => '0813' . str_pad($i, 8, '0', STR_PAD_LEFT),
                 'identifier' => '20010' . str_pad($i, 3, '0', STR_PAD_LEFT),
                 'program_studi_id' => 2,
                 'jenjang_studi' => 'S1',

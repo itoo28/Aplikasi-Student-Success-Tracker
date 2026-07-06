@@ -1,14 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center rounded-xl bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">Akses Akun</span>
-                <flux:heading size="xl" level="1">Manajemen User</flux:heading>
-            </div>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-[0_8px_20px_rgb(124,58,237,0.35)] transition-all">
-                <i data-lucide="plus" class="h-4 w-4"></i>
-                Tambah User
-            </a>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center rounded-xl bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">Akses Akun</span>
+            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">Manajemen User</h2>
         </div>
     </x-slot>
 
@@ -16,7 +10,7 @@
         <div class="pointer-events-none absolute -left-20 top-8 h-52 w-52 rounded-full bg-violet-200/35 blur-3xl"></div>
         <div class="pointer-events-none absolute -right-24 bottom-6 h-56 w-56 rounded-full bg-indigo-200/35 blur-3xl"></div>
 
-        <div class="relative space-y-6">
+        <div class="relative space-y-8">
             @php
                 $hasActiveFilters = filled($selectedSearch)
                     || filled($selectedRole)
@@ -34,15 +28,24 @@
                 }
             @endphp
 
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- PANEL FILTER & NAVIGASI DATA                               --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
             <div class="rounded-3xl border border-violet-100/80 bg-white/95 shadow-[0_10px_30px_rgb(124,58,237,0.12)] backdrop-blur-sm overflow-hidden">
-                <div class="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-indigo-50 to-sky-50 px-5 py-4">
-                    <h3 class="text-sm font-bold text-slate-800">Panel Filter & Navigasi Data</h3>
-                    <p class="mt-1 text-xs text-slate-500">Gunakan pencarian dulu, lalu persempit dengan role/program studi/semester agar data lebih fokus.</p>
+
+                {{-- Header Panel: judul saja, TANPA tombol Tambah User --}}
+                <div class="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-indigo-50 to-sky-50 px-6 py-5">
+                    <h3 class="text-lg font-bold text-slate-800">Panel Filter &amp; Navigasi Data</h3>
+                    <p class="mt-0.5 text-xs text-slate-500">Gunakan pencarian dulu, lalu persempit dengan role/program studi/semester agar data lebih fokus.</p>
                 </div>
 
-                <form id="userFilterForm" method="GET" action="{{ route('admin.users.index') }}" class="space-y-4 p-5">
-                    <div class="grid grid-cols-1 gap-3 xl:grid-cols-4">
-                        <div class="xl:col-span-2">
+                {{-- Form Filter --}}
+                <form id="userFilterForm" method="GET" action="{{ route('admin.users.index') }}" class="p-5 space-y-4">
+
+                    {{-- Baris 1: Pencarian + Urutkan + Per Halaman --}}
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        {{-- Pencarian (lebar 2 kolom di atas xl) --}}
+                        <div class="sm:col-span-2">
                             <flux:field>
                                 <flux:label for="search">Cari User</flux:label>
                                 <flux:input
@@ -54,6 +57,7 @@
                             </flux:field>
                         </div>
 
+                        {{-- Urutkan --}}
                         <div>
                             <flux:field>
                                 <flux:label for="sort">Urutkan Data</flux:label>
@@ -67,6 +71,7 @@
                             </flux:field>
                         </div>
 
+                        {{-- Per Halaman --}}
                         <div>
                             <flux:field>
                                 <flux:label for="per_page">Per Halaman</flux:label>
@@ -81,8 +86,10 @@
                         </div>
                     </div>
 
+                    {{-- Baris 2: Filter lanjutan (Role, Program Studi, Semester) --}}
                     <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                        <div class="grid grid-cols-1 gap-3 xl:grid-cols-4">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            {{-- Filter Role --}}
                             <div>
                                 <flux:field>
                                     <flux:label for="role">Filter Role</flux:label>
@@ -97,6 +104,7 @@
                                 </flux:field>
                             </div>
 
+                            {{-- Filter Program Studi (hanya tampil saat role = mahasiswa) --}}
                             <div id="programStudiFilterWrap" class="{{ $selectedRole === 'mahasiswa' ? '' : 'hidden' }} xl:col-span-2">
                                 <flux:field>
                                     <flux:label for="program_studi_id">Filter Program Studi</flux:label>
@@ -111,6 +119,7 @@
                                 </flux:field>
                             </div>
 
+                            {{-- Filter Semester (hanya tampil saat role = mahasiswa) --}}
                             <div id="semesterFilterWrap" class="{{ $selectedRole === 'mahasiswa' ? '' : 'hidden' }}">
                                 <flux:field>
                                     <flux:label for="semester">Filter Semester</flux:label>
@@ -127,15 +136,23 @@
                         </div>
                     </div>
 
+                    {{-- Tombol Reset (hanya muncul bila ada filter aktif) --}}
                     @if ($hasActiveFilters)
-                        <div class="flex flex-wrap items-center gap-2">
-                            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">Reset Semua</a>
+                        <div class="flex items-center">
+                            <a
+                                href="{{ route('admin.users.index') }}"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+                            >
+                                <i data-lucide="x-circle" class="h-4 w-4 text-slate-400"></i>
+                                Reset Semua Filter
+                            </a>
                         </div>
                     @endif
                 </form>
 
+                {{-- Badge filter aktif --}}
                 @if ($hasActiveFilters)
-                    <div class="border-t border-violet-100 bg-violet-50/40 px-5 py-4">
+                    <div class="border-t border-violet-100 bg-violet-50/40 px-5 py-3">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="text-xs font-semibold uppercase tracking-wide text-violet-700">Filter Aktif:</span>
 
@@ -185,33 +202,49 @@
                 @endif
             </div>
 
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- TABEL DATA USER                                            --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
             <div class="rounded-3xl border border-emerald-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(16,185,129,0.14)] overflow-hidden">
-                <div class="px-6 py-3 border-b border-emerald-100/70 bg-emerald-50/60">
+
+                {{-- Info bar: jumlah data (kiri) + info halaman (kanan) --}}
+                <div class="flex flex-wrap items-center justify-between gap-2 px-6 py-3 border-b border-emerald-100/70 bg-emerald-50/60">
                     @if ($users->total() > 0)
                         <p class="text-xs font-semibold text-emerald-700">
-                            Data yang terlihat sekarang: {{ $users->count() }} data, dari total {{ $users->total() }} data.
+                            Menampilkan <span class="font-bold">{{ $users->count() }}</span> dari <span class="font-bold">{{ $users->total() }}</span> data
                         </p>
-                        <p class="mt-1 text-xs text-emerald-600">
-                            Di halaman ini menampilkan data nomor {{ $users->firstItem() }} sampai {{ $users->lastItem() }}.
+                        <p class="text-xs text-emerald-600">
+                            Halaman ini: No. {{ $users->firstItem() }}–{{ $users->lastItem() }}
                         </p>
                     @else
-                        <p class="text-xs font-semibold text-emerald-700">
-                            Belum ada data untuk ditampilkan.
-                        </p>
+                        <p class="text-xs font-semibold text-emerald-700">Belum ada data untuk ditampilkan.</p>
                     @endif
                 </div>
+
+                {{-- Tabel --}}
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[1180px] text-sm text-left text-slate-600">
                         <thead class="sticky top-0 z-10 text-xs text-emerald-700 uppercase bg-emerald-50/90 backdrop-blur">
                             <tr>
-                                <th class="w-[72px] px-6 py-4 font-semibold tracking-wider">No</th>
+                                <th class="w-[56px] px-6 py-4 font-semibold tracking-wider">No</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Nama</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Role</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Program Studi</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Identifier</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Nomor HP</th>
                                 <th class="px-6 py-4 font-semibold tracking-wider">Status</th>
-                                <th class="w-[220px] px-6 py-4 font-semibold tracking-wider text-right">Aksi</th>
+                                {{-- Kolom Aksi: header berisi tombol Tambah User (SATU-SATUNYA) --}}
+                                <th class="w-[240px] px-6 py-4 font-semibold tracking-wider">
+                                    <div class="flex items-center justify-end">
+                                        <a
+                                            href="{{ route('admin.users.create') }}"
+                                            class="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-[0_2px_8px_rgb(124,58,237,0.4)] transition-all hover:shadow-[0_4px_12px_rgb(124,58,237,0.5)] hover:-translate-y-px active:translate-y-0"
+                                        >
+                                            <i data-lucide="user-plus" class="h-3.5 w-3.5"></i>
+                                            Tambah User
+                                        </a>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-emerald-100/60">
@@ -220,12 +253,12 @@
                                     $resolvedRole = $user->resolvedSkkmRole();
                                     $roleLabel = $roleOptions[$resolvedRole] ?? strtoupper($resolvedRole);
                                     $roleBadgeClass = match ($resolvedRole) {
-                                        'mahasiswa' => 'bg-sky-100 text-sky-700 border-sky-200',
-                                        'dosen_pa' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                        'kaprodi' => 'bg-violet-100 text-violet-700 border-violet-200',
+                                        'mahasiswa'     => 'bg-sky-100 text-sky-700 border-sky-200',
+                                        'dosen_pa'      => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                        'kaprodi'       => 'bg-violet-100 text-violet-700 border-violet-200',
                                         'kemahasiswaan' => 'bg-amber-100 text-amber-700 border-amber-200',
-                                        'super_admin' => 'bg-rose-100 text-rose-700 border-rose-200',
-                                        default => 'bg-slate-100 text-slate-700 border-slate-200',
+                                        'super_admin'   => 'bg-rose-100 text-rose-700 border-rose-200',
+                                        default         => 'bg-slate-100 text-slate-700 border-slate-200',
                                     };
                                 @endphp
                                 <tr class="hover:bg-emerald-50/40 transition-colors">
@@ -233,11 +266,11 @@
                                         {{ $users->firstItem() + $loop->index }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="font-medium text-zinc-800">{{ $user->name }}</div>
-                                        <div class="text-xs text-zinc-500">{{ $user->email }}</div>
+                                        <div class="font-medium text-slate-800">{{ $user->name }}</div>
+                                        <div class="text-xs text-slate-500">{{ $user->email }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold {{ $roleBadgeClass }}">
+                                        <span class="inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-bold {{ $roleBadgeClass }}">
                                             {{ $roleLabel }}
                                         </span>
                                     </td>
@@ -246,21 +279,28 @@
                                             <div class="font-medium text-slate-700">{{ $user->programStudi->nama }}</div>
                                             <div class="text-xs text-slate-500">{{ $user->programStudi->jenjang }}</div>
                                         @else
-                                            <span class="text-slate-500">-</span>
+                                            <span class="text-slate-400">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">{{ $user->identifier ?? '-' }}</td>
-                                    <td class="px-6 py-4">{{ $user->phone_number ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ $user->identifier ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ $user->phone_number ?? '—' }}</td>
                                     <td class="px-6 py-4">
                                         @if ($user->is_active)
-                                            <span class="inline-flex rounded-lg border border-emerald-200 bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">Aktif</span>
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aktif
+                                            </span>
                                         @else
-                                            <span class="inline-flex rounded-lg border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">Nonaktif</span>
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Nonaktif
+                                            </span>
                                         @endif
                                     </td>
-                                    <td class="w-[220px] px-6 py-4 whitespace-nowrap">
+                                    <td class="w-[240px] px-6 py-4 whitespace-nowrap">
                                         <div class="flex flex-nowrap items-center justify-end gap-2">
-                                            <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex min-w-[86px] items-center justify-center gap-1 px-3 py-2 rounded-lg border border-amber-200 bg-amber-100 text-amber-800 text-xs font-semibold hover:bg-amber-200 transition-colors">
+                                            <a
+                                                href="{{ route('admin.users.edit', $user) }}"
+                                                class="inline-flex min-w-[80px] items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs font-semibold hover:bg-amber-100 hover:border-amber-300 transition-colors"
+                                            >
                                                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                                                 Edit
                                             </a>
@@ -277,7 +317,10 @@
                                             >
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex min-w-[86px] items-center justify-center gap-1 px-3 py-2 rounded-lg border border-rose-200 bg-rose-100 text-rose-700 text-xs font-semibold hover:bg-rose-200 transition-colors">
+                                                <button
+                                                    type="submit"
+                                                    class="inline-flex min-w-[80px] items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 text-xs font-semibold hover:bg-rose-100 hover:border-rose-300 transition-colors"
+                                                >
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     Hapus
                                                 </button>
@@ -287,14 +330,22 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
-                                        Belum ada data user.
+                                    <td colspan="8" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                                                <i data-lucide="users" class="h-6 w-6 text-slate-400"></i>
+                                            </div>
+                                            <p class="text-sm font-medium text-slate-500">Belum ada data user yang sesuai filter.</p>
+                                            <p class="text-xs text-slate-400">Coba ubah filter atau tambahkan user baru.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
+
+                {{-- Pagination --}}
                 <div class="px-6 py-4 border-t border-emerald-100/70 bg-white/70">
                     {{ $users->links() }}
                 </div>
@@ -304,19 +355,18 @@
 
     @push('scripts')
         <script>
-            const filterForm = document.getElementById('userFilterForm');
-            const searchInput = document.getElementById('search');
-            const roleFilter = document.getElementById('role');
-            const sortFilter = document.getElementById('sort');
-            const perPageFilter = document.getElementById('per_page');
+            const filterForm             = document.getElementById('userFilterForm');
+            const searchInput            = document.getElementById('search');
+            const roleFilter             = document.getElementById('role');
+            const sortFilter             = document.getElementById('sort');
+            const perPageFilter          = document.getElementById('per_page');
             const programStudiFilterWrap = document.getElementById('programStudiFilterWrap');
-            const semesterFilterWrap = document.getElementById('semesterFilterWrap');
-            const programStudiFilter = document.getElementById('program_studi_id');
-            const semesterFilter = document.getElementById('semester');
+            const semesterFilterWrap     = document.getElementById('semesterFilterWrap');
+            const programStudiFilter     = document.getElementById('program_studi_id');
+            const semesterFilter         = document.getElementById('semester');
+
             const submitFilters = () => {
-                if (filterForm) {
-                    filterForm.requestSubmit();
-                }
+                if (filterForm) filterForm.requestSubmit();
             };
 
             const debounce = (callback, delay = 400) => {
@@ -329,46 +379,27 @@
 
             const toggleMahasiswaFilters = () => {
                 const showMahasiswaFilters = roleFilter.value === 'mahasiswa';
-
                 programStudiFilterWrap.classList.toggle('hidden', !showMahasiswaFilters);
                 semesterFilterWrap.classList.toggle('hidden', !showMahasiswaFilters);
-
                 if (!showMahasiswaFilters) {
                     programStudiFilter.value = '';
-                    semesterFilter.value = '';
+                    semesterFilter.value     = '';
                 }
             };
 
             toggleMahasiswaFilters();
-            roleFilter.addEventListener('change', () => {
-                toggleMahasiswaFilters();
-                submitFilters();
-            });
+            roleFilter.addEventListener('change', () => { toggleMahasiswaFilters(); submitFilters(); });
 
-            if (sortFilter && filterForm) {
-                sortFilter.addEventListener('change', submitFilters);
-            }
-
-            if (perPageFilter && filterForm) {
-                perPageFilter.addEventListener('change', submitFilters);
-            }
-
-            if (programStudiFilter && filterForm) {
-                programStudiFilter.addEventListener('change', submitFilters);
-            }
-
-            if (semesterFilter && filterForm) {
-                semesterFilter.addEventListener('change', submitFilters);
-            }
+            if (sortFilter    && filterForm) sortFilter.addEventListener('change', submitFilters);
+            if (perPageFilter  && filterForm) perPageFilter.addEventListener('change', submitFilters);
+            if (programStudiFilter && filterForm) programStudiFilter.addEventListener('change', submitFilters);
+            if (semesterFilter     && filterForm) semesterFilter.addEventListener('change', submitFilters);
 
             if (searchInput && filterForm) {
                 const debouncedSubmit = debounce(submitFilters, 450);
                 searchInput.addEventListener('input', debouncedSubmit);
                 searchInput.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter') {
-                        event.preventDefault();
-                        submitFilters();
-                    }
+                    if (event.key === 'Enter') { event.preventDefault(); submitFilters(); }
                 });
             }
         </script>

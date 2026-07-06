@@ -86,7 +86,7 @@
             <x-input-error for="email" class="mt-2" />
 
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && ! $this->user->hasVerifiedEmail())
-                <p class="mt-2 text-sm text-zinc-600">
+                <p class="mt-2 text-sm text-slate-600">
                     {{ __('Alamat email Anda belum diverifikasi.') }}
 
                     <button type="button" class="ms-1 font-medium text-indigo-600 hover:text-indigo-800" wire:click.prevent="sendEmailVerification">

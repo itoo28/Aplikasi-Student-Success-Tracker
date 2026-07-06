@@ -10,16 +10,16 @@
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 min-h-screen">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-12 bg-slate-50 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden backdrop-blur-xl">
                 
-                <div class="bg-indigo-600 px-8 py-6">
-                    <h3 class="text-xl font-bold text-white">Form Pengajuan Kegiatan</h3>
-                    <p class="text-indigo-200 mt-1 text-sm">Pilih kategori kegiatan secara bertahap dan unggah bukti fisik yang sesuai.</p>
+                <div class="bg-indigo-600 px-6 sm:px-8 py-4 sm:py-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-white">Form Pengajuan Kegiatan</h3>
+                    <p class="text-indigo-200 mt-1 text-xs sm:text-sm">Pilih kategori kegiatan secara bertahap dan unggah bukti fisik yang sesuai.</p>
                 </div>
 
-                <div class="p-8">
+                <div class="p-5 sm:p-8">
                     @if ($errors->any())
                         <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl">
                             <div class="flex items-center">
@@ -148,29 +148,67 @@
                         {{-- File Upload --}}
                         <div class="pt-4 border-t border-slate-100">
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Bukti Fisik (Sertifikat / Surat Tugas)</label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-2xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors bg-slate-50 group">
-                                <div class="space-y-2 text-center">
+                            <input type="hidden" name="uploaded_file_path" id="uploaded_file_path">
+                            
+                            {{-- Dropzone Area --}}
+                            <div id="upload-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-2xl hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-300 bg-slate-50 group relative cursor-pointer">
+                                <div class="space-y-2 text-center pointer-events-none">
                                     <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-indigo-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <div class="flex text-sm text-slate-600 justify-center">
-                                        <label for="file_bukti" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                            <span class="px-2">Upload file PDF, JPG, PNG</span>
-                                            <input id="file_bukti" name="file_bukti" type="file" class="sr-only" required accept=".pdf,.jpg,.jpeg,.png">
-                                        </label>
+                                        <span class="font-medium text-indigo-600 group-hover:text-indigo-500">Pilih file atau seret ke sini</span>
                                     </div>
-                                    <p class="text-xs text-slate-500">Maksimal 5MB.</p>
-                                    <p id="file-name-preview" class="text-xs font-semibold text-indigo-600 hidden"></p>
+                                    <p class="text-xs text-slate-500">PDF, JPG, PNG hingga 5MB</p>
+                                </div>
+                                <input id="file_bukti" name="file_bukti" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+
+                            {{-- Progress Bar Container --}}
+                            <div id="upload-progress-container" class="hidden mt-3 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                                <div class="flex justify-between items-center mb-1 text-xs font-semibold">
+                                    <span class="text-slate-600 flex items-center gap-1.5">
+                                        <svg class="animate-spin h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Mengunggah file...
+                                    </span>
+                                    <span id="upload-progress-percent" class="text-indigo-600">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div id="upload-progress-bar" class="bg-indigo-600 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Preview Area --}}
+                            <div id="upload-preview-container" class="hidden mt-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm relative transition-all duration-300">
+                                <div class="flex items-center gap-4">
+                                    {{-- Icon/Image Thumbnail --}}
+                                    <div class="size-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 overflow-hidden relative" id="preview-media-wrapper">
+                                        {{-- Will render img or file icon --}}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-semibold text-slate-800 truncate" id="preview-filename">-</p>
+                                        <p class="text-xs text-slate-500 mt-0.5" id="preview-filesize">-</p>
+                                        <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            Berhasil diunggah
+                                        </span>
+                                    </div>
+                                    <button type="button" id="btn-remove-file" class="size-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors shadow-sm self-start">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Actions --}}
-                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-slate-100">
-                            <a href="{{ route('skkm.index') }}" class="px-6 py-3 border border-slate-300 rounded-xl shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-6 border-t border-slate-100">
+                            <a href="{{ route('skkm.index') }}" class="px-6 py-3 border border-slate-300 rounded-xl shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors text-center justify-center inline-flex w-full sm:w-auto">
                                 Batal
                             </a>
-                            <button type="submit" id="btn-submit" disabled class="px-8 py-3 border border-transparent rounded-xl shadow-lg shadow-indigo-200 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+                            <button type="submit" id="btn-submit" disabled class="px-8 py-3 border border-transparent rounded-xl shadow-lg shadow-indigo-200 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-center justify-center inline-flex w-full sm:w-auto">
                                 Kirim Pengajuan
                             </button>
                         </div>
@@ -197,7 +235,6 @@
         const elSubmit   = document.getElementById('btn-submit');
         const elStepLabel= document.getElementById('step-label');
         const elFile     = document.getElementById('file_bukti');
-        const elFileName = document.getElementById('file-name-preview');
 
         const unsurLabels = {
             'penalaran': 'Penalaran & Keilmuan',
@@ -276,7 +313,16 @@
             elPoinDesc.textContent = rule.jenis_item + tingkatLabel + ' • ' + perananLabel;
             elPoinBukti.textContent = rule.bukti_fisik_required || '-';
             elPreview.classList.remove('hidden');
-            elSubmit.disabled = false;
+            
+            // Enable submit only if file is uploaded and upload is not in progress
+            const elUploadedPath = document.getElementById('uploaded_file_path');
+            const elProgressContainer = document.getElementById('upload-progress-container');
+            const uploadInProgress = elProgressContainer && !elProgressContainer.classList.contains('hidden');
+            if (elUploadedPath && elUploadedPath.value && !uploadInProgress) {
+                elSubmit.disabled = false;
+            } else {
+                elSubmit.disabled = true;
+            }
         }
 
         // When Unsur changes
@@ -407,15 +453,159 @@
             }
         });
 
-        // File name preview
+        // Modern File Upload with Progress Bar and direct preview
+        const elDropzone = document.getElementById('upload-dropzone');
+        const elProgressContainer = document.getElementById('upload-progress-container');
+        const elProgressBar = document.getElementById('upload-progress-bar');
+        const elProgressPercent = document.getElementById('upload-progress-percent');
+        const elPreviewContainer = document.getElementById('upload-preview-container');
+        const elPreviewMedia = document.getElementById('preview-media-wrapper');
+        const elPreviewFilename = document.getElementById('preview-filename');
+        const elPreviewFilesize = document.getElementById('preview-filesize');
+        const elBtnRemove = document.getElementById('btn-remove-file');
+        const elUploadedPath = document.getElementById('uploaded_file_path');
+
         if (elFile) {
+            // Drag over effects for Dropzone
+            elDropzone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                elDropzone.classList.add('border-indigo-500', 'bg-indigo-50');
+            });
+            elDropzone.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                elDropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
+            });
+            elDropzone.addEventListener('drop', function (e) {
+                elDropzone.classList.remove('border-indigo-500', 'bg-indigo-50');
+            });
+
             elFile.addEventListener('change', function () {
-                if (this.files.length > 0) {
-                    elFileName.textContent = this.files[0].name;
-                    elFileName.classList.remove('hidden');
-                } else {
-                    elFileName.classList.add('hidden');
+                const file = this.files[0];
+                if (!file) return;
+
+                // Validate size (5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('Ukuran file maksimal adalah 5MB.');
+                    this.value = '';
+                    return;
                 }
+
+                // Show progress bar, hide dropzone, hide preview
+                elDropzone.classList.add('hidden');
+                elProgressContainer.classList.remove('hidden');
+                elPreviewContainer.classList.add('hidden');
+                elSubmit.disabled = true;
+
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file_bukti', file);
+
+                // Setup CSRF Token
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+                // Perform AJAX upload via XMLHttpRequest
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{ route("skkm.upload-temp") }}', true);
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                xhr.upload.onprogress = function (e) {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        elProgressBar.style.width = percent + '%';
+                        elProgressPercent.textContent = percent + '%';
+                    }
+                };
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                elUploadedPath.value = response.path;
+                                elProgressContainer.classList.add('hidden');
+                                
+                                // Setup preview
+                                elPreviewFilename.textContent = file.name;
+                                
+                                // Format file size
+                                const kb = file.size / 1024;
+                                if (kb > 1024) {
+                                    elPreviewFilesize.textContent = (kb / 1024).toFixed(2) + ' MB';
+                                } else {
+                                    elPreviewFilesize.textContent = kb.toFixed(1) + ' KB';
+                                }
+
+                                // Render preview media based on file type
+                                elPreviewMedia.innerHTML = '';
+                                if (file.type.startsWith('image/')) {
+                                    const img = document.createElement('img');
+                                    img.src = response.url;
+                                    img.className = 'w-full h-full object-cover';
+                                    elPreviewMedia.appendChild(img);
+                                } else {
+                                    // PDF Icon
+                                    elPreviewMedia.innerHTML = `
+                                        <div class="flex flex-col items-center justify-center text-rose-500">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span class="text-[9px] font-bold mt-0.5 uppercase">PDF</span>
+                                        </div>
+                                    `;
+                                }
+
+                                elPreviewContainer.classList.remove('hidden');
+                                
+                                // Enable submit button if a rule is selected
+                                if (elHidden.value) {
+                                    elSubmit.disabled = false;
+                                }
+                                
+                                // Remove required validation attribute
+                                elFile.removeAttribute('required');
+                            } else {
+                                handleUploadError();
+                            }
+                        } catch (e) {
+                            handleUploadError();
+                        }
+                    } else {
+                        handleUploadError();
+                    }
+                };
+
+                xhr.onerror = function () {
+                    handleUploadError();
+                };
+
+                xhr.send(formData);
+            });
+
+            function handleUploadError() {
+                alert('Gagal mengunggah file. Silakan coba lagi.');
+                resetUploadState();
+            }
+
+            function resetUploadState() {
+                elFile.value = '';
+                elUploadedPath.value = '';
+                elFile.setAttribute('required', 'required');
+                elDropzone.classList.remove('hidden');
+                elProgressContainer.classList.add('hidden');
+                elPreviewContainer.classList.add('hidden');
+                elProgressBar.style.width = '0%';
+                elProgressPercent.textContent = '0%';
+                if (!elHidden.value) {
+                    elSubmit.disabled = true;
+                }
+            }
+
+            elBtnRemove.addEventListener('click', function (e) {
+                e.preventDefault();
+                resetUploadState();
             });
         }
     });

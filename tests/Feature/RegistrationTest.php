@@ -39,15 +39,41 @@ class RegistrationTest extends TestCase
             $this->markTestSkipped('Registration support is not enabled.');
         }
 
-        $response = $this->post('/register', [
+        $fakultas = \App\Models\Fakultas::create([
+            'kode' => 'FT',
+            'nama' => 'Fakultas Teknik',
+        ]);
+
+        $programStudi = \App\Models\ProgramStudi::create([
+            'fakultas_id' => $fakultas->id,
+            'kode' => 'IF',
+            'nama' => 'Informatika',
+            'jenjang' => 'S1',
+        ]);
+
+        $lecturer = \App\Models\User::create([
+            'name' => 'Dr. Ahmad, M.Kom.',
+            'email' => 'ahmad.dosen@example.com',
+            'role' => 'lecturer',
+            'skkm_role' => 'dosen_pa',
+            'identifier' => '19870001',
+            'is_active' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->withSession(['registration_prodi_id' => $programStudi->id])->post('/register', [
             'name' => 'Test User',
+            'identifier' => '220101015',
+            'phone_number' => '081234567890',
+            'program_studi_id' => $programStudi->id,
+            'semester' => 5,
+            'lecturer_id' => $lecturer->id,
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('login'));
     }
 }

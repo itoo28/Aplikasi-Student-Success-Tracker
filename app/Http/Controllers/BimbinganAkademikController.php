@@ -10,22 +10,32 @@ use Illuminate\Support\Facades\Auth;
 class BimbinganAkademikController extends Controller
 {
     // --- ROLE: MAHASISWA ---
-    public function mahasiswaIndex()
+    public function mahasiswaIndex(Request $request)
     {
         $mahasiswa = Auth::user();
         $semesterAktif = $mahasiswa->semester ?? 1;
+        $status = $request->query('status');
 
-        $riwayat = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+        $riwayatQuery = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->with(['mahasiswa', 'dosen'])
-            ->latest()
-            ->get();
+            ->latest();
+
+        if (filled($status) && in_array($status, ['pending', 'validated', 'completed', 'revised', 'canceled'])) {
+            $riwayatQuery->where('status', $status);
+        }
+
+        $riwayat = $riwayatQuery->get();
 
         $bimbinganSemesterIni = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
             ->where('semester', $semesterAktif)
             ->where('status', 'completed')
             ->count();
 
-        return view('bimbingan.mahasiswa', compact('riwayat', 'bimbinganSemesterIni', 'semesterAktif'));
+        $pendingRiwayat = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'pending')
+            ->get();
+
+        return view('bimbingan.mahasiswa', compact('riwayat', 'bimbinganSemesterIni', 'semesterAktif', 'pendingRiwayat', 'status'));
     }
 
     public function mahasiswaStore(Request $request)
@@ -86,10 +96,12 @@ class BimbinganAkademikController extends Controller
         $dosen = Auth::user();
         $filterType = $request->query('filter_type', 'all');
         $filterValue = $request->query('filter_value');
+        $statusJadwal = $request->query('status_jadwal', 'all');
+        $statusPengajuan = $request->query('status_pengajuan', 'all');
 
         $statistikAngkatan = $dosen->adviseeStudents()
             ->whereNotNull('identifier')
-            ->selectRaw("DISTINCT SUBSTRING(identifier, 1, 2) as angkatan_kode")
+            ->selectRaw("DISTINCT SUBSTR(identifier, 1, 2) as angkatan_kode")
             ->get()
             ->map(function ($item) {
                 return '20' . $item->angkatan_kode;
@@ -107,7 +119,7 @@ class BimbinganAkademikController extends Controller
         if ($filterType === 'angkatan' && $filterValue) {
             $angkatanCode = substr($filterValue, 2);
             $pendingRequestsQuery->whereHas('mahasiswa', function ($query) use ($angkatanCode) {
-                $query->whereRaw('SUBSTRING(identifier, 1, 2) = ?', [$angkatanCode]);
+                $query->whereRaw('SUBSTR(identifier, 1, 2) = ?', [$angkatanCode]);
             });
         }
 
@@ -115,13 +127,28 @@ class BimbinganAkademikController extends Controller
             $pendingRequestsQuery->where('mahasiswa_id', $filterValue);
         }
 
+        if (filled($statusPengajuan) && $statusPengajuan !== 'all' && in_array($statusPengajuan, ['pending', 'validated', 'revised', 'completed', 'canceled'])) {
+            $pendingRequestsQuery->where('status', $statusPengajuan);
+        }
+
         $pendingRequests = $pendingRequestsQuery->latest()->get();
 
-        $scheduledBimbingan = Bimbingan::where('dosen_id', $dosen->id)
-            ->where('tipe_pengajuan', 'undangan_dosen')
+        $scheduledBimbinganQuery = Bimbingan::where('dosen_id', $dosen->id)
+            ->where(function ($query) {
+                $query->where('tipe_pengajuan', 'undangan_dosen')
+                      ->orWhere(function ($q) {
+                          $q->where('tipe_pengajuan', 'mandiri_mahasiswa')
+                            ->whereIn('status', ['validated', 'completed', 'canceled']);
+                      });
+            })
             ->with('mahasiswa.programStudi')
-            ->orderBy('tanggal', 'asc')
-            ->get();
+            ->orderBy('tanggal', 'asc');
+
+        if (filled($statusJadwal) && $statusJadwal !== 'all' && in_array($statusJadwal, ['validated', 'completed', 'canceled'])) {
+            $scheduledBimbinganQuery->where('status', $statusJadwal);
+        }
+
+        $scheduledBimbingan = $scheduledBimbinganQuery->get();
 
         // Kelompokkan bimbingan terjadwal berdasarkan group_key
         $scheduledBimbinganGrouped = $scheduledBimbingan->groupBy(function ($item) {
@@ -135,7 +162,9 @@ class BimbinganAkademikController extends Controller
             'mahasiswaBimbingan',
             'angkatanOptions',
             'filterType',
-            'filterValue'
+            'filterValue',
+            'statusJadwal',
+            'statusPengajuan'
         ));
     }
 
@@ -164,7 +193,7 @@ class BimbinganAkademikController extends Controller
 
         if ($request->filter_type === 'angkatan') {
             $angkatanCode = substr($request->filter_value, 2);
-            $studentsQuery->whereRaw('SUBSTRING(identifier, 1, 2) = ?', [$angkatanCode]);
+            $studentsQuery->whereRaw('SUBSTR(identifier, 1, 2) = ?', [$angkatanCode]);
         }
 
         if ($request->filter_type === 'individu') {
@@ -179,6 +208,7 @@ class BimbinganAkademikController extends Controller
 
         $created = [];
         $skipped = [];
+        $createdBimbingans = [];
 
         // Generate group_key jika tipe filter adalah kelompok (all / angkatan)
         $groupKey = null;
@@ -198,7 +228,7 @@ class BimbinganAkademikController extends Controller
                 continue;
             }
 
-            Bimbingan::create([
+            $bimbingan = Bimbingan::create([
                 'mahasiswa_id' => $mahasiswa->id,
                 'dosen_id' => $dosen->id,
                 'semester' => $semesterAktif,
@@ -209,6 +239,12 @@ class BimbinganAkademikController extends Controller
                 'status' => 'validated',
                 'group_key' => $groupKey,
             ]);
+
+            $bimbingan->loadMissing('mahasiswa');
+            $createdBimbingans[] = [
+                'name' => $mahasiswa->name,
+                'whatsapp_link' => $bimbingan->whatsapp_link,
+            ];
 
             $created[] = $mahasiswa->name;
         }
@@ -222,7 +258,13 @@ class BimbinganAkademikController extends Controller
             $message .= ' Beberapa mahasiswa tidak ditambahkan karena sudah mencapai batas: ' . implode(', ', $skipped) . '.';
         }
 
-        return redirect()->route('bimbingan.dosen.index')->with('success', $message);
+        return redirect()->route('bimbingan.dosen.index')->with([
+            'success' => $message,
+            'created_bimbingan_students' => $createdBimbingans,
+            'created_bimbingan_is_group' => count($createdBimbingans) > 1,
+            'created_bimbingan_topic' => $request->topik,
+            'created_bimbingan_date' => \Carbon\Carbon::parse($request->tanggal)->format('d M Y')
+        ]);
     }
 
     public function dosenUpdate(Request $request, Bimbingan $bimbingan)
@@ -241,7 +283,14 @@ class BimbinganAkademikController extends Controller
             'catatan' => $request->catatan,
         ]);
 
-        return redirect()->route('bimbingan.dosen.index')->with('success', 'Status pengajuan berhasil diperbarui.');
+        $bimbingan->loadMissing('mahasiswa');
+
+        return redirect()->route('bimbingan.dosen.index')->with([
+            'success' => 'Status pengajuan berhasil diperbarui.',
+            'validation_whatsapp_link' => $bimbingan->whatsapp_validation_link,
+            'validation_student_name' => $bimbingan->mahasiswa?->name,
+            'validation_status' => $bimbingan->status === 'validated' ? 'Disetujui' : 'Revisi/Ditolak',
+        ]);
     }
 
     public function dosenReport(Request $request, Bimbingan $bimbingan)
@@ -285,21 +334,121 @@ class BimbinganAkademikController extends Controller
             abort(403);
         }
 
+        $bimbingan->loadMissing('mahasiswa');
+        $studentName = '';
+        $whatsappLink = '';
+        $cancelledStudents = [];
+
         if ($bimbingan->group_key) {
+            $groupBimbingan = Bimbingan::where('group_key', $bimbingan->group_key)
+                ->where('dosen_id', Auth::id())
+                ->with('mahasiswa')
+                ->get();
+
             Bimbingan::where('group_key', $bimbingan->group_key)
                 ->where('dosen_id', Auth::id())
-                ->delete();
+                ->update(['status' => 'canceled']);
+
+            foreach ($groupBimbingan as $item) {
+                $cancelledStudents[] = [
+                    'name' => $item->mahasiswa?->name,
+                    'whatsapp_cancel_link' => $item->whatsapp_cancel_link,
+                ];
+            }
+
+            $first = $groupBimbingan->first();
+            $studentName = $groupBimbingan->count() . ' mahasiswa';
+            $whatsappLink = $first ? $first->whatsapp_cancel_link : null;
         } else {
-            $bimbingan->delete();
+            $bimbingan->update(['status' => 'canceled']);
+            $studentName = $bimbingan->mahasiswa?->name;
+            $whatsappLink = $bimbingan->whatsapp_cancel_link;
+            $cancelledStudents[] = [
+                'name' => $studentName,
+                'whatsapp_cancel_link' => $whatsappLink,
+            ];
         }
 
-        return redirect()->route('bimbingan.dosen.index')->with('success', 'Jadwal bimbingan berhasil dibatalkan/dihapus.');
+        return redirect()->route('bimbingan.dosen.index')->with([
+            'success' => 'Jadwal bimbingan berhasil dibatalkan.',
+            'cancel_whatsapp_link' => $whatsappLink,
+            'cancel_student_name' => $studentName,
+            'cancelled_students' => $cancelledStudents,
+            'cancel_is_group' => count($cancelledStudents) > 1,
+        ]);
+    }
+
+    public function dosenPrint(Bimbingan $bimbingan)
+    {
+        $user = Auth::user();
+        $userRole = $user->resolvedSkkmRole();
+
+        $isAuthorized = ($bimbingan->dosen_id === $user->id) ||
+                        ($bimbingan->mahasiswa_id === $user->id) ||
+                        in_array($userRole, ['super_admin', 'kaprodi', 'kemahasiswaan']);
+
+        if (! $isAuthorized) {
+            abort(403, 'Anda tidak memiliki akses untuk mencetak bimbingan ini.');
+        }
+
+        $bimbingan->load(['mahasiswa.programStudi', 'dosen']);
+
+        return view('bimbingan.print', compact('bimbingan'));
     }
 
     // --- ROLE: KAPRODI & KEMAHASISWAAN ---
-    public function rekapitulasiIndex()
+    public function rekapitulasiIndex(Request $request)
     {
-        $mahasiswaList = User::whereNotNull('lecturer_id')
+        $search = $request->query('search');
+        $selectedProgramStudi = $request->query('program_studi_id');
+        $selectedSemester = $request->query('semester');
+        $selectedStatus = $request->query('status_bimbingan');
+
+        $query = User::whereNotNull('lecturer_id')
+            ->where(function ($query) {
+                $query->where('role', 'student')
+                      ->orWhere('skkm_role', 'student')
+                      ->orWhere('skkm_role', 'mahasiswa');
+            });
+
+        if (filled($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('identifier', 'like', '%' . $search . '%');
+            });
+        }
+
+        if (filled($selectedProgramStudi)) {
+            $query->where('program_studi_id', $selectedProgramStudi);
+        }
+
+        if (filled($selectedSemester)) {
+            $query->where('semester', $selectedSemester);
+        }
+
+        if (filled($selectedStatus)) {
+            if ($selectedStatus === 'sudah') {
+                $query->whereHas('bimbingans', function ($q) {
+                    $q->whereColumn('bimbingans.semester', 'users.semester')
+                      ->where('status', 'completed');
+                });
+            } elseif ($selectedStatus === 'belum') {
+                $query->whereDoesntHave('bimbingans', function ($q) {
+                    $q->whereColumn('bimbingans.semester', 'users.semester')
+                      ->where('status', 'completed');
+                });
+            }
+        }
+
+        $mahasiswaList = $query->withCount(['bimbingans as bimbingan_semester_count' => function ($query) {
+                $query->whereColumn('bimbingans.semester', 'users.semester')
+                    ->where('status', 'completed');
+            }])
+            ->with('programStudi.fakultas')
+            ->get();
+
+        // Calculate statistics based on unfiltered active student population
+        $allMahasiswaList = User::whereNotNull('lecturer_id')
             ->where(function ($query) {
                 $query->where('role', 'student')
                       ->orWhere('skkm_role', 'student')
@@ -309,13 +458,41 @@ class BimbinganAkademikController extends Controller
                 $query->whereColumn('bimbingans.semester', 'users.semester')
                     ->where('status', 'completed');
             }])
-            ->with('programStudi.fakultas')
             ->get();
 
-        $totalMahasiswa = $mahasiswaList->count();
-        $memenuhiSyarat = $mahasiswaList->where('bimbingan_semester_count', '>=', 1)->count();
+        $totalMahasiswa = $allMahasiswaList->count();
+        $memenuhiSyarat = $allMahasiswaList->where('bimbingan_semester_count', '>=', 1)->count();
         $belumBimbingan = $totalMahasiswa - $memenuhiSyarat;
 
-        return view('bimbingan.rekapitulasi', compact('mahasiswaList', 'totalMahasiswa', 'memenuhiSyarat', 'belumBimbingan'));
+        $programStudiOptions = \App\Models\ProgramStudi::where('is_active', true)->orderBy('nama')->get();
+        $semesterOptions = range(1, 8);
+
+        return view('bimbingan.rekapitulasi', compact(
+            'mahasiswaList',
+            'totalMahasiswa',
+            'memenuhiSyarat',
+            'belumBimbingan',
+            'search',
+            'selectedProgramStudi',
+            'selectedSemester',
+            'selectedStatus',
+            'programStudiOptions',
+            'semesterOptions'
+        ));
+    }
+
+    public function rekapitulasiDetail(User $mahasiswa)
+    {
+        $skkmRole = auth()->user()->resolvedSkkmRole();
+        if (! in_array($skkmRole, ['super_admin', 'kaprodi', 'kemahasiswaan'])) {
+            abort(403);
+        }
+
+        $riwayat = Bimbingan::where('mahasiswa_id', $mahasiswa->id)
+            ->with(['mahasiswa', 'dosen'])
+            ->latest()
+            ->get();
+
+        return view('bimbingan.rekapitulasi-detail', compact('mahasiswa', 'riwayat'));
     }
 }

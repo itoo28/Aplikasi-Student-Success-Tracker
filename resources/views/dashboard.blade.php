@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-slate-800 leading-tight">
+        <h2 class="font-semibold text-2xl text-slate-800 leading-tight">
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
@@ -21,7 +21,7 @@
             @endphp
 
             {{-- Hero Greeting --}}
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-8 text-white shadow-2xl shadow-indigo-300/30">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 sm:p-8 text-white shadow-2xl shadow-indigo-300/30">
                 <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
                 <div class="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-purple-400/10 blur-2xl"></div>
 
@@ -29,8 +29,8 @@
                     {{-- Left: Greeting + Info --}}
                     <div>
                         <p class="text-indigo-200 text-sm font-medium">Selamat datang kembali 👋</p>
-                        <h2 class="text-2xl lg:text-3xl font-extrabold mt-1">{{ $student->name }}</h2>
-                        <div class="flex flex-wrap items-center gap-3 mt-3">
+                        <h2 class="text-2xl lg:text-3xl font-extrabold mt-1 truncate max-w-xs sm:max-w-md md:max-w-none">{{ $student->name }}</h2>
+                        <div class="flex flex-wrap items-center gap-2 mt-3">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10">
                                 <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> {{ $student->jenjang_studi ?? 'S1' }}
                             </span>
@@ -38,36 +38,36 @@
                                 <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Semester {{ $student->semester ?? '-' }}
                             </span>
                             @if($student->lecturer)
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10">
-                                <i data-lucide="user-check" class="w-3.5 h-3.5"></i> PA: {{ $student->lecturer->name }}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-lg text-xs font-semibold border border-white/10 max-w-[200px] truncate" title="PA: {{ $student->lecturer->name }}">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 shrink-0"></i> PA: {{ $student->lecturer->name }}
                             </span>
                             @endif
                         </div>
                     </div>
 
                     {{-- Right: Circular Progress --}}
-                    <div class="flex items-center gap-6">
-                        <div class="relative w-28 h-28 flex-shrink-0">
-                            <svg class="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
+                    <div class="flex items-center gap-5 sm:gap-6 border-t border-white/10 pt-5 lg:border-t-0 lg:pt-0">
+                        <div class="relative w-20 h-20 sm:w-28 sm:h-28 flex-shrink-0">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                                 <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="10"/>
                                 <circle cx="60" cy="60" r="52" fill="none" stroke="url(#dashGrad)" stroke-width="10" stroke-linecap="round"
                                     stroke-dasharray="{{ 2 * 3.14159 * 52 }}" stroke-dashoffset="{{ 2 * 3.14159 * 52 * (1 - $progressPercent / 100) }}"/>
                                 <defs><linearGradient id="dashGrad"><stop offset="0%" stop-color="#a5b4fc"/><stop offset="100%" stop-color="#e9d5ff"/></linearGradient></defs>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-2xl font-extrabold">{{ $progressPercent }}%</span>
-                                <span class="text-[9px] text-indigo-200 font-semibold uppercase tracking-wider">Tercapai</span>
+                                <span class="text-xl sm:text-2xl font-extrabold">{{ $progressPercent }}%</span>
+                                <span class="text-[8px] sm:text-[9px] text-indigo-200 font-semibold uppercase tracking-wider">Tercapai</span>
                             </div>
                         </div>
                         <div class="text-sm">
-                            <p class="font-bold text-lg">{{ $approvedPoints }}<span class="text-indigo-300 font-medium text-sm"> / {{ $targetKelulusan }}</span></p>
+                            <p class="font-bold text-base sm:text-lg">{{ $approvedPoints }}<span class="text-indigo-300 font-medium text-xs sm:text-sm"> / {{ $targetKelulusan }}</span></p>
                             <p class="text-indigo-200 text-xs mt-0.5">Poin SKKM Disetujui</p>
                             @if($progressPercent >= 100)
-                                <span class="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-emerald-400/20 text-emerald-200 rounded-full text-[10px] font-bold border border-emerald-400/30">
+                                <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-400/20 text-emerald-200 rounded-full text-[9px] sm:text-[10px] font-bold border border-emerald-400/30">
                                     <i data-lucide="check-circle" class="w-3 h-3"></i> Memenuhi Syarat
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-amber-400/20 text-amber-200 rounded-full text-[10px] font-bold border border-amber-400/30">
+                                <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-400/20 text-amber-200 rounded-full text-[9px] sm:text-[10px] font-bold border border-amber-400/30">
                                     <i data-lucide="target" class="w-3 h-3"></i> Kurang {{ $remainingPoints }} poin
                                 </span>
                             @endif
@@ -77,61 +77,61 @@
             </div>
 
             {{-- Stats Mini Cards --}}
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center"><i data-lucide="check-circle" class="w-4.5 h-4.5 text-emerald-600"></i></div>
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Disetujui</span>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-[0_10px_25px_rgba(79,70,229,0.15)] hover:shadow-[0_14px_35px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-2.5 sm:mb-3">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10"><i data-lucide="check-circle" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white"></i></div>
+                        <span class="text-[9px] sm:text-[11px] font-bold text-indigo-200 uppercase tracking-wider">Disetujui</span>
                     </div>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $approvedCount }}</p>
-                    <p class="text-xs text-emerald-600 font-semibold mt-0.5">+{{ $approvedPoints }} poin</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $approvedCount }}</p>
+                    <p class="text-[10px] sm:text-xs text-indigo-100 font-bold mt-0.5">+{{ $approvedPoints }} poin</p>
                 </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center"><i data-lucide="clock" class="w-4.5 h-4.5 text-amber-600"></i></div>
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Menunggu</span>
+                <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-[0_10px_25px_rgba(245,158,11,0.2)] hover:shadow-[0_14px_35px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-2.5 sm:mb-3">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10"><i data-lucide="clock" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white"></i></div>
+                        <span class="text-[9px] sm:text-[11px] font-bold text-amber-100 uppercase tracking-wider">Menunggu</span>
                     </div>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $pendingCount }}</p>
-                    <p class="text-xs text-amber-600 font-semibold mt-0.5">+{{ $pendingPoints }} poin</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $pendingCount }}</p>
+                    <p class="text-[10px] sm:text-xs text-amber-100 font-bold mt-0.5">+{{ $pendingPoints }} poin</p>
                 </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center"><i data-lucide="x-circle" class="w-4.5 h-4.5 text-rose-600"></i></div>
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Ditolak</span>
+                <div class="bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-[0_10px_25px_rgba(244,63,94,0.2)] hover:shadow-[0_14px_35px_rgba(244,63,94,0.3)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-2.5 sm:mb-3">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10"><i data-lucide="x-circle" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white"></i></div>
+                        <span class="text-[9px] sm:text-[11px] font-bold text-rose-100 uppercase tracking-wider">Ditolak</span>
                     </div>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $rejectedCount }}</p>
-                    <p class="text-xs text-rose-600 font-semibold mt-0.5">perlu revisi</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $rejectedCount }}</p>
+                    <p class="text-[10px] sm:text-xs text-rose-100 font-bold mt-0.5">revisi</p>
                 </div>
-                <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-shadow">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center"><i data-lucide="trending-up" class="w-4.5 h-4.5 text-violet-600"></i></div>
-                        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Sisa Target</span>
+                <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-[0_10px_25px_rgba(79,70,229,0.15)] hover:shadow-[0_14px_35px_rgba(79,70,229,0.25)] hover:-translate-y-0.5 transition-all duration-300 border border-white/10">
+                    <div class="flex items-center gap-2 sm:gap-3 mb-2.5 sm:mb-3">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10"><i data-lucide="trending-up" class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white"></i></div>
+                        <span class="text-[9px] sm:text-[11px] font-bold text-indigo-200 uppercase tracking-wider">Sisa Target</span>
                     </div>
-                    <p class="text-2xl font-extrabold text-slate-800">{{ $remainingPoints }}</p>
-                    <p class="text-xs text-violet-600 font-semibold mt-0.5">poin lagi</p>
+                    <p class="text-xl sm:text-2xl font-extrabold text-white">{{ $remainingPoints }}</p>
+                    <p class="text-[10px] sm:text-xs text-indigo-100 font-bold mt-0.5">poin lagi</p>
                 </div>
             </div>
 
             {{-- Main Grid --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
                 {{-- Bimbingan Terakhir --}}
-                <div class="rounded-3xl bg-white border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="rounded-3xl bg-white border border-slate-100 p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center">
                         <i data-lucide="book-open" class="w-5 h-5 text-cyan-500 mr-2"></i> Bimbingan Terakhir
                     </h4>
                     @if ($latestBimbingan)
                         <button type="button" @click="showGuidanceDetail = true" class="group w-full bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left transition-all hover:border-cyan-200 hover:bg-cyan-50/50 hover:shadow-sm">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs font-semibold text-slate-500">{{ $latestBimbingan->tanggal?->format('d M Y') }}</span>
-                                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ring-inset {{ $latestBimbinganStatus['class'] }}">
+                            <div class="flex justify-between items-start mb-2 gap-2">
+                                <span class="text-xs font-semibold text-slate-500 shrink-0">{{ $latestBimbingan->tanggal?->format('d M Y') }}</span>
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold ring-1 ring-inset {{ $latestBimbinganStatus['class'] }} truncate shrink-0">
                                     {{ $latestBimbinganStatus['label'] }}
                                 </span>
                             </div>
                             <p class="text-slate-800 font-medium text-sm line-clamp-2 mb-3">{{ $latestBimbingan->topik }}</p>
                             <div class="flex items-center text-xs text-slate-500">
-                                <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5"></i>
-                                {{ $latestBimbingan->dosen?->name ?? '-' }}
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1.5 shrink-0"></i>
+                                <span class="truncate">{{ $latestBimbingan->dosen?->name ?? '-' }}</span>
                             </div>
                             <div class="mt-4 flex items-center text-xs font-semibold text-cyan-700">
                                 Lihat detail dan ringkasan
@@ -157,11 +157,11 @@
                 </div>
 
                 {{-- Chart --}}
-                <div class="lg:col-span-2 rounded-3xl bg-white border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="lg:col-span-2 rounded-3xl bg-white border border-slate-100 p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <h4 class="text-base font-bold text-slate-800 mb-4 flex items-center">
                         <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-500 mr-2"></i> Poin SKKM per Semester
                     </h4>
-                    <div class="w-full h-72 relative">
+                    <div class="w-full h-56 sm:h-72 relative">
                         <canvas id="skkmChart"></canvas>
                     </div>
                 </div>
@@ -169,7 +169,7 @@
 
             {{-- Activity Feed --}}
             <div class="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div class="px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <h3 class="text-base font-bold text-slate-800 flex items-center">
                         <i data-lucide="activity" class="w-5 h-5 text-indigo-500 mr-2"></i> Aktivitas Terbaru
                     </h3>
@@ -177,7 +177,7 @@
                 </div>
                 <div class="divide-y divide-slate-100">
                     @forelse ($activities as $item)
-                        <div class="px-6 py-4 flex items-center gap-4 hover:bg-slate-50/60 transition-colors">
+                        <div class="px-4 sm:px-6 py-3.5 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-slate-50/60 transition-colors">
                             @if($item['category'] === 'SKKM')
                                 <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="file-badge" class="w-4 h-4 text-indigo-600"></i>
@@ -197,11 +197,11 @@
                                 </div>
                             </div>
                             @if(in_array($item['status'], ['approved', 'validated', 'completed', 'disetujui']))
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Disetujui</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-bold border border-emerald-200 flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Disetujui</span>
                             @elseif(in_array($item['status'], ['pending', 'menunggu_dosen']))
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Menunggu</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-200 flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Menunggu</span>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Ditolak</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 text-rose-700 rounded-full text-[10px] font-bold border border-rose-200 flex-shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Ditolak</span>
                             @endif
                         </div>
                     @empty
@@ -320,117 +320,156 @@
         </div>
     @else
         <!-- LECTURER DASHBOARD -->
-        <div class="relative isolate overflow-hidden rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-6 sm:p-8 space-y-8">
+        <div class="relative isolate overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-indigo-100/80 bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 p-4 sm:p-8 space-y-6 sm:space-y-8">
             <div class="pointer-events-none absolute -left-20 top-8 h-48 w-48 rounded-full bg-indigo-300/30 blur-3xl"></div>
             <div class="pointer-events-none absolute -right-24 top-16 h-56 w-56 rounded-full bg-cyan-300/35 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-emerald-200/35 blur-3xl"></div>
 
-            <div class="relative space-y-8">
+            <div class="relative space-y-6 sm:space-y-8">
             <!-- Greeting Row -->
-            <div class="rounded-3xl p-8 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
+            <div class="rounded-3xl p-5 sm:p-8 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <p class="text-indigo-100 text-sm font-semibold uppercase tracking-wide">Dosen PA Dashboard</p>
-                        <h3 class="text-2xl font-extrabold mt-1">Halo, {{ $lecturer->name }}</h3>
-                        <p class="text-indigo-100 mt-2">Ringkasan aktivitas mahasiswa bimbingan akademik Anda.</p>
+                        <p class="text-indigo-100 text-xs sm:text-sm font-semibold uppercase tracking-wide">Dosen PA Dashboard</p>
+                        <h3 class="text-xl sm:text-2xl font-extrabold mt-1">Halo, {{ $lecturer->name }}</h3>
+                        <p class="text-indigo-100 text-xs sm:text-sm mt-1.5 sm:mt-2">Ringkasan aktivitas mahasiswa bimbingan akademik Anda.</p>
                     </div>
-                    <span class="inline-flex items-center rounded-xl bg-white/15 px-3 py-1.5 text-xs font-semibold border border-white/20">
+                    <span class="inline-flex items-center rounded-xl bg-white/15 px-3 py-1.5 text-xs font-semibold border border-white/20 shrink-0">
                         {{ now()->format('d M Y') }}
                     </span>
                 </div>
             </div>
 
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <!-- Total Mhs -->
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-[0_14px_35px_rgb(14,165,233,0.30)]">
-                    <p class="text-sm font-semibold text-sky-100 mb-2">Total Mahasiswa</p>
-                    <h4 class="text-3xl font-extrabold">{{ $totalStudents }}</h4>
+                <div class="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35_rgba(37,99,235,0.35)] flex flex-col justify-between">
                     <div>
-                        <i data-lucide="users" class="w-5 h-5 mt-3 text-sky-100"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-indigo-100 mb-1.5 sm:mb-2">Total Mahasiswa</p>
+                        <h4 class="text-2xl sm:text-3xl font-extrabold">{{ $totalStudents }}</h4>
+                        <p class="text-[10px] sm:text-xs text-indigo-100/80 mt-1.5 sm:mt-2 line-clamp-2 md:line-clamp-none">Total mahasiswa di bawah bimbingan akademik Anda.</p>
+                    </div>
+                    <div>
+                        <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5 mt-2 sm:mt-3 text-indigo-100"></i>
                     </div>
                 </div>
                 
                 <!-- Menunggu SKKM -->
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
-                    <p class="text-sm font-semibold text-amber-100 mb-2">Antrean SKKM</p>
-                    <h4 class="text-3xl font-extrabold">{{ $pendingSkkmCount }}</h4>
+                <div class="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-[0_14px_35_rgba(245,158,11,0.30)] flex flex-col justify-between">
                     <div>
-                        <i data-lucide="file-clock" class="w-5 h-5 mt-3 text-amber-100"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-amber-100 mb-1.5 sm:mb-2">Antrean SKKM</p>
+                        <h4 class="text-2xl sm:text-3xl font-extrabold">{{ $pendingSkkmCount }}</h4>
+                        <p class="text-[10px] sm:text-xs text-amber-100/80 mt-1.5 sm:mt-2 line-clamp-2 md:line-clamp-none">Jumlah pengajuan SKKM mahasiswa yang perlu divalidasi.</p>
+                    </div>
+                    <div>
+                        <i data-lucide="file-clock" class="w-4 h-4 sm:w-5 sm:h-5 mt-2 sm:mt-3 text-amber-100"></i>
                     </div>
                 </div>
 
                 <!-- Bimbingan Hari Ini -->
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
-                    <p class="text-sm font-semibold text-emerald-100 mb-2">Bimbingan Hari Ini</p>
-                    <h4 class="text-3xl font-extrabold">{{ $guidanceTodayCount }}</h4>
+                <div class="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35_rgba(37,99,235,0.35)] flex flex-col justify-between">
                     <div>
-                        <i data-lucide="calendar-clock" class="w-5 h-5 mt-3 text-emerald-100"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-indigo-100 mb-1.5 sm:mb-2">Bimbingan Hari Ini</p>
+                        <h4 class="text-2xl sm:text-3xl font-extrabold">{{ $guidanceTodayCount }}</h4>
+                        <p class="text-[10px] sm:text-xs text-indigo-100/80 mt-1.5 sm:mt-2 line-clamp-2 md:line-clamp-none">Jumlah sesi bimbingan yang dijadwalkan pada hari ini.</p>
+                    </div>
+                    <div>
+                        <i data-lucide="calendar-clock" class="w-4 h-4 sm:w-5 sm:h-5 mt-2 sm:mt-3 text-indigo-100"></i>
                     </div>
                 </div>
 
                 <!-- Mhs Beresiko -->
-                <div
-                    class="rounded-3xl p-6 text-white shadow-[0_14px_35px_rgb(244,63,94,0.30)]"
-                    style="background-image: linear-gradient(135deg, #f43f5e 0%, #e11d48 52%, #9f1239 100%);"
-                >
-                    <p class="text-sm font-semibold text-rose-100 mb-2">Mhs Beresiko</p>
-                    <h4 class="text-3xl font-extrabold">{{ $atRiskCount }}</h4>
+                <div class="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_14px_35_rgba(244,63,94,0.30)] flex flex-col justify-between">
                     <div>
-                        <i data-lucide="alert-triangle" class="w-5 h-5 mt-3 text-rose-100"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-rose-100 mb-1.5 sm:mb-2">Mhs Beresiko</p>
+                        <h4 class="text-2xl sm:text-3xl font-extrabold">{{ $atRiskCount }}</h4>
+                        <p class="text-[10px] sm:text-xs text-rose-100/80 mt-1.5 sm:mt-2 line-clamp-2 md:line-clamp-none">Mahasiswa dengan perolehan poin SKKM di bawah target.</p>
+                    </div>
+                    <div>
+                        <i data-lucide="alert-triangle" class="w-4 h-4 sm:w-5 sm:h-5 mt-2 sm:mt-3 text-rose-100"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Antrean Table -->
             <div class="rounded-3xl border border-indigo-100/80 bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(37,99,235,0.12)] overflow-hidden">
-                <div class="px-8 py-6 border-b border-indigo-100 flex justify-between items-center bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
-                        <i data-lucide="clock" class="w-5 h-5 text-indigo-500 mr-2"></i>
-                        Antrean Verifikasi SKKM
+                <div class="px-5 sm:px-8 py-4 sm:py-6 border-b border-indigo-100 flex justify-between items-center bg-gradient-to-r from-indigo-100/80 via-sky-100/70 to-cyan-100/70">
+                    <h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center">
+                        <i data-lucide="clock" class="w-5 h-5 text-indigo-500 mr-2 shrink-0"></i>
+                        <span class="truncate">Antrean Verifikasi SKKM</span>
                     </h3>
-                    <a href="{{ route('skkm.verifikasi.index') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl transition-colors">
+                    <a href="{{ route('skkm.verifikasi.index') }}" class="text-xs sm:text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3.5 py-1.5 rounded-xl transition-colors shrink-0">
                         Lihat Semua
                     </a>
                 </div>
-                <div class="overflow-x-auto">
+                
+                {{-- Desktop View Table --}}
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-sm text-left text-slate-500">
                         <thead class="text-xs text-indigo-700 uppercase bg-indigo-50/70">
                             <tr>
-                                <th class="px-8 py-4 font-semibold tracking-wider">Mahasiswa</th>
-                                <th class="px-8 py-4 font-semibold tracking-wider">Kegiatan</th>
-                                <th class="px-8 py-4 font-semibold tracking-wider">Poin</th>
-                                <th class="px-8 py-4 font-semibold tracking-wider">Status</th>
+                                <th class="px-6 py-4 font-semibold tracking-wider">Mahasiswa</th>
+                                <th class="px-6 py-4 font-semibold tracking-wider">Kegiatan</th>
+                                <th class="px-6 py-4 font-semibold tracking-wider">Poin</th>
+                                <th class="px-6 py-4 font-semibold tracking-wider">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-indigo-100/60">
                             @forelse ($approvalQueue as $item)
                                 <tr class="hover:bg-indigo-50/40 transition-colors">
-                                    <td class="px-8 py-4">
+                                    <td class="px-6 py-4">
                                         <div class="font-bold text-slate-800">{{ $item->mahasiswa?->name }}</div>
                                         <div class="text-xs text-slate-400 mt-0.5">{{ $item->mahasiswa?->identifier }}</div>
                                     </td>
-                                    <td class="px-8 py-4 font-medium text-slate-800">
+                                    <td class="px-6 py-4 font-medium text-slate-800">
                                         {{ $item->nama_kegiatan }}
                                     </td>
-                                    <td class="px-8 py-4">
+                                    <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
                                             +{{ $item->poin_otomatis }} Pts
                                         </span>
                                     </td>
-                                    <td class="px-8 py-4">
-                                        <span class="inline-flex items-center px-2.5 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold">
-                                            Pending
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Pending
                                         </span>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-8 py-8 text-center text-slate-500">Tidak ada antrean verifikasi saat ini.</td>
+                                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">Tidak ada antrean verifikasi saat ini.</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Mobile View Cards --}}
+                <div class="block md:hidden divide-y divide-indigo-100/60">
+                    @forelse ($approvalQueue as $item)
+                        <div class="p-4 hover:bg-indigo-50/40 transition-colors space-y-2.5">
+                            <div class="flex justify-between items-start">
+                                <div class="min-w-0">
+                                    <div class="font-bold text-slate-800 text-sm truncate">{{ $item->mahasiswa?->name }}</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">{{ $item->mahasiswa?->identifier }}</div>
+                                </div>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-200 shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Pending
+                                </span>
+                            </div>
+                            <div class="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <span class="text-[9px] font-bold text-slate-400 block mb-0.5 uppercase tracking-wide">Kegiatan</span>
+                                <div class="font-medium text-slate-800 leading-relaxed">{{ $item->nama_kegiatan }}</div>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="inline-flex items-center px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
+                                    +{{ $item->poin_otomatis }} Pts
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="px-4 py-8 text-center text-xs text-slate-500">Tidak ada antrean verifikasi saat ini.</div>
+                    @endforelse
                 </div>
             </div>
             </div>

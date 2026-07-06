@@ -147,9 +147,9 @@ class GroupScheduledBimbinganTest extends TestCase
 
         $response->assertRedirect(route('bimbingan.dosen.index'));
 
-        // Assert both deleted
-        $this->assertDatabaseMissing('bimbingans', ['id' => $b1->id]);
-        $this->assertDatabaseMissing('bimbingans', ['id' => $b2->id]);
+        // Assert both status set to canceled
+        $this->assertDatabaseHas('bimbingans', ['id' => $b1->id, 'status' => 'canceled']);
+        $this->assertDatabaseHas('bimbingans', ['id' => $b2->id, 'status' => 'canceled']);
     }
 
     public function test_dosen_can_delete_individual_bimbingan(): void
@@ -174,8 +174,8 @@ class GroupScheduledBimbinganTest extends TestCase
 
         $response->assertRedirect(route('bimbingan.dosen.index'));
 
-        // Assert record is deleted
-        $this->assertDatabaseMissing('bimbingans', ['id' => $b->id]);
+        // Assert record status is set to canceled
+        $this->assertDatabaseHas('bimbingans', ['id' => $b->id, 'status' => 'canceled']);
     }
 
     public function test_bimbingan_dosen_whatsapp_link_generation(): void
@@ -205,5 +205,67 @@ class GroupScheduledBimbinganTest extends TestCase
         $this->assertStringStartsWith('https://wa.me/6289988887777?text=', $b->dosen_whatsapp_link);
         $this->assertStringContainsString(rawurlencode('Budi Santoso'), $b->dosen_whatsapp_link);
         $this->assertStringContainsString(rawurlencode('Pengajuan Skripsi'), $b->dosen_whatsapp_link);
+    }
+
+    public function test_whatsapp_cancel_link_generation(): void
+    {
+        $student = User::factory()->create([
+            'role' => 'student',
+            'phone_number' => '081234567890',
+        ]);
+
+        $b = Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => User::factory()->create(['role' => 'lecturer'])->id,
+            'tanggal' => '2026-06-05',
+            'topik' => 'Test Topik',
+            'tipe_pengajuan' => 'undangan_dosen',
+            'status' => 'validated',
+        ]);
+
+        $this->assertNotNull($b->whatsapp_cancel_link);
+        $this->assertStringStartsWith('https://wa.me/6281234567890?text=', $b->whatsapp_cancel_link);
+        $this->assertStringContainsString(rawurlencode('Bimbingan dibatalkan. Silakan menghubungi dosen pembimbing untuk penjadwalan ulang. Terima kasih.'), $b->whatsapp_cancel_link);
+    }
+
+    public function test_dosen_validation_redirects_with_whatsapp_link(): void
+    {
+        $dosen = User::factory()->create([
+            'role' => 'lecturer',
+            'skkm_role' => 'dosen_pa',
+        ]);
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'phone_number' => '081234567899',
+            'name' => 'John Doe',
+        ]);
+
+        $b = Bimbingan::create([
+            'mahasiswa_id' => $student->id,
+            'dosen_id' => $dosen->id,
+            'tanggal' => '2026-06-05',
+            'topik' => 'Test Topic',
+            'tipe_pengajuan' => 'mandiri_mahasiswa',
+            'status' => 'pending',
+            'semester' => 4,
+        ]);
+
+        $response = $this->actingAs($dosen)->post(route('bimbingan.dosen.update', $b->id), [
+            'status' => 'validated',
+            'catatan' => 'Silakan hadir tepat waktu.',
+        ]);
+
+        $response->assertRedirect(route('bimbingan.dosen.index'));
+        $response->assertSessionHas('validation_whatsapp_link');
+        $response->assertSessionHas('validation_student_name', 'John Doe');
+        $response->assertSessionHas('validation_status', 'Disetujui');
+
+        $link = session('validation_whatsapp_link');
+        $this->assertNotNull($link);
+        $this->assertStringStartsWith('https://wa.me/6281234567899?text=', $link);
+        $this->assertStringContainsString(rawurlencode('John Doe'), $link);
+        $this->assertStringContainsString(rawurlencode('DISETUJUI'), $link);
+        $this->assertStringContainsString(rawurlencode('Silakan hadir tepat waktu.'), $link);
     }
 }

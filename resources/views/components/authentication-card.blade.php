@@ -4,7 +4,7 @@
             {{ $logo }}
         </div>
 
-        <div class="rounded-3xl border border-zinc-200/70 bg-white/95 p-7 shadow-xl shadow-zinc-200/50 backdrop-blur">
+        <div class="rounded-3xl border border-slate-200/70 bg-white/95 p-7 shadow-xl shadow-slate-200/50 backdrop-blur">
             {{ $slot }}
         </div>
     </div>

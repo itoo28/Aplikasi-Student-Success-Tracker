@@ -36,13 +36,15 @@
                 <flux:heading size="xl" level="1">Profil Akun</flux:heading>
                 <flux:text class="mt-1">Kelola keamanan akun dan informasi kontak Anda.</flux:text>
             </div>
-            <flux:badge color="indigo">{{ $roleLabel }}</flux:badge>
+            <div class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold text-slate-900 bg-slate-100 border border-slate-200">
+                {{ $roleLabel }}
+            </div>
         </div>
     </x-slot>
 
     <div class="space-y-6">
         <div class="grid gap-6 lg:grid-cols-3">
-            <div class="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm">
+            <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
                 <div class="flex items-start gap-4">
                     <flux:avatar :name="$profileUser->name" :initials="$avatarInitials" size="xl" />
                     <div class="min-w-0">
@@ -67,15 +69,15 @@
                         @if ($profileUser->is_active)
                             <flux:badge color="emerald">Aktif</flux:badge>
                         @else
-                            <flux:badge color="zinc">Nonaktif</flux:badge>
+                            <flux:badge color="slate">Nonaktif</flux:badge>
                         @endif
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm lg:col-span-2">
+            <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm lg:col-span-2">
                 <div class="mb-4 flex items-center gap-2">
-                    <flux:icon.lock-closed variant="mini" class="text-zinc-500" />
+                    <flux:icon.lock-closed variant="mini" class="text-slate-500" />
                     <flux:heading size="lg">Identitas Akun (Read-only)</flux:heading>
                 </div>
 

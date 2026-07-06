@@ -47,6 +47,65 @@ class StudentPhoneNumberIntegrationTest extends TestCase
         ]);
     }
 
+    public function test_super_admin_can_store_lecturer_phone_number(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'lecturer',
+            'skkm_role' => 'super_admin',
+        ]);
+        $programStudi = $this->createProgramStudi();
+
+        $response = $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'Dosen PA Contoh',
+            'email' => 'dosenpa@example.com',
+            'identifier' => 'NIDN0001',
+            'phone_number' => '0812-3456-7890',
+            'skkm_role' => 'dosen_pa',
+            'program_studi_id' => $programStudi->id,
+            'is_active' => 1,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('admin.users.index'));
+        $this->assertDatabaseHas('users', [
+            'email' => 'dosenpa@example.com',
+            'phone_number' => '0812-3456-7890',
+            'skkm_role' => 'dosen_pa',
+        ]);
+    }
+
+    public function test_super_admin_can_update_lecturer_phone_number(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'lecturer',
+            'skkm_role' => 'super_admin',
+        ]);
+        $programStudi = $this->createProgramStudi();
+        $lecturer = User::factory()->create([
+            'role' => 'lecturer',
+            'skkm_role' => 'dosen_pa',
+            'program_studi_id' => $programStudi->id,
+            'phone_number' => '0812-1111-2222',
+        ]);
+
+        $response = $this->actingAs($admin)->put(route('admin.users.update', $lecturer), [
+            'name' => 'Dosen PA Terupdate',
+            'email' => 'dosenpa_updated@example.com',
+            'identifier' => 'NIDN0001',
+            'phone_number' => '0812-3456-7890',
+            'skkm_role' => 'dosen_pa',
+            'program_studi_id' => $programStudi->id,
+            'is_active' => 1,
+        ]);
+
+        $response->assertRedirect(route('admin.users.index'));
+        $this->assertDatabaseHas('users', [
+            'id' => $lecturer->id,
+            'phone_number' => '0812-3456-7890',
+            'email' => 'dosenpa_updated@example.com',
+        ]);
+    }
+
     public function test_dosen_invitation_whatsapp_link_uses_international_number(): void
     {
         $student = User::factory()->create([

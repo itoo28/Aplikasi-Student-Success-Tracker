@@ -20,16 +20,16 @@
                 <div class="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
                     <p class="text-sm font-semibold text-amber-100">Menunggu Verifikasi</p>
                     <div class="mt-2 flex items-center space-x-3">
-                        <span class="text-4xl font-extrabold">{{ $pendingSubmissions->count() }}</span>
+                        <span class="text-3xl font-extrabold">{{ $pendingSubmissions->count() }}</span>
                         <span class="text-lg font-medium text-amber-100">Pengajuan Baru</span>
                     </div>
                 </div>
 
-                <div class="rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 p-6 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
-                    <p class="text-sm font-semibold text-emerald-100">Selesai Diverifikasi</p>
+                <div class="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-200">Selesai Diverifikasi</p>
                     <div class="mt-2 flex items-center space-x-3">
-                        <span class="text-4xl font-extrabold">{{ $verifiedSubmissions->count() }}</span>
-                        <span class="text-lg font-medium text-emerald-100">Pengajuan (Terbaru)</span>
+                        <span class="text-3xl font-extrabold">{{ $verifiedSubmissions->count() }}</span>
+                        <span class="text-lg font-medium text-indigo-200">Pengajuan (Terbaru)</span>
                     </div>
                 </div>
             </div>
@@ -136,7 +136,7 @@
                                             data-sub-unsur="{{ $subUnsurLabel }}"
                                             data-jenis-item="{{ $jenisItemLabel }}"
                                             data-tingkat="{{ $tingkatLabel }}"
-                                            class="inline-flex items-center rounded-lg border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                            class="inline-flex items-center rounded-xl border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                         >
                                             Verifikasi
                                         </button>
@@ -187,12 +187,12 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         @if($sub->status_verifikasi == 'disetujui')
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-inset ring-emerald-500/20">
-                                                Disetujui (+{{ $sub->poin_otomatis }})
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Disetujui (+{{ $sub->poin_otomatis }})
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-600 ring-1 ring-inset ring-rose-500/20">
-                                                Ditolak
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Ditolak
                                             </span>
                                         @endif
                                     </td>
@@ -330,7 +330,7 @@
                         <button type="button" onclick="closeVerifyModal()" class="inline-flex w-full justify-center rounded-xl border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                             Batal
                         </button>
-                        <button type="submit" class="inline-flex w-full justify-center rounded-xl border border-transparent bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
+                        <button type="submit" class="inline-flex w-full justify-center rounded-xl border border-transparent bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto">
                             Simpan Verifikasi
                         </button>
                     </div>

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Skkm;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\PointRule;
 use App\Models\SkkmProgress;
 use App\Models\SkkmSubmission;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -57,6 +59,33 @@ class SkkmSubmissionController extends Controller
     }
 
     /**
+     * Upload file bukti temporary/directly via AJAX.
+     */
+    public function uploadTemp(Request $request)
+    {
+        abort_unless(Auth::user()->hasSkkmRole('student'), 403);
+
+        $request->validate([
+            'file_bukti' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // maks 5MB
+        ]);
+
+        if ($request->hasFile('file_bukti')) {
+            $path = $request->file('file_bukti')->store('bukti_skkm', 'public');
+            
+            return response()->json([
+                'success' => true,
+                'path' => $path,
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'File tidak ditemukan.'
+        ], 400);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -68,7 +97,8 @@ class SkkmSubmissionController extends Controller
             'nama_kegiatan' => 'required|string|max:255',
             'penyelenggara' => 'required|string|max:255',
             'tanggal_kegiatan' => 'required|date',
-            'file_bukti' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // maks 5MB
+            'file_bukti' => $request->filled('uploaded_file_path') ? 'nullable' : 'required|file|mimes:pdf,jpg,jpeg,png|max:5120', // maks 5MB
+            'uploaded_file_path' => 'nullable|string',
             'semester_input' => 'required|integer|min:1|max:8',
         ]);
 
@@ -76,7 +106,11 @@ class SkkmSubmissionController extends Controller
             ->where('is_active', true)
             ->findOrFail($request->point_rule_id);
 
-        $path = $request->file('file_bukti')->store('bukti_skkm', 'public');
+        if ($request->filled('uploaded_file_path')) {
+            $path = $request->uploaded_file_path;
+        } else {
+            $path = $request->file('file_bukti')->store('bukti_skkm', 'public');
+        }
 
         SkkmSubmission::create([
             'mahasiswa_id' => Auth::id(),
@@ -126,23 +160,211 @@ class SkkmSubmissionController extends Controller
      */
     public function monitoringIndex(Request $request)
     {
-        abort_unless(Auth::user()->hasSkkmRole('dosen_pa'), 403);
+        $user = Auth::user();
+        abort_unless($user->hasSkkmRole('dosen_pa'), 403);
 
-        $search = $request->query('search');
+        $search = trim((string) $request->query('q', $request->query('search', '')));
+        $selectedSemester = $request->query('semester');
+        $selectedStatusYudisium = trim((string) $request->query('status_yudisium', ''));
+        $perPage = (int) $request->query('per_page', 25);
+        $perPageOptions = [15, 25, 50];
 
-        $students = Auth::user()
-            ->adviseeStudents()
-            ->with(['programStudi.fakultas', 'skkmProgress'])
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = 25;
+        }
+
+        $semesterOptions = range(1, 14);
+        $statusYudisiumOptions = [
+            'memenuhi' => 'Memenuhi',
+            'dalam_proses' => 'Dalam proses',
+            'belum_memenuhi' => 'Belum memenuhi',
+            'belum_ada' => 'Belum ada progres',
+        ];
+        $allowedStatusYudisium = array_keys($statusYudisiumOptions);
+
+        $selectedSemester = is_numeric($selectedSemester) ? (int) $selectedSemester : null;
+        if (! in_array($selectedSemester, $semesterOptions, true)) {
+            $selectedSemester = null;
+        }
+
+        if (! in_array($selectedStatusYudisium, $allowedStatusYudisium, true)) {
+            $selectedStatusYudisium = '';
+        }
+
+        $studentsQuery = $user->adviseeStudents()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
                         ->orWhere('identifier', 'like', "%{$search}%");
                 });
             })
+            ->when($selectedSemester, function (Builder $query, int $semester) {
+                $query->where(function (Builder $semesterQuery) use ($semester) {
+                    $semesterQuery->where('semester', $semester)
+                        ->orWhereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('semester_aktif', $semester));
+                });
+            })
+            ->when($selectedStatusYudisium !== '', function (Builder $query) use ($selectedStatusYudisium) {
+                if ($selectedStatusYudisium === 'belum_ada') {
+                    $query->whereDoesntHave('skkmProgress');
+
+                    return;
+                }
+
+                $query->whereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('status_yudisium', $selectedStatusYudisium));
+            });
+
+        // Hitung statistik berdasarkan filter aktif (sebelum dipaginasi)
+        $totalStudents = (clone $studentsQuery)->count();
+
+        $studentsFulfilled = (clone $studentsQuery)
+            ->whereHas('skkmProgress', fn ($q) => $q->where('status_yudisium', 'memenuhi'))
+            ->count();
+
+        $studentsInProgress = (clone $studentsQuery)
+            ->whereHas('skkmProgress', fn ($q) => $q->whereIn('status_yudisium', ['dalam_proses', 'belum_memenuhi']))
+            ->count();
+
+        $students = $studentsQuery
+            ->with(['programStudi.fakultas', 'skkmProgress'])
+            ->orderBy('name')
+            ->paginate($perPage, ['*'], 'students_page')
+            ->withQueryString();
+
+        return view('skkm.dosen.mahasiswa', [
+            'students' => $students,
+            'totalStudents' => $totalStudents,
+            'studentsFulfilled' => $studentsFulfilled,
+            'studentsInProgress' => $studentsInProgress,
+            'search' => $search,
+            'selectedSemester' => $selectedSemester,
+            'selectedStatusYudisium' => $selectedStatusYudisium,
+            'semesterOptions' => $semesterOptions,
+            'statusYudisiumOptions' => $statusYudisiumOptions,
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
+        ]);
+    }
+
+    public function monitoringExport(Request $request)
+    {
+        $user = Auth::user();
+        abort_unless($user->hasSkkmRole('dosen_pa'), 403);
+
+        $search = trim((string) $request->query('q', $request->query('search', '')));
+        $selectedSemester = $request->query('semester');
+        $selectedStatusYudisium = trim((string) $request->query('status_yudisium', ''));
+        $semesterOptions = range(1, 14);
+        $statusYudisiumOptions = [
+            'memenuhi' => 'Memenuhi',
+            'dalam_proses' => 'Dalam proses',
+            'belum_memenuhi' => 'Belum memenuhi',
+            'belum_ada' => 'Belum ada progres',
+        ];
+        $allowedStatusYudisium = array_keys($statusYudisiumOptions);
+
+        $selectedSemester = is_numeric($selectedSemester) ? (int) $selectedSemester : null;
+        if (! in_array($selectedSemester, $semesterOptions, true)) {
+            $selectedSemester = null;
+        }
+
+        if (! in_array($selectedStatusYudisium, $allowedStatusYudisium, true)) {
+            $selectedStatusYudisium = '';
+        }
+
+        $students = $user->adviseeStudents()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('identifier', 'like', "%{$search}%");
+                });
+            })
+            ->when($selectedSemester, function (Builder $query, int $semester) {
+                $query->where(function (Builder $semesterQuery) use ($semester) {
+                    $semesterQuery->where('semester', $semester)
+                        ->orWhereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('semester_aktif', $semester));
+                });
+            })
+            ->when($selectedStatusYudisium !== '', function (Builder $query) use ($selectedStatusYudisium) {
+                if ($selectedStatusYudisium === 'belum_ada') {
+                    $query->whereDoesntHave('skkmProgress');
+
+                    return;
+                }
+
+                $query->whereHas('skkmProgress', fn (Builder $progressQuery) => $progressQuery->where('status_yudisium', $selectedStatusYudisium));
+            })
+            ->with(['programStudi.fakultas', 'skkmProgress'])
             ->orderBy('name')
             ->get();
 
-        return view('skkm.dosen.mahasiswa', compact('students', 'search'));
+        $fileName = 'poin-skkm-mahasiswa-bimbingan-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($students) {
+            $output = fopen('php://output', 'w');
+            if ($output === false) {
+                return;
+            }
+
+            // BOM untuk kompatibilitas UTF-8 di Microsoft Excel
+            fwrite($output, "\xEF\xBB\xBF");
+            fwrite($output, "sep=;\r\n");
+
+            fputcsv($output, [
+                'No',
+                'Nama Mahasiswa',
+                'NIM',
+                'Fakultas',
+                'Program Studi',
+                'Semester',
+                'Poin Semester 1-2',
+                'Poin Semester 3-4',
+                'Poin Semester 5-6',
+                'Poin Semester 7-8',
+                'Total Poin SKKM',
+                'Status SKKM (Yudisium)',
+            ], ';');
+
+            foreach ($students as $index => $student) {
+                $progress = $student->skkmProgress;
+                $p12 = (int) ($progress->poin_smt_1_2 ?? 0);
+                $p34 = (int) ($progress->poin_smt_3_4 ?? 0);
+                $p56 = (int) ($progress->poin_smt_5_6 ?? 0);
+                $p78 = (int) ($progress->poin_smt_7_8 ?? 0);
+                $total = (int) ($progress->total_poin ?? ($p12 + $p34 + $p56 + $p78));
+                $semesterAktif = $progress->semester_aktif ?? $student->semester;
+                $status = $progress->status_yudisium ?? null;
+                $statusLabel = match ($status) {
+                    'memenuhi' => 'Memenuhi',
+                    'belum_memenuhi' => 'Belum Memenuhi',
+                    'dalam_proses' => 'Dalam Proses',
+                    default => 'Belum Ada Progres',
+                };
+
+                // Format identifier (NIM) agar tidak terpotong leading zero di Excel
+                $nim = $student->identifier;
+                $formattedNim = $nim ? '="' . $nim . '"' : '-';
+
+                fputcsv($output, [
+                    $index + 1,
+                    trim($student->name),
+                    $formattedNim,
+                    trim($student->programStudi?->fakultas?->nama ?? '-'),
+                    trim((string) (($student->programStudi?->jenjang ?? '') . ' ' . ($student->programStudi?->nama ?? '-'))),
+                    $semesterAktif ?? '-',
+                    $p12,
+                    $p34,
+                    $p56,
+                    $p78,
+                    $total,
+                    $statusLabel,
+                ], ';');
+            }
+
+            fclose($output);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**

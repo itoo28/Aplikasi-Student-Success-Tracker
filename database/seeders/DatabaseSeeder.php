@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(PointRuleSeeder::class);
+        $this->call(FakultasSainsTeknologiSeeder::class);
 
         User::updateOrCreate(
             ['email' => 'superadmin@example.com'],

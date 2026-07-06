@@ -15,7 +15,7 @@
         @fluxAppearance
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-zinc-50 antialiased">
+    <body class="min-h-screen bg-slate-50 antialiased">
         <flux:accent color="indigo">
             <div class="relative min-h-screen overflow-hidden">
                 <div class="pointer-events-none absolute inset-0">

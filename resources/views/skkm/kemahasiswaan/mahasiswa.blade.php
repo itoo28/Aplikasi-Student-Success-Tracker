@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <span class="inline-flex items-center rounded-xl bg-indigo-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-700">Kemahasiswaan</span>
-            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">Data Mahasiswa</h2>
+            <h2 class="font-semibold text-2xl text-slate-800 leading-tight">Poin SKKM</h2>
         </div>
     </x-slot>
 
@@ -127,8 +127,9 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <a
                             href="{{ route('skkm.kemahasiswaan.mahasiswa.export', request()->query()) }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-emerald-100 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-200 transition-colors"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-green-600 hover:bg-green-700 shadow-[0_6px_16px_rgba(22,163,74,0.25)] transition-all hover:shadow-lg hover:-translate-y-px active:translate-y-0 px-4 py-2.5"
                         >
+                            <i data-lucide="file-spreadsheet" class="h-4 w-4"></i>
                             Export Excel (CSV)
                         </a>
 

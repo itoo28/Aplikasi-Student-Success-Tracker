@@ -68,13 +68,13 @@
 
         @if (Route::has('login'))
             @auth
-                <a href="{{ url('/dashboard') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 shadow-xl shadow-indigo-500/30 transition-all transform hover:-translate-y-1">
+                <a href="{{ url('/dashboard') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-xl shadow-amber-500/20 transition-all transform hover:-translate-y-1">
                     Lanjutkan ke Dashboard
                     <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
                 </a>
             @else
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-violet-500 hover:from-indigo-700 hover:to-violet-600 shadow-xl shadow-indigo-500/30 transition-all transform hover:-translate-y-1">
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-xl shadow-amber-500/20 transition-all transform hover:-translate-y-1">
                         Mulai Sekarang
                         <i data-lucide="rocket" class="w-5 h-5 ml-2"></i>
                     </a>

@@ -16,7 +16,7 @@
         @fluxAppearance
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-zinc-50 text-zinc-900 antialiased">
+    <body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
         <flux:accent color="indigo" class="min-h-screen min-h-dvh">
             <x-banner />
 
@@ -47,19 +47,18 @@
                     'dosen_pa' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
                         ['route' => 'skkm.verifikasi.index', 'active' => 'skkm.verifikasi.*', 'label' => 'Antrean SKKM', 'icon' => 'clipboard-document-check'],
-                        ['route' => 'skkm.monitoring.index', 'active' => 'skkm.monitoring.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
+                        ['route' => 'skkm.monitoring.index', 'active' => 'skkm.monitoring.*', 'label' => 'Monitoring Poin SKKM', 'icon' => 'users'],
                         ['route' => 'bimbingan.dosen.index', 'active' => 'bimbingan.dosen.*', 'label' => 'Bimbingan Akademik', 'icon' => 'book-open'],
                     ],
                     'kaprodi' => [
                         ['route' => 'skkm.kaprodi.dashboard', 'active' => 'skkm.kaprodi.dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
-                        ['route' => 'skkm.kaprodi.index', 'active' => 'skkm.kaprodi.index', 'label' => 'Monitoring SKKM', 'icon' => 'chart-bar'],
-                        ['route' => 'skkm.kaprodi.mahasiswa.index', 'active' => 'skkm.kaprodi.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
-                        ['route' => 'bimbingan.rekapitulasi.kaprodi', 'active' => 'bimbingan.rekapitulasi.kaprodi', 'label' => 'Rekap Bimbingan', 'icon' => 'document-chart-bar'],
+                        ['route' => 'skkm.kaprodi.index', 'active' => 'skkm.kaprodi.index', 'label' => 'Monitoring Poin SKKM', 'icon' => 'chart-bar'],
+                        ['route' => 'bimbingan.rekapitulasi.kaprodi', 'active' => 'bimbingan.rekapitulasi.kaprodi*', 'label' => 'Bimbingan Akademik', 'icon' => 'document-chart-bar'],
                     ],
                     'kemahasiswaan' => [
                         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'squares-2x2'],
-                        ['route' => 'skkm.kemahasiswaan.mahasiswa.index', 'active' => 'skkm.kemahasiswaan.mahasiswa.*', 'label' => 'Data Mahasiswa', 'icon' => 'users'],
-                        ['route' => 'bimbingan.rekapitulasi.kemahasiswaan', 'active' => 'bimbingan.rekapitulasi.kemahasiswaan', 'label' => 'Rekap Bimbingan', 'icon' => 'document-chart-bar'],
+                        ['route' => 'skkm.kemahasiswaan.mahasiswa.index', 'active' => 'skkm.kemahasiswaan.mahasiswa.*', 'label' => 'Poin SKKM', 'icon' => 'users'],
+                        ['route' => 'bimbingan.rekapitulasi.kemahasiswaan', 'active' => 'bimbingan.rekapitulasi.kemahasiswaan*', 'label' => 'Bimbingan Akademik', 'icon' => 'document-chart-bar'],
                         ['route' => 'skkm.point-rules.index', 'active' => 'skkm.point-rules.*', 'label' => 'Manajemen Poin SKKM', 'icon' => 'list-bullet'],
                     ],
                     'super_admin' => [
@@ -67,6 +66,7 @@
                         ['route' => 'admin.users.index', 'active' => 'admin.users.*', 'label' => 'Manajemen User', 'icon' => 'users'],
                         ['route' => 'admin.fakultas.index', 'active' => 'admin.fakultas.*', 'label' => 'Manajemen Fakultas', 'icon' => 'building-office-2'],
                         ['route' => 'admin.program-studi.index', 'active' => 'admin.program-studi.*', 'label' => 'Manajemen Program Studi', 'icon' => 'book-open'],
+                        ['route' => 'admin.bimbingan', 'active' => 'admin.bimbingan*', 'label' => 'Bimbingan Akademik', 'icon' => 'document-chart-bar'],
                         ['route' => 'skkm.point-rules.index', 'active' => 'skkm.point-rules.*', 'label' => 'Manajemen Poin SKKM', 'icon' => 'list-bullet'],
                     ],
                     default => [
@@ -104,7 +104,7 @@
                 }
             @endphp
 
-            <flux:sidebar sticky collapsible="mobile" class="bg-white border-r border-zinc-200/70">
+            <flux:sidebar sticky collapsible="mobile" class="bg-white border-r border-slate-200/70">
                 <flux:sidebar.header>
                     <flux:sidebar.brand :href="route('dashboard')" name="SST Portal">
                         <img
@@ -117,7 +117,9 @@
                 </flux:sidebar.header>
 
                 <div class="px-2">
-                    <flux:badge size="sm" color="indigo">{{ $roleLabel }}</flux:badge>
+                    <div class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold text-slate-900 bg-slate-100 border border-slate-200">
+                        {{ $roleLabel }}
+                    </div>
                 </div>
 
                 <flux:sidebar.nav>
@@ -152,7 +154,7 @@
                 </flux:dropdown>
             </flux:sidebar>
 
-            <flux:header class="border-b border-zinc-200/70 bg-white">
+            <flux:header class="border-b border-slate-200/70 bg-white">
                 <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
                 <div class="ms-3 min-w-0 flex-1">
@@ -164,7 +166,7 @@
                 </div>
 
                 <flux:dropdown position="top" align="start" class="lg:hidden">
-                    <flux:profile :name="Auth::user()->name" :initials="$avatarInitials" />
+                    <flux:profile class="mobile-profile-compact" :name="Auth::user()->name" :initials="$avatarInitials" />
 
                     <flux:menu>
                         <flux:menu.item :href="route('profile.show')" icon="user">
@@ -292,12 +294,155 @@
 
         @stack('modals')
 
+        <!-- Global Loading Spinner Overlay -->
+        <div id="global-page-loader" class="global-loader-overlay">
+            <div class="relative flex flex-col items-center justify-center">
+                <div class="relative flex items-center justify-center">
+                    <!-- Spinner Ring -->
+                    <div class="spinner-outer">
+                        <div class="w-full h-full rounded-full bg-white"></div>
+                    </div>
+                    <!-- Stable Logo -->
+                    <div class="absolute spinner-logo-container">
+                        <img src="{{ asset('brand/logo-uhb.svg') }}" alt="UHB Logo" class="spinner-logo" />
+                    </div>
+                </div>
+                <!-- Loader Text -->
+                <span class="global-loader-text">Memuat data...</span>
+            </div>
+        </div>
+
         @livewireScripts
         @fluxScripts
         <script>
             if (window.lucide) {
                 lucide.createIcons();
             }
+
+            // Global Loader logic
+            document.addEventListener('DOMContentLoaded', () => {
+                const loader = document.getElementById('global-page-loader');
+                let safetyTimeout = null;
+
+                const showSpinner = (duration = null) => {
+                    if (loader) {
+                        loader.classList.add('active');
+                        
+                        // Clear existing safety timeout
+                        if (safetyTimeout) {
+                            clearTimeout(safetyTimeout);
+                            safetyTimeout = null;
+                        }
+
+                        // Auto-hide safeguard
+                        if (duration) {
+                            safetyTimeout = setTimeout(hideSpinner, duration);
+                        } else {
+                            // Default safety timeout of 3 seconds for page loads
+                            safetyTimeout = setTimeout(hideSpinner, 3000);
+                        }
+                    }
+                };
+
+                const hideSpinner = () => {
+                    if (loader) {
+                        loader.classList.remove('active');
+                    }
+                    if (safetyTimeout) {
+                        clearTimeout(safetyTimeout);
+                        safetyTimeout = null;
+                    }
+                };
+
+                // 1. Navigation / Link Clicks
+                document.addEventListener('click', (event) => {
+                    const link = event.target.closest('a');
+                    if (link) {
+                        const href = link.getAttribute('href');
+                        const target = link.getAttribute('target');
+                        
+                        // Ignore hash links, javascript void, download, target blank, external, or modifier clicks
+                        if (href && 
+                            !href.startsWith('#') && 
+                            !href.startsWith('javascript:') && 
+                            target !== '_blank' &&
+                            !link.hasAttribute('download') &&
+                            !event.ctrlKey && 
+                            !event.metaKey && 
+                            !event.shiftKey) {
+                            
+                            // Check if local link
+                            const isLocal = href.startsWith('/') || href.startsWith(window.location.origin);
+                            if (isLocal) {
+                                showSpinner();
+                            }
+                        }
+                    }
+                });
+
+                // 2. Form Submissions (checking that they aren't prevented by validation or custom modals)
+                document.addEventListener('submit', (event) => {
+                    // Let form handlers run first (e.g. confirmation modal dialogs)
+                    setTimeout(() => {
+                        if (!event.defaultPrevented && event.target.getAttribute('target') !== '_blank') {
+                            showSpinner();
+                        }
+                    }, 0);
+                });
+
+                // 3. Tab Clicks / Alpine ActiveTab Switches / Local Filter Buttons
+                document.addEventListener('click', (event) => {
+                    const target = event.target.closest('button, [role="tab"], .filter-btn, [data-filter]');
+                    if (target) {
+                        const isTabButton = target.classList.contains('filter-btn') || 
+                                            target.getAttribute('role') === 'tab' ||
+                                            target.getAttribute('data-filter') ||
+                                            (target.getAttribute('@click') && target.getAttribute('@click').includes('activeTab')) ||
+                                            (target.getAttribute('x-on:click') && target.getAttribute('x-on:click').includes('activeTab'));
+                        
+                        if (isTabButton) {
+                            showSpinner(250); // Premium visual loader transition for instant tab actions (250ms)
+                        }
+                    }
+                });
+
+                // 4. Livewire Hooks (if Livewire exists globally)
+                if (window.Livewire) {
+                    initLivewireHooks();
+                } else {
+                    document.addEventListener('livewire:init', () => {
+                        initLivewireHooks();
+                    });
+                }
+
+                function initLivewireHooks() {
+                    if (window.Livewire && window.Livewire.hook) {
+                        window.Livewire.hook('request', ({ respond, succeed, fail }) => {
+                            showSpinner();
+                            respond(() => {
+                                hideSpinner();
+                            });
+                            succeed(() => {
+                                hideSpinner();
+                            });
+                            fail(() => {
+                                hideSpinner();
+                            });
+                        });
+                    }
+                }
+
+                // 5. Unload & Back-Forward Cache (BFcache) recovery
+                window.addEventListener('beforeunload', () => {
+                    showSpinner();
+                });
+
+                window.addEventListener('pageshow', (event) => {
+                    if (event.persisted) {
+                        hideSpinner();
+                    }
+                });
+            });
         </script>
         @stack('scripts')
     </body>

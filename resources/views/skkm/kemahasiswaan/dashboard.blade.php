@@ -33,25 +33,26 @@
 
         <div class="relative space-y-8">
             <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgb(79,70,229,0.35)]">
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
                     <p class="text-sm font-semibold text-indigo-100">Mahasiswa Aktif</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $totalActiveStudents }}</h3>
                     <p class="text-xs text-indigo-100 mt-2">Total mahasiswa aktif di sistem</p>
                 </div>
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-[0_14px_35px_rgb(16,185,129,0.30)]">
-                    <p class="text-sm font-semibold text-emerald-100">Belum Ada Poin</p>
+                <!-- Card krusial menggunakan gradient merah -->
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_14px_35px_rgba(244,63,94,0.35)]">
+                    <p class="text-sm font-semibold text-rose-100">Belum Ada Poin</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsWithoutPoints }}</h3>
-                    <p class="text-xs text-emerald-100 mt-2">Mahasiswa yang belum punya poin SKKM</p>
+                    <p class="text-xs text-rose-100 mt-2">Mahasiswa yang belum punya poin SKKM</p>
                 </div>
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-[0_14px_35px_rgb(14,165,233,0.30)]">
-                    <p class="text-sm font-semibold text-sky-100">Mahasiswa Dalam Proses</p>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Mahasiswa Dalam Proses</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsInProgress }}</h3>
-                    <p class="text-xs text-sky-100 mt-2">Jumlah mahasiswa yang progresnya belum memenuhi target</p>
+                    <p class="text-xs text-indigo-100 mt-2">Jumlah mahasiswa yang progresnya belum memenuhi target</p>
                 </div>
-                <div class="rounded-3xl p-6 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-[0_14px_35px_rgb(245,158,11,0.30)]">
-                    <p class="text-sm font-semibold text-amber-100">Sudah Penuh Poin</p>
+                <div class="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_14px_35px_rgba(37,99,235,0.35)]">
+                    <p class="text-sm font-semibold text-indigo-100">Sudah Penuh Poin</p>
                     <h3 class="mt-2 text-3xl font-extrabold">{{ $studentsCompleted }}</h3>
-                    <p class="text-xs text-amber-100 mt-2">Mahasiswa yang sudah memenuhi target poin</p>
+                    <p class="text-xs text-indigo-100 mt-2">Mahasiswa yang sudah memenuhi target poin</p>
                 </div>
             </div>
 

@@ -113,8 +113,9 @@ class UserManagementController extends Controller
             $validated['jenjang_studi'] = ProgramStudi::whereKey($validated['program_studi_id'])->value('jenjang');
         }
 
+        $validated['phone_number'] = !empty($validated['phone_number']) ? $validated['phone_number'] : null;
+
         if ($validated['skkm_role'] !== 'mahasiswa') {
-            $validated['phone_number'] = null;
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
             if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {
@@ -158,8 +159,9 @@ class UserManagementController extends Controller
             $validated['jenjang_studi'] = ProgramStudi::whereKey($validated['program_studi_id'])->value('jenjang');
         }
 
+        $validated['phone_number'] = !empty($validated['phone_number']) ? $validated['phone_number'] : null;
+
         if ($validated['skkm_role'] !== 'mahasiswa') {
-            $validated['phone_number'] = null;
             $validated['semester'] = null;
             $validated['lecturer_id'] = null;
             if (! in_array($validated['skkm_role'], ['kaprodi', 'dosen_pa'], true)) {

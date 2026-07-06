@@ -17,6 +17,7 @@ class ProgramStudi extends Model
         'nama',
         'jenjang',
         'is_active',
+        'registration_code',
     ];
 
     protected $casts = [

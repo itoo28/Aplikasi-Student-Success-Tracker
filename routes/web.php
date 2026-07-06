@@ -19,6 +19,15 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::registration())) {
+    Route::middleware('guest')->group(function () {
+        Route::get('/register', [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+        Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
+        Route::post('/register/verify', [App\Http\Controllers\Auth\RegisterController::class, 'verifyCode'])->name('register.verify');
+        Route::get('/register/reset', [App\Http\Controllers\Auth\RegisterController::class, 'resetCode'])->name('register.reset');
+    });
+}
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -43,6 +52,7 @@ Route::middleware([
         Route::get('/skkm', [SkkmSubmissionController::class, 'index'])->name('skkm.index');
         Route::get('/skkm/create', [SkkmSubmissionController::class, 'create'])->name('skkm.create');
         Route::post('/skkm', [SkkmSubmissionController::class, 'store'])->name('skkm.store');
+        Route::post('/skkm/upload-temp', [SkkmSubmissionController::class, 'uploadTemp'])->name('skkm.upload-temp');
 
         // Bimbingan Akademik (Mahasiswa)
         Route::get('/bimbingan', [BimbinganAkademikController::class, 'mahasiswaIndex'])->name('bimbingan.mahasiswa.index');
@@ -53,6 +63,7 @@ Route::middleware([
     Route::middleware('skkm.role:dosen_pa')->group(function () {
         Route::get('/skkm/verifikasi', [SkkmSubmissionController::class, 'verifikasiIndex'])->name('skkm.verifikasi.index');
         Route::get('/skkm/monitoring', [SkkmSubmissionController::class, 'monitoringIndex'])->name('skkm.monitoring.index');
+        Route::get('/skkm/monitoring/export', [SkkmSubmissionController::class, 'monitoringExport'])->name('skkm.monitoring.export');
         Route::post('/skkm/{submission}/verify', [SkkmSubmissionController::class, 'verify'])->name('skkm.verify');
 
         // Bimbingan Akademik (Dosen PA)
@@ -61,6 +72,7 @@ Route::middleware([
         Route::post('/bimbingan/dosen/{bimbingan}/update', [BimbinganAkademikController::class, 'dosenUpdate'])->name('bimbingan.dosen.update');
         Route::post('/bimbingan/dosen/{bimbingan}/report', [BimbinganAkademikController::class, 'dosenReport'])->name('bimbingan.dosen.report');
         Route::delete('/bimbingan/dosen/{bimbingan}', [BimbinganAkademikController::class, 'dosenDestroy'])->name('bimbingan.dosen.destroy');
+        Route::get('/bimbingan/dosen/{bimbingan}/print', [BimbinganAkademikController::class, 'dosenPrint'])->name('bimbingan.dosen.print');
     });
 
     // SKKM Module (Kaprodi)
@@ -71,11 +83,13 @@ Route::middleware([
             Route::get('/', fn () => redirect()->route('skkm.kaprodi.dashboard'))->name('home');
             Route::get('/dashboard', [SkkmValidationController::class, 'kaprodiDashboard'])->name('dashboard');
             Route::get('/monitoring', [SkkmValidationController::class, 'kaprodiIndex'])->name('index');
-            Route::get('/mahasiswa', [SkkmValidationController::class, 'kaprodiMahasiswaIndex'])->name('mahasiswa.index');
+            Route::get('/mahasiswa', fn () => redirect()->route('skkm.kaprodi.index', ['tab' => 'students']))->name('mahasiswa.index');
+            Route::get('/mahasiswa/export', [SkkmValidationController::class, 'kaprodiMahasiswaExport'])->name('mahasiswa.export');
         });
 
     Route::middleware('skkm.role:kaprodi')->group(function () {
         Route::get('/bimbingan/rekapitulasi/kaprodi', [BimbinganAkademikController::class, 'rekapitulasiIndex'])->name('bimbingan.rekapitulasi.kaprodi');
+        Route::get('/bimbingan/rekapitulasi/kaprodi/{mahasiswa}', [BimbinganAkademikController::class, 'rekapitulasiDetail'])->name('bimbingan.rekapitulasi.kaprodi.detail');
     });
 
     // SKKM Module (Kemahasiswaan)
@@ -90,6 +104,7 @@ Route::middleware([
 
     Route::middleware('skkm.role:kemahasiswaan')->group(function () {
         Route::get('/bimbingan/rekapitulasi/kemahasiswaan', [BimbinganAkademikController::class, 'rekapitulasiIndex'])->name('bimbingan.rekapitulasi.kemahasiswaan');
+        Route::get('/bimbingan/rekapitulasi/kemahasiswaan/{mahasiswa}', [BimbinganAkademikController::class, 'rekapitulasiDetail'])->name('bimbingan.rekapitulasi.kemahasiswaan.detail');
     });
 
     // SKKM Module (Super Admin)
@@ -101,5 +116,7 @@ Route::middleware([
             Route::resource('/users', UserManagementController::class)->except(['show']);
             Route::resource('/fakultas', FakultasController::class)->except(['show']);
             Route::resource('/program-studi', ProgramStudiController::class)->except(['show']);
+            Route::get('/bimbingan', [BimbinganAkademikController::class, 'rekapitulasiIndex'])->name('bimbingan');
+            Route::get('/bimbingan/{mahasiswa}', [BimbinganAkademikController::class, 'rekapitulasiDetail'])->name('bimbingan.detail');
         });
 });

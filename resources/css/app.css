@@ -12,6 +12,94 @@
 
 @theme {
     --font-sans: Inter, sans-serif;
+
+    /* Custom Blue Gradient Palette (Primary Theme) */
+    --color-indigo-50: #eff6ff;
+    --color-indigo-100: #dbeafe;
+    --color-indigo-200: #bfdbfe;
+    --color-indigo-300: #93c5fd;
+    --color-indigo-400: #60a5fa;
+    --color-indigo-500: #3b82f6;
+    --color-indigo-600: #2563eb;
+    --color-indigo-700: #1d4ed8;
+    --color-indigo-800: #1e40af;
+    --color-indigo-900: #1e3a8a;
+    --color-indigo-950: #172554;
+
+    /* Custom Navy Blue Palette (Primary Accent / Dark Gradient End) - Replaces violet to avoid purple */
+    --color-violet-50: #f0f4ff;
+    --color-violet-100: #d9e2fc;
+    --color-violet-200: #b9c9f9;
+    --color-violet-300: #8da6f4;
+    --color-violet-400: #5a7beb;
+    --color-violet-500: #385ae0;
+    --color-violet-600: #1e3bb3;
+    --color-violet-700: #192e94;
+    --color-violet-800: #17277a;
+    --color-violet-900: #172464;
+    --color-violet-950: #0f153f;
+
+    --color-sky-50: #f0f9ff;
+    --color-sky-100: #e0f2fe;
+    --color-sky-200: #bae6fd;
+    --color-sky-300: #7dd3fc;
+    --color-sky-400: #38bdf8;
+    --color-sky-500: #0ea5e9;
+    --color-sky-600: #0284c7;
+    --color-sky-700: #0369a1;
+    --color-sky-800: #075985;
+    --color-sky-900: #0c4a6e;
+    --color-sky-950: #082f49;
+
+    --color-emerald-50: #ecfdf5;
+    --color-emerald-100: #d1fae5;
+    --color-emerald-200: #a7f3d0;
+    --color-emerald-300: #6ee7b7;
+    --color-emerald-400: #34d399;
+    --color-emerald-500: #10b981;
+    --color-emerald-600: #059669;
+    --color-emerald-700: #047857;
+    --color-emerald-800: #065f46;
+    --color-emerald-900: #064e3b;
+    --color-emerald-950: #022c22;
+
+    --color-teal-50: #f0f4ff;
+    --color-teal-100: #d9e2fc;
+    --color-teal-200: #b9c9f9;
+    --color-teal-300: #8da6f4;
+    --color-teal-400: #5a7beb;
+    --color-teal-500: #385ae0;
+    --color-teal-600: #1e3bb3;
+    --color-teal-700: #192e94;
+    --color-teal-800: #17277a;
+    --color-teal-900: #172464;
+    --color-teal-950: #0f153f;
+
+    /* Premium Gold Palette (Accent Theme - used on selected CTA buttons) */
+    --color-amber-50: #fffdf5;
+    --color-amber-100: #fef6d0;
+    --color-amber-200: #fdec9c;
+    --color-amber-300: #fcd962;
+    --color-amber-400: #fbbf24;
+    --color-amber-500: #d4af37;
+    --color-amber-600: #b8921e;
+    --color-amber-700: #927011;
+    --color-amber-800: #745609;
+    --color-amber-900: #5a4103;
+    --color-amber-950: #3b2901;
+
+    /* Custom Purple Re-mapping to Navy Blue (to avoid purple in gradients) */
+    --color-purple-50: #f0f4ff;
+    --color-purple-100: #d9e2fc;
+    --color-purple-200: #b9c9f9;
+    --color-purple-300: #8da6f4;
+    --color-purple-400: #5a7beb;
+    --color-purple-500: #385ae0;
+    --color-purple-600: #1e3bb3;
+    --color-purple-700: #192e94;
+    --color-purple-800: #17277a;
+    --color-purple-900: #172464;
+    --color-purple-950: #0f153f;
 }
 
 [x-cloak] {
@@ -30,6 +118,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -40,6 +129,7 @@
         opacity: 0;
         transform: translateY(12px) scale(0.97);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -59,6 +149,7 @@
         opacity: 0;
         transform: translate3d(0, -10px, 0) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1);
@@ -70,8 +161,300 @@
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1);
     }
+
     to {
         opacity: 0;
         transform: translate3d(0, -8px, 0) scale(0.98);
+    }
+}
+
+/* ============================================================
+   Sidebar Fix (safety-net CSS)
+   Root fixes are in published view files:
+     resources/views/flux/sidebar/brand.blade.php
+     resources/views/flux/sidebar/item.blade.php
+   These rules are fallback overrides only.
+   ============================================================ */
+
+/* Brand / app name — "SST Portal" text must always be fully opaque */
+[data-flux-sidebar-brand] div {
+    color: rgb(15 23 42) !important;
+    /* slate-900 — near black, maximum contrast */
+    opacity: 1 !important;
+    font-weight: 600 !important;
+}
+
+/* Default sidebar menu item text */
+[data-flux-sidebar-item] {
+    color: rgb(71 85 105) !important;
+    /* slate-600 */
+    opacity: 1 !important;
+}
+
+[data-flux-sidebar-item] [data-content] {
+    color: inherit !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+}
+
+/* Active menu item */
+[data-flux-sidebar-item][data-current],
+[data-flux-sidebar-item][data-current] [data-content] {
+    color: var(--color-indigo-700) !important;
+}
+
+/* Hover state */
+[data-flux-sidebar-item]:hover,
+[data-flux-sidebar-item]:hover [data-content] {
+    color: rgb(15 23 42) !important;
+    /* slate-900 */
+}
+
+/* Icons follow the text color */
+[data-flux-sidebar-item] svg {
+    color: inherit !important;
+    opacity: 1 !important;
+}
+
+/* Override Flux CSS variable so accent-content is never transparent */
+:root {
+    --color-accent-content: var(--color-indigo-700);
+}
+
+/* ============================================================
+   Login Form — Input Contrast Fix
+   Tailwind v4 no longer supports `placeholder-zinc-400`;
+   the Flux stubs were built for v3, so placeholder & input
+   colours are broken.  These native CSS rules fill that gap.
+   ============================================================ */
+
+/* Input text — typed content */
+[data-flux-input] input {
+    background-color: rgb(241 245 249) !important;
+    /* slate-100 - light grey background */
+    border-color: rgb(203 213 225) !important;
+    /* slate-300 - clear border */
+    color: rgb(30 41 59) !important;
+    /* slate-800 */
+}
+
+/* On focus/hover, ensure input borders stay distinct */
+[data-flux-input] input:focus {
+    border-color: var(--color-indigo-600) !important;
+    background-color: rgb(255 255 255) !important;
+    /* switch to pure white on focus for typing comfort */
+}
+
+/* Placeholder text — hint before user types */
+[data-flux-input] input::placeholder {
+    color: rgb(100 116 139) !important;
+    /* slate-500 — readable but clearly secondary */
+    opacity: 1 !important;
+    /* Chrome resets opacity to 0.54 by default */
+}
+
+/* Disabled input text */
+[data-flux-input] input:disabled {
+    color: rgb(100 116 139) !important;
+    /* slate-500 */
+    background-color: rgb(226 232 240) !important;
+    /* slate-200 */
+}
+
+/* Checkbox (Ingat saya) — make the square indicator box much clearer */
+[data-flux-checkbox-indicator] {
+    border-color: rgb(148 163 184) !important;
+    /* slate-400 border */
+    background-color: rgb(241 245 249) !important;
+    /* slate-100 background */
+}
+
+/* Active/Checked checkbox style */
+ui-checkbox[data-checked] [data-flux-checkbox-indicator] {
+    border-color: transparent !important;
+    background-color: var(--color-indigo-600) !important;
+}
+
+/* Leading / trailing icon wrappers inside flux:input */
+[data-flux-input]>div [class*="text-zinc-400"] {
+    color: rgb(71 85 105) !important;
+    /* slate-600 — clearly visible */
+}
+
+/* Eye (viewable) button icon inside password field */
+[data-flux-input] button svg,
+[data-flux-input] button [data-slot="icon"] {
+    color: rgb(71 85 105) !important;
+    /* slate-600 */
+}
+
+/* flux:label above each field */
+[data-flux-label] {
+    color: rgb(30 41 59) !important;
+    /* slate-800 */
+    opacity: 1 !important;
+    font-weight: 600 !important;
+}
+
+/* "Lupa Password?" subtle link — keep it readable and smaller */
+[data-flux-link][data-variant="subtle"] {
+    color: var(--color-indigo-700) !important;
+    opacity: 1 !important;
+    font-size: 0.75rem !important;
+}
+
+/* ============================================================
+   Global Loading Spinner Overlay
+   ============================================================ */
+.global-loader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    visibility: hidden;
+}
+
+.global-loader-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+/* Spinner outer ring */
+.spinner-outer {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 3px;
+    background: conic-gradient(from 0deg, var(--color-indigo-600) 0%, var(--color-sky-400) 50%, transparent 100%);
+    animation: spin-clockwise 1.2s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Spinning outer ring animation */
+@keyframes spin-clockwise {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Logo image container (stable, centered, pulses gently) */
+.spinner-logo-container {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: logo-pulse 1.8s ease-in-out infinite;
+}
+
+/* Make sure the logo is stable */
+.spinner-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+@keyframes logo-pulse {
+    0%, 100% {
+        transform: scale(0.95);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+.global-loader-text {
+    margin-top: 24px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-indigo-950);
+    letter-spacing: 0.05em;
+    animation: text-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes text-pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   Mobile Custom Utilities
+   ============================================================ */
+@media (max-width: 639px) {
+    /* Touch-friendly spacing adjustment */
+    .mobile-compact-padding {
+        padding: 1rem !important;
+    }
+    
+    /* Scroll horizontal list container */
+    .mobile-scroll-x {
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important; /* Hide scrollbar for standard browsers */
+        gap: 0.5rem !important;
+        padding-bottom: 0.25rem !important;
+    }
+    
+    .mobile-scroll-x::-webkit-scrollbar {
+        display: none !important; /* Hide scrollbar for WebKit browsers */
+    }
+    
+    .mobile-scroll-item {
+        scroll-snap-align: start !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Avoid text wrapping inside horizontal scrolling buttons */
+    .mobile-nowrap {
+        white-space: nowrap !important;
+    }
+}
+
+/* Hide profile username in mobile header profile dropdown to prevent overlapping */
+@media (max-width: 1023px) {
+    .mobile-profile-compact > span {
+        display: none !important;
+    }
+}
+
+/* Global mobile-responsive header title slots */
+@media (max-width: 767px) {
+    flux-header h2,
+    header h2,
+    [data-flux-header] h2 {
+        font-size: 1.125rem !important; /* text-lg */
+        line-height: 1.5rem !important;
+    }
+}
+
+/* Ensure tables inside overflow-x-auto scroll wrappers don't squish on mobile viewports */
+@media (max-width: 1023px) {
+    .overflow-x-auto table:not([class*="min-w-"]),
+    [class*="overflow-x-auto"] table:not([class*="min-w-"]) {
+        min-width: 800px !important; /* Force layout expansion for clean scroll capability */
     }
 }

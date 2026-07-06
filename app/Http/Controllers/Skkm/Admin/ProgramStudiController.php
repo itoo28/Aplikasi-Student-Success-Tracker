@@ -97,6 +97,7 @@ class ProgramStudiController extends Controller
             'nama' => ['required', 'string', 'max:100'],
             'jenjang' => ['required', Rule::in(['S1', 'D4', 'D3'])],
             'is_active' => ['nullable', 'boolean'],
+            'registration_code' => ['nullable', 'string', 'max:50', Rule::unique('program_studis', 'registration_code')->ignore($programStudi?->id)],
         ]);
     }
 }
